@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"/> -->
+  <meta name="viewport"
+        content="width=device-width,
+                 initial-scale=1.0,
+                 maximum-scale=1.0,
+                 minimum-scale=1.0,
+                 user-scalable=no">
+  <title>Create Your Character</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+/* 
+        body {
+        display: flex;
+        flex-direction: column;
+        } */
+  </style>
+
+ 
+</head>
+
+<body class="char-page">
+  <!-- HEADER: 1/6 -->
+  <header class="header">
+    <div class="header-top">
+      <div class="back-buttons">
+        <button class="circle-button small blue-bg" onclick="goBack()">←</button>
+        <button class="text-back" onclick="goBack()">BACK TO MAIN PAGE</button>
+      </div>
+    </div>
+
+    <div class="title-section">
+      <h1>LET'S CREATE A PDD CHARACTER!</h1>
+      <div class="steps">
+        <div class="step"></div>
+        <div class="step active"></div>
+        <div class="step"></div>
+        <!-- <div class="step"></div> -->
+      </div>
+      <p class="subtitle">Let's choose prints and patterns for our character's clothes!</p>
+    </div>
+  </header>
+
+  <!-- BUILDER: 4/6 -->
+  <main class="builder-section">
+    <div class="rig-background"></div>
+    <svg id="rig" width="800" height="800" viewBox="0 0 800 800"></svg>
+    
+    <div class="head">
+      <ul class="list">
+        <li class="hide"></li>
+        <li class="prev"></li>
+        <li class="act"></li>
+        <li class="next"></li>
+        <li class="next new-next"></li>
+      </ul>
+      <div class="swipe"></div>
+    </div>
+
+    <div class="torso">
+      <ul class="list">
+        <li class="hide"></li>
+        <li class="prev"></li>
+        <li class="act"></li>
+        <li class="next"></li>
+        <li class="next new-next"></li>
+      </ul>
+      <div class="swipe"></div>
+    </div>
+
+    <div class="legs">
+      <ul class="list">
+        <li class="hide"></li>
+        <li class="prev"></li>
+        <li class="act"></li>
+        <li class="next"></li>
+        <li class="next new-next"></li>
+      </ul>
+      <div class="swipe"></div>
+    </div>
+
+     <div class="shoes">
+      <ul class="list">
+        <li class="hide"></li>
+        <li class="prev"></li>
+        <li class="act"></li>
+        <li class="next"></li>
+        <li class="next new-next"></li>
+      </ul>
+      <div class="swipe"></div>
+    </div>
+  </main>
+   <script src="https://hammerjs.github.io/dist/hammer.js"></script>
+
+  <!-- FOOTER: 1/6 -->
+  <footer class="footer-section">
+    <button class="text-back">NEXT</button>
+  </footer>
+</body>
+
+
+<script>
+  function goBack() {
+    window.location.href = "./index.html"; 
+  }
+
+  // === CONFIG ===
+
+const baseRig = {
+  head:      { x: 0, y: 0 },
+  neck:      { x: 0, y: 30 },
+  shoulderL: { x: -40, y: 40 },
+  shoulderR: { x:  40, y: 40 },
+  elbowL:    { x: -70, y: 100 },
+  elbowR:    { x:  70, y: 100 },
+  handL:     { x: -80, y: 160 },
+  handR:     { x:  80, y: 160 },
+  hipL:      { x: -20, y: 170 },
+  hipR:      { x:  20, y: 170 },
+  kneeL:     { x: -30, y: 260 },
+  kneeR:     { x:  30, y: 260 },
+  footL:     { x: -40, y: 350 },
+  footR:     { x:  40, y: 350 }
+};
+
+const bones = [
+  ['head', 'neck'],
+  ['neck', 'shoulderL'],
+  ['neck', 'shoulderR'],
+  ['shoulderL', 'elbowL'],
+  ['shoulderR', 'elbowR'],
+  ['elbowL', 'handL'],
+  ['elbowR', 'handR'],
+  ['neck', 'hipL'],
+  ['neck', 'hipR'],
+  ['hipL', 'kneeL'],
+  ['hipR', 'kneeR'],
+  ['kneeL', 'footL'],
+  ['kneeR', 'footR']
+];
+
+
+
+
+
+const svg = document.getElementById('rig');
+const svgWidth = svg.viewBox.baseVal.width;
+const svgHeight = svg.viewBox.baseVal.height;
+
+let scale;
+ let yspacing= 70;
+window.addEventListener('resize', setScaleForViewport);
+
+
+function svgPointToClient(x, y) {
+  const pt = svg.createSVGPoint()
+  pt.x = x; pt.y = y
+  const screenPt = pt.matrixTransform(svg.getScreenCTM())
+  return { x: screenPt.x, y: screenPt.y }
+}
+
+
+function setScaleForViewport() {
+  if (window.innerWidth <= 768) {
+    scale = 1.9;
+    console.log("check mobile")
+  } else {
+    scale = 1.3;
+  }
+  
+  // updateNodes();
+}
+
+setScaleForViewport();
+
+
+let origin = { x: svgWidth / 2, y: 100 };
+
+// Live nodes
+const nodes = {};
+updateNodes();
+
+// Create bones & joints
+const lines = [];
+const circles = [];
+
+bones.forEach(([a, b]) => {
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('stroke', 'red');
+  line.setAttribute('stroke-width', 3);
+  //svg.appendChild(line);
+  lines.push({ line, a, b });
+});
+
+Object.keys(nodes).forEach(name => {
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('r', 8);
+  circle.setAttribute('fill', 'red');
+  circle.style.cursor = 'pointer';
+  //svg.appendChild(circle);
+  circles.push({ circle, name });
+});
+
+// Store original bone lengths:
+const boneLengths = {};
+bones.forEach(([a, b]) => {
+  const dx = nodes[a].x - nodes[b].x;
+  const dy = nodes[a].y - nodes[b].y;
+  boneLengths[`${a}-${b}`] = Math.hypot(dx, dy);
+  boneLengths[`${b}-${a}`] = boneLengths[`${a}-${b}`]; // symmetric
+});
+
+
+// CAROUSEL
+
+
+
+// === DRAGGING ===
+
+let dragging = null;
+
+circles.forEach(({ circle, name }) => {
+  circle.addEventListener('mousedown', e => startDrag(e, name));
+  circle.addEventListener('touchstart', e => startDrag(e, name));
+});
+
+window.addEventListener('mousemove', dragMove);
+window.addEventListener('touchmove', dragMove, { passive: false });
+
+window.addEventListener('mouseup', endDrag);
+window.addEventListener('touchend', endDrag);
+
+function startDrag(e, name) {
+  e.preventDefault();
+  dragging = name;
+}
+
+function dragMove(e) {
+  if (!dragging) return;
+  e.preventDefault();
+
+  const pt = getMousePos(e);
+
+  // Find its connected neighbors
+  const connected = bones.filter(([a,b]) => a === dragging || b === dragging)
+    .map(([a,b]) => (a === dragging ? b : a));
+
+  // For simplicity, we constrain to just the FIRST neighbor:
+  if (connected.length) {
+    const parent = connected[0];
+    const length = boneLengths[`${dragging}-${parent}`];
+
+    const dx = pt.x - nodes[parent].x;
+    const dy = pt.y - nodes[parent].y;
+    const dist = Math.hypot(dx, dy) || 1;
+
+    const newX = nodes[parent].x + dx / dist * length;
+    const newY = nodes[parent].y + dy / dist * length;
+
+    nodes[dragging].x = newX;
+    nodes[dragging].y = newY;
+  } else {
+    // If no connected parent, allow free drag (e.g. head)
+    nodes[dragging].x = pt.x;
+    nodes[dragging].y = pt.y;
+  }
+}
+
+
+
+function endDrag() {
+  dragging = null;
+}
+
+function getMousePos(e) {
+  let clientX, clientY;
+  if (e.touches && e.touches.length) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+
+  const rect = svg.getBoundingClientRect();
+  return {
+    x: ((clientX - rect.left) / rect.width) * svg.viewBox.baseVal.width,
+    y: ((clientY - rect.top) / rect.height) * svg.viewBox.baseVal.height
+  };
+}
+
+// === UPDATE LOOP ===
+
+function animate() {
+  lines.forEach(({ line, a, b }) => {
+    line.setAttribute('x1', nodes[a].x);
+    line.setAttribute('y1', nodes[a].y);
+    line.setAttribute('x2', nodes[b].x);
+    line.setAttribute('y2', nodes[b].y);
+  });
+
+  circles.forEach(({ circle, name }) => {
+    circle.setAttribute('cx', nodes[name].x);
+    circle.setAttribute('cy', nodes[name].y);
+  });
+
+  requestAnimationFrame(animate);
+  positionCarousels()
+
+}
+animate();
+
+// === INIT ===
+
+
+
+function updateNodes() {
+  Object.entries(baseRig).forEach(([name, pos]) => {
+   if (window.innerWidth <= 768)
+      yspacing= 0;
+    else
+      yspacing=100;
+
+    nodes[name] = {
+      x: origin.x + pos.x * scale,
+      y: origin.y + yspacing + pos.y * scale
+    };
+  });
+}
+
+
+
+// ROW SWIPING
+
+/**
+ * fetches an SVG file and injects its text into the target element
+ * @param {string} src — path to your .svg file
+ * @param {HTMLElement} targetEl — container where the inline SVG will go
+ */
+function loadInlineSVG(src, targetEl) {
+  fetch(src)
+    .then(res => res.text())
+    .then(svgText => {
+      targetEl.innerHTML = svgText;
+    })
+    .catch(err => console.error('failed to load SVG:', src, err));
+}
+
+
+class Carousel {
+  constructor({ listEl, swipeEl, images, spacing = 320, prevBtnColor = 'blue-bg', nextBtnColor = 'blue-bg', btnSize = 'extrasmall' }) {
+    this.listEl = listEl
+    this.swipeEl = swipeEl
+    this.images = images
+    this.currentIndex = 0
+    //this.spacing = spacing
+    if (window.innerWidth <= 768)
+      spacing= 120;
+    else
+      spacing=320;
+    this.spacing = spacing
+    this.prevBtnColor = prevBtnColor
+    this.nextBtnColor = nextBtnColor
+    this.btnSize = btnSize
+
+    this.init()
+  }
+
+  init() {
+    this.buildSlides()
+    this.updateClasses()
+    this.bindEvents()
+    this.createNavButtons()
+  }
+
+ buildSlides() {
+  this.listEl.innerHTML = ''
+  this.images.forEach(src => {
+    const li = document.createElement('li')
+    // create a div to hold the inline SVG
+    const svgContainer = document.createElement('div')
+    svgContainer.classList.add('svg-container')
+    // size it to fill the <li>
+    svgContainer.style.width  = '100%'
+    svgContainer.style.height = '100%'
+
+    // fetch & inject the SVG markup
+    loadInlineSVG(src, svgContainer)
+
+    li.appendChild(svgContainer)
+    this.listEl.appendChild(li)
+  })
+}
+
+
+  updateClasses() {
+    const items = Array.from(this.listEl.children)
+    const len = items.length
+    items.forEach((li, i) => {
+      li.className = ''
+      const offset = (i - this.currentIndex + len) % len
+      if      (offset === 0)       li.classList.add('act')
+      else if (offset === 1)       li.classList.add('next')
+      else if (offset === 2)       li.classList.add('new-next')
+      else if (offset === len - 1) li.classList.add('prev')
+      else if (offset === len - 2) li.classList.add('hide')
+    })
+  }
+
+  next() {
+    this.currentIndex = (this.currentIndex + 1) % this.images.length
+    this.updateClasses()
+  }
+
+  prev() {
+    this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length
+    this.updateClasses()
+  }
+
+  bindEvents() {
+    this.listEl.addEventListener('click', e => {
+      const li = e.target.closest('li')
+      if (!li) return
+      if (li.classList.contains('next')) this.next()
+      else if (li.classList.contains('prev')) this.prev()
+    })
+    const hammer = new Hammer(this.swipeEl)
+    hammer.on('swipeleft',  () => this.next())
+    hammer.on('swiperight', () => this.prev())
+  }
+
+  createNavButtons() {
+    const rect = this.listEl.getBoundingClientRect()
+    const btns = ['prev','next'].map(dir => {
+      const btn = document.createElement('button')
+      btn.classList.add('circle-button', this.btnSize, dir === 'prev' ? 
+      this.prevBtnColor : this.nextBtnColor)
+      btn.innerText = dir === 'prev' ? '←' : '→'
+      btn.addEventListener('click', () => this[dir]())
+      document.body.appendChild(btn)
+      return btn
+    })
+
+    const [prevBtn, nextBtn] = btns
+    const btnW = prevBtn.offsetWidth
+    const btnH = prevBtn.offsetHeight
+
+    Object.assign(prevBtn.style, {
+      position: 'absolute',
+      left:  `${rect.left - btnW - this.spacing}px`,
+      top:   `${rect.top  + (rect.height - btnH)/2}px`,
+      zIndex:'10'
+    })
+
+    Object.assign(nextBtn.style, {
+      position: 'absolute',
+      left:  `${rect.right + this.spacing}px`,
+      top:   `${rect.top   + (rect.height - btnH)/2}px`,
+      zIndex:'10'
+    })
+  }
+}
+
+// example usage:
+
+
+const hats = [
+  './assets/char-pattern/hair-hat/hair-hat-01.svg',
+  './assets/char-pattern/hair-hat/hair-hat-02.svg',
+  './assets/char-pattern/hair-hat/hair-hat-03.svg',
+  './assets/char-pattern/hair-hat/hair-hat-04.svg',
+  './assets/char-pattern/hair-hat/hair-hat-05.svg'
+];
+const torsos = [
+  './assets/char-pattern/torso/torso-01.svg',
+  './assets/char-pattern/torso/torso-02.svg',
+  './assets/char-pattern/torso/torso-03.svg',
+  './assets/char-pattern/torso/torso-04.svg',
+  './assets/char-pattern/torso/torso-05.svg',
+  // './assets/char/torso/torso-06.svg',
+  // './assets/char/torso/torso-07.svg',
+  
+];
+const legs = [
+  './assets/char-pattern/legs/legs-01.svg',
+  './assets/char-pattern/legs/legs-02.svg',
+  './assets/char-pattern/legs/legs-03.svg',
+  './assets/char-pattern/legs/legs-04.svg',
+  './assets/char-pattern/legs/legs-05.svg'
+];
+const shoes = [
+  './assets/char-pattern/shoes/shoes-01.svg',
+  './assets/char-pattern/shoes/shoes-02.svg',
+  './assets/char-pattern/shoes/shoes-03.svg',
+  './assets/char-pattern/shoes/shoes-04.svg',
+  './assets/char-pattern/shoes/shoes-05.svg'
+];
+
+// 2. build imageSets with those named arrays
+const imageSets = [ hats, torsos, legs, shoes];
+
+document.querySelectorAll('.list').forEach((listEl, i) => {
+  const swipeEl = document.querySelectorAll('.swipe')[i]
+  new Carousel({ listEl, swipeEl, images: imageSets[i] })
+})
+
+function positionCarousels() {
+
+  
+  // head node
+  const headPos = svgPointToClient(nodes.head.x, nodes.head.y)
+  const headDiv = document.querySelector('.head')
+  headDiv.style.left = `${headPos.x}px`
+  
+  if (window.innerWidth <= 768)
+      headDiv.style.top  = `${headPos.y-(yspacing+250)}px`
+  else
+      headDiv.style.top  = `${headPos.y-(yspacing+100)}px`
+
+
+  
+  // torso center = average of shoulderL, shoulderR, hipR, hipL
+  const keys = ['shoulderL','shoulderR','hipR','hipL']
+  const sum = keys.reduce((acc,k) => {
+    acc.x += nodes[k].x
+    acc.y += nodes[k].y
+    return acc
+  }, {x:0,y:0})
+  const avg = { x: sum.x/4, y: sum.y/4 }
+  const torsoPos = svgPointToClient(avg.x, avg.y)
+  const torsoDiv = document.querySelector('.torso')
+  torsoDiv.style.left = `${torsoPos.x}px`
+  
+   if (window.innerWidth <= 768)
+      torsoDiv.style.top  = `${torsoPos.y-(yspacing+220)}px`
+  else
+      torsoDiv.style.top  = `${torsoPos.y-(yspacing+150)}px`
+
+  //leg 
+  const kneeLClient = svgPointToClient(nodes.kneeL.x, nodes.kneeL.y);
+  const kneeRClient = svgPointToClient(nodes.kneeR.x, nodes.kneeR.y);
+  const kneeAvgX = (kneeLClient.x + kneeRClient.x) / 2;
+  const kneeAvgY = (kneeLClient.y + kneeRClient.y) / 2;
+  const legsDiv = document.querySelector('.legs');
+  legsDiv.style.left = `${kneeAvgX}px`;
+  // adjust the vertical offset as needed; using same −250 for now
+  legsDiv.style.top  = `${kneeAvgY + 0}px`;
+  
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const hats = [
+//   './assets/char/hair-hat/hair-hat-01.svg',
+//   './assets/char/hair-hat/hair-hat-02.svg',
+//   './assets/char/hair-hat/hair-hat-03.svg',
+//   './assets/char/hair-hat/hair-hat-04.svg',
+//   './assets/char/hair-hat/hair-hat-05.svg'
+// ];
+
+// const list = document.querySelector('.list');
+// let currentIndex = 0;
+
+// // wipe out any existing <li> and build one per hat
+// function initGallery() {
+//   list.innerHTML = '';
+//   hats.forEach(src => {
+//     const li = document.createElement('li');
+//     const img = document.createElement('img');
+//     img.src = src;
+//     img.style.width = '100%';
+//     img.style.height = '100%';
+//     li.appendChild(img);
+//     list.appendChild(li);
+//   });
+//   updateClasses();
+// }
+
+// function updateClasses() {
+//   const items = Array.from(list.children);
+//   const len = items.length;
+//   items.forEach((li, i) => {
+//     // reset
+//     li.className = '';
+//     const offset = (i - currentIndex + len) % len;
+//     if (offset === 0)       li.classList.add('act');
+//     else if (offset === 1)  li.classList.add('next');
+//     else if (offset === 2)  li.classList.add('new-next');
+//     else if (offset === len - 1)   li.classList.add('prev');
+//     else if (offset === len - 2)   li.classList.add('hide');
+//   });
+// }
+
+// function next() {
+//   currentIndex = (currentIndex + 1) % hats.length;
+//   updateClasses();
+// }
+
+// function prev() {
+//   currentIndex = (currentIndex - 1 + hats.length) % hats.length;
+//   updateClasses();
+// }
+
+// // click handlers
+// list.addEventListener('click', e => {
+//   const li = e.target.closest('li');
+//   if (!li) return;
+//   if (li.classList.contains('next')) next();
+//   else if (li.classList.contains('prev')) prev();
+// });
+
+// // swipe handlers
+// const hammer = new Hammer(document.querySelector('.swipe'));
+// hammer.on('swipeleft',  next);
+// hammer.on('swiperight', prev);
+
+// // kick it off
+// initGallery();
+// createNavButtons();
+
+// function createNavButtons() {
+//   const container = document.body;
+//   const list = document.querySelector('.list');
+//   const rect = list.getBoundingClientRect();
+
+//   // PREV
+//   const prevBtn = document.createElement('button');
+//   prevBtn.classList.add('circle-button','extrasmall','blue-bg');
+//   prevBtn.innerText = '←';
+//   prevBtn.addEventListener('click', prev);
+//   container.appendChild(prevBtn);
+
+//   // NEXT
+//   const nextBtn = document.createElement('button');
+//   nextBtn.classList.add('circle-button','extrasmall','blue-bg');
+//   nextBtn.innerText = '→';
+//   nextBtn.addEventListener('click', next);
+//   container.appendChild(nextBtn);
+
+//   // once in DOM, we can read their sizes
+//   const btnW = prevBtn.offsetWidth;
+//   const btnH = prevBtn.offsetHeight;
+
+//   let spacing = 420;
+
+//   // position them 20px from carousel edges, vertically centered
+//   Object.assign(prevBtn.style, {
+//     position: 'absolute',
+//     left:  `${rect.left - btnW - spacing}px`,
+//     top:   `${rect.top  + (rect.height - btnH)/2}px`,
+//     zIndex:'10'
+//   });
+
+//   Object.assign(nextBtn.style, {
+//     position: 'absolute',
+//     left:  `${rect.right + spacing}px`,
+//     top:   `${rect.top   + (rect.height - btnH)/2}px`,
+//     zIndex:'10'
+//   });
+// }
+
+
+//ARCHIVE
+
+// // === Hat Row Logic ===
+// const hatTrack = document.querySelector('.hat-track');
+// const hatLeft = document.getElementById('hatLeft');
+// const hatRight = document.getElementById('hatRight');
+// const hatOptions = document.querySelectorAll('.hat-option');
+
+// let hatIndex = 2; // index of current center hat
+
+
+
+// function updateHatTrack() {
+//  const offset = hatOptions[0].offsetWidth + 40; // image width + new gap
+//   const windowWidth = 900; // updated width
+//   const centerOffset = (windowWidth / 2) - (offset / 2);
+
+//   hatTrack.style.transform = `translateX(${centerOffset - hatIndex * offset}px)`;
+
+
+//   // Mark active
+//   hatOptions.forEach((hat, i) => {
+//     hat.classList.toggle('active', i === hatIndex);
+//   });
+// }
+
+// // Arrow buttons:
+// hatLeft.addEventListener('click', () => {
+//   if (hatIndex > 0) {
+//     hatIndex--;
+//     updateHatTrack();
+//   }
+
+//   if (hatIndex==0){
+//     hatIndex= hatOptions.length - 1;
+//     updateHatTrack();
+//   }
+  
+// });
+
+// hatRight.addEventListener('click', () => {
+//   if (hatIndex < hatOptions.length - 1) {
+//     hatIndex++;
+//     updateHatTrack();
+//   }
+// });
+
+// // Click to choose
+// hatOptions.forEach((hat, i) => {
+//   hat.addEventListener('click', () => {
+//     hatIndex = i;
+//     updateHatTrack();
+//   });
+// });
+
+// // Initial position
+// updateHatTrack();
+
+
+// function updateHatRowPosition() {
+//   const row = document.querySelector('.hat-row-container');
+//   const svgRect = svg.getBoundingClientRect();
+
+//   if (nodes.head && !isNaN(nodes.head.y)) {
+//     // Convert SVG Y to screen Y:
+//     const svgY = nodes.head.y;
+//     const pageY = svgRect.top + (svgY / svg.viewBox.baseVal.height) * svgRect.height;
+
+//     // Similarly, center the row horizontally:
+//     const svgX = nodes.head.x;
+//     const pageX = svgRect.left + (svgX / svg.viewBox.baseVal.width) * svgRect.width;
+
+//     // Set absolute screen coordinates:
+//     row.style.left = `${pageX}px`;
+//     row.style.top = `${pageY - 100}px`; // offset upward behind head, tweak as needed
+//   }
+// }
+
+
+// function animate() {
+//   lines.forEach(({ line, a, b }) => {
+//     line.setAttribute('x1', nodes[a].x);
+//     line.setAttribute('y1', nodes[a].y);
+//     line.setAttribute('x2', nodes[b].x);
+//     line.setAttribute('y2', nodes[b].y);
+//   });
+
+//   circles.forEach(({ circle, name }) => {
+//     circle.setAttribute('cx', nodes[name].x);
+//     circle.setAttribute('cy', nodes[name].y);
+//   });
+
+//   updateHatRowPosition();
+
+//   requestAnimationFrame(animate);
+// }
+
+
+
+
+
+
+
+
+
+</script>
+</html>

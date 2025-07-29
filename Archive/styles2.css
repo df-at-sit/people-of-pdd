@@ -1,0 +1,951 @@
+    /* ---------------------------------------
+   1) FONT
+--------------------------------------- */
+    @font-face {
+        font-family: 'PP Mori';
+        src: url('./assets/fonts/PPMori-SemiBold.otf') format('opentype');
+    }
+
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'PP Mori', sans-serif;
+        background: white;
+        color: #2a9df4;
+    }
+
+    .char-page {
+        display: flex;
+        flex-direction: column;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .gallery-page {
+        display: flex;
+        flex-direction: column;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    *,
+    *:before,
+    *:after {
+        box-sizing: inherit;
+    }
+
+    /* COLOR HELPERS */
+    .blue-bg {
+        background-color: #58aaf7;
+        color: white;
+    }
+
+    .orange-bg {
+        background-color: #e85e24;
+        color: white;
+    }
+
+    .yellow-bg {
+        background-color: #f4b63d;
+        color: white;
+    }
+
+
+    .red-bg {
+        background-color: #e53935 !important;
+        color: white;
+    }
+
+    .red-bg:hover {
+        background-color: transparent;
+        border: 3px solid #e53935;
+        color: #f4b63d;
+    }
+
+
+
+    /* HEADER */
+    .header {
+        width: 100%;
+        background: white;
+    }
+
+
+
+    .header-top {
+        display: flex;
+
+        align-items: center;
+        justify-content: space-between;
+        padding: 40px 40px;
+        /* no horizontal padding */
+        /* width: 100%; */
+        position: relative;
+    }
+
+
+    /* Center section is absolutely centered, unaffected by side widths */
+    .header-center {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+    }
+
+    /* Left and right columns */
+    .header-left,
+    .header-right {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        /* prevent shrinking */
+    }
+
+    /* BUTTONS */
+    .circle-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #2a9df4;
+
+        color: #fff;
+        font-size: 1.2rem;
+        border: none;
+        cursor: pointer;
+        margin-right: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background-color 0.3s ease, border 0.3s ease, color 0.3s ease;
+
+    }
+
+
+
+    .circle-button.extrasmall {
+        width: 30px;
+        height: 30px;
+        font-size: 1.0rem;
+    }
+
+    .circle-button.small {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .circle-button.medium {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8rem;
+    }
+
+
+    .text-back {
+        padding: 10px 20px;
+        border-radius: 20px;
+        background-color: #2a9df4;
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        border: none;
+        cursor: pointer;
+    }
+
+
+
+    .steps {
+        display: flex;
+        justify-content: center;
+        margin: 10px 0;
+    }
+
+    .step {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 4px solid #2a9df4;
+        margin: 0 8px;
+    }
+
+    .step.active {
+        background: #2a9df4;
+    }
+
+
+    /* TITLE */
+    .header-center h1 {
+        color: #2a9df4;
+        text-transform: uppercase;
+        font-size: 2rem;
+        letter-spacing: 2px;
+        margin: 0;
+    }
+
+    .subtitle {
+        color: #2a9df4;
+        font-size: 0.9rem;
+        margin: 5px 0 0;
+    }
+
+    /* SEARCH */
+    .search-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .search-container input {
+        padding: 8px 14px;
+        border: 2px solid #2a9df4;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-family: 'PP Mori', sans-serif;
+        text-transform: uppercase;
+        color: #2a9df4;
+        outline: none;
+        width: 200px;
+    }
+
+    .search-container input::placeholder {
+        color: #2a9df4;
+        opacity: 0.8;
+    }
+
+    .search-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid #2a9df4;
+        background-color: #2a9df4;
+        color: #fff;
+        font-size: 1.1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s;
+    }
+
+    .search-btn:hover {
+        background-color: #1e7fd1;
+    }
+
+    /* FOOTER */
+    .footer-section {
+        padding: 20px;
+        text-align: center;
+        width: 100%;
+    }
+
+    /* GALLERY */
+    #gallery-container {
+        position: relative;
+        width: 100%;
+        height: calc(100vh - 140px);
+        overflow: visible;
+    }
+
+    .gallery-card {
+        position: absolute;
+        transform-origin: center center;
+        transform: scale(1);
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .gallery-card:hover {
+        transform: scale(1.5) !important;
+    }
+
+    /* TOOLTIP */
+    .tooltip {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -110%) scale(0.1);
+        padding: 6px 12px;
+        background-color: #2a9df4;
+        border-radius: 12px;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 100;
+        transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+    }
+
+    .tooltip::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 7px 7px 0 7px;
+        border-style: solid;
+        border-color: #2a9df4 transparent transparent transparent;
+    }
+
+    .tooltip h3 {
+        margin: 0 0 4px;
+        color: #fff;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        text-align: center;
+    }
+
+    .tooltip p {
+        margin: 0;
+        color: #ffe699;
+        font-size: 0.5rem;
+        text-align: center;
+    }
+
+    .gallery-card:hover .tooltip {
+        opacity: 1;
+        transform: translate(-50%, -110%) scale(1);
+        pointer-events: auto;
+    }
+
+
+    /* ---------------------------------------
+    BUILDER SECTION (CHARACTER PAGE)
+    --------------------------------------- */
+
+    .builder-section {
+        position: relative;
+        /* <== important! */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+        width: 100%;
+        flex: 1 1 66.666%;
+        /* 4/6 */
+        overflow: hidden;
+        /* optional: avoid accidental overflow */
+    }
+
+    #rig {
+        border: none;
+        /* z-index: 99; */
+    }
+
+    .rig-background {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 175px;
+        /* adjust width as needed */
+        height: 100%;
+        /* tall vertical bar */
+        background-color: #2a9df4;
+        /* your blue */
+        z-index: 0;
+        /* behind SVG & carousels */
+        border-radius: 40px;
+        /* optional: rounded edges */
+        transition: background 0.7s ease, opacity 0.7s ease;
+    }
+
+    .svg-container svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .svg-container svg path {
+        cursor: pointer;
+    }
+
+
+    /* ---------------------------------------
+    BUILDER SECTION (SVG ASSETS)
+    --------------------------------------- */
+
+    .list {
+        height: 150px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%)
+    }
+
+    .list li {
+        list-style-type: none;
+
+
+        opacity: 1;
+        position: absolute;
+        left: 50%;
+
+        border-radius: 2px;
+        /* background: #9C89B8; */
+        transition: transform 1s, opacity 1s;
+
+    }
+
+    /* base state: fully visible */
+    .list .svg-container {
+        opacity: 1;
+        transform: scale(1);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    /* when the UL has is-animating, fade out & shrink */
+    .list.is-animating .svg-container {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    .swipe {
+        width: 270px;
+        height: 200px;
+        position: absolute;
+        background-color: green;
+        border-radius: 2px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+    }
+
+
+
+
+    .legs {
+        transform: translateY(50px)translateX(-400px);
+        z-index: 2;
+    }
+
+    .shoes {
+        transform: translateY(190px)translateX(-400px);
+        z-index: 1;
+    }
+
+    .head {
+        position: absolute;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        z-index: 4;
+    }
+
+    .torso {
+        position: absolute;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        z-index: 3;
+    }
+
+
+    .head li {
+        width: 130px;
+        height: 130px;
+        margin-left: -65px;
+    }
+
+
+    .torso li {
+        width: 240px;
+        height: 240px;
+        margin-left: -120px;
+    }
+
+    .legs li {
+        width: 250px;
+        height: 250px;
+        margin-left: -125px;
+    }
+
+    .shoes li {
+        width: 180px;
+        height: 180px;
+        margin-left: -90px;
+    }
+
+
+    .list .act {
+        opacity: 1;
+    }
+
+    .list .prev,
+    .list .next {
+        cursor: pointer;
+    }
+
+    .list .prev {
+        transform: translateX(-220px) scale(.70);
+    }
+
+    .list .next {
+        transform: translateX(220px) scale(.70);
+    }
+
+    .list .hide {
+        transform: translateX(-420px) scale(.70);
+    }
+
+    .list .new-next {
+        transform: translateX(420px) scale(.70);
+    }
+
+    .list .hide,
+    .list .new-next {
+        opacity: 0;
+        transition: opacity .5s, transform .5s;
+    }
+
+
+    /* ---------------------------------------
+    STAGE 2
+        --------------------------------------- */
+
+
+    body.stage-2 .carousel-nav {
+        display: inline-flex !important;
+        /* or `flex` if you’re using `display: flex` elsewhere */
+    }
+
+
+
+    /* ---------------------------------------
+    STAGE 3
+        --------------------------------------- */
+
+    /* Stage-3: hide everything but the head, center & zoom it */
+    body.stage-3 {
+        overflow: hidden;
+        /* prevent scrollbars when we blow it up */
+    }
+
+
+    body.stage-3 main.builder-section {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        /* fill screen */
+    }
+
+    /* hide every <li> except the .act one in the head carousel */
+    body.stage-3 .head .list li:not(.act),
+    body.stage-3 .torso .list li:not(.act) {
+        display: none !important;
+    }
+
+    /* hide the swipe area if you like */
+    body.stage-3 .head .swipe,
+    body.stage-3 .torso .swipe {
+        display: none !important;
+    }
+
+    body.stage-3 .head {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translateX(-50%) scale(3);
+        transform-origin: center center;
+        /* transition: transform 0.7s ease;  */
+        z-index: 1000 !important;
+    }
+
+    body.stage-3 .torso {
+        position: fixed !important;
+        top: 80% !important;
+        left: 50% !important;
+        transform: translateX(-50%) scale(3);
+        transform-origin: center center;
+        /* transition: transform 0.7s ease;  */
+        z-index: 0 !important;
+    }
+
+    /* keep footer in its normal spot but on top of the torso in stage-3 */
+    body.stage-3 .footer-section {
+        position: relative;
+        /* make z-index apply without re-positioning */
+        z-index: 1003 !important;
+        /* higher than head (1000), canvas (1001), toolbar (1002) */
+    }
+
+
+    body.stage-3 .footer-section .back-btn,
+    body.stage-3 .footer-section .next-btn {
+        /* ensure they keep their pill shape */
+        display: inline-flex;
+    }
+
+    body.stage-3 .draw-toolbar {
+        position: fixed !important;
+
+        top: 50%;
+        transform: translateY(-50%);
+
+        display: flex;
+        flex-direction: row;
+        gap: 16px;
+        z-index: 10;
+
+        width: 50%;
+        height: 20%;
+        border-radius: 30px;
+
+    }
+
+
+    body.stage-3 .draw-toolbar {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        padding: 16px;
+        background-color: none;
+        border-radius: 24px;
+        z-index: 10;
+    }
+
+
+    #faceCanvas {
+        position: fixed;
+        z-index: 1001;
+        background: tr ansparent;
+        touch-action: none;
+        cursor: crosshair;
+        cursor: url('assets/icons/brush.cur') 16 16, auto;
+        transform: none !important;
+    }
+
+
+    /* === Radial Fan Layout === */
+    .color-picker {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin-right: 20px;
+    }
+
+    /* Position swatches radially */
+    .color-picker .color-swatch {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        /* border: 0px solid #2a9df4; */
+        border: none;
+        /* box-shadow: 0 0 2px rgba(0,0,0,0.3); */
+        cursor: pointer;
+        transform: translate(-50%, -50%);
+    }
+
+    /* Optional: highlight selected */
+    .color-picker .color-swatch.selected {
+        border: 10px solid #f4b63d;
+    }
+
+
+    .button-row {
+        position: relative;
+        width: 200px;
+        height: 200px;
+    }
+
+    .arc-button {
+        position: absolute;
+        background: #e85e24;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transform: translate(-50%, -50%);
+    }
+
+    #clearBtn {
+        border-radius: 999px;
+        width: auto;
+        padding: 8px 16px;
+        margin-left: 20px;
+        font-size: 1.5rem;
+    }
+
+    body:not(.stage-3):not(.stage-4) .carousel-nav {
+        display: inline-flex !important;
+    }
+
+    body.stage-3 .draw-toolbar .corner-circle.orange-bg {
+        top: -15px !important;
+        right: -15px !important;
+        bottom: auto !important;
+        left: auto !important;
+    }
+
+    body.stage-3 .carousel-nav {
+        display: none !important;
+    }
+
+    body.stage-3 .carousel-nav,
+    body.stage-3 .list li:not(.act) {
+        display: none !important;
+    }
+
+
+
+    /* ---------------------------------------
+   INPUT 
+--------------------------------------- */
+
+
+
+    .card-input {
+        position: absolute;
+        background: #f4b63d;
+        padding: 14px 20px;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        font-weight: bold;
+        color: white;
+        transform: rotate(-5deg);
+        z-index: 1000;
+        max-width: 200px;
+        text-align: left;
+    }
+
+
+    .card-input input,
+    .card-input textarea {
+        width: 100%;
+        margin-top: 6px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: none;
+        font-family: inherit;
+        font-size: 0.9rem;
+    }
+
+    .card-input .icon {
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        background: #e91e63;
+        color: white;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+
+    .trait-card {
+        font-size: 0.85rem;
+        line-height: 1.1;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+        transform: rotate(-10deg);
+        width: auto;
+        max-width: 160px;
+    }
+
+    .trait-card.blue {
+        background: #2a9df4;
+    }
+
+    .trait-card.pink {
+        background: #e91e63;
+    }
+
+
+
+    .card-input {
+        display: none;
+        /* default hidden */
+    }
+
+
+    /* ---------------------------------------
+    STAGE 4
+        --------------------------------------- */
+
+
+
+    /*  ❌ turn off all nav buttons & extra slides */
+    body.stage-4 .carousel-nav,
+    body.stage-4 .list .prev,
+    body.stage-4 .list .next,
+    body.stage-4 .list .hide,
+    body.stage-4 .list .new-next {
+        display: none !important;
+    }
+
+    /*  ✅ keep only the active <li> visible */
+    body.stage-4 .list .act {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    body.stage-4 #faceCanvas {
+        display: block !important;
+        transform: none !important;
+    }
+
+
+    body.stage-4 .carousel-nav,
+    body.stage-4 .list li:not(.act) {
+        display: none !important;
+    }
+
+    /* after stage-3 zoom, stage-4 sends everything back to “normal” */
+    body.stage-4 .head,
+    body.stage-4 .torso {
+        position: absolute !important;
+        /* top: 100px   !important;
+  left: 50%    !important; */
+        transform: translateX(-50%) scale(1) !important;
+
+    }
+
+    body.stage-4 #faceCanvas {
+        transform: none !important;
+    }
+
+    body.stage-4 .rig-background {
+        /* background: linear-gradient(to top, #2a9df4, transparent); */
+        opacity: 0;
+
+        /* transition: background 0.7s ease, opacity 0.7s ease, width 0.7s ease; */
+    }
+
+
+    body.stage-4 .card-input {
+        display: block;
+    }
+
+
+    body.stage-4 .name-card {
+        top: 75px;
+        left: 450px;
+        transform: rotate(-10deg);
+    }
+
+    body.stage-4 .fav-card {
+        top: 150px;
+        right: 400px;
+        transform: rotate(8deg);
+    }
+
+    body.stage-4 .trait-card.blue {
+        bottom: 190px;
+        left: 460px;
+        transform: rotate(-8deg);
+    }
+
+    body.stage-4 .trait-card.pink {
+        bottom: 150px;
+        left: 520px;
+        transform: rotate(8deg);
+    }
+
+
+
+    body.stage-4 .email-card {
+        bottom: 50px;
+        right: 440px;
+        transform: rotate(-6deg);
+    }
+
+    /* ---------------------------------------
+   6.3) FOOTER
+--------------------------------------- */
+
+    .footer-section {
+        flex: 1 1 16.666%;
+        /* 1/6 */
+        display: flex;
+        align-items: center;
+        transition: all .3s ease;
+    }
+
+
+    /* stage 1: only next button, center it */
+    .footer-section.stage-1 {
+        justify-content: center;
+    }
+
+    .footer-section.stage-1 .back-btn {
+        display: none;
+    }
+
+    /* stage 2: two buttons side-by-side, centered */
+    .footer-section.stage-2 {
+        justify-content: center;
+        gap: 20px;
+        /* space between buttons */
+    }
+
+    .footer-section.stage-2 .back-btn {
+        display: inline-block;
+        /* make sure it’s visible */
+    }
+
+
+
+    .character-grid {
+        position: relative;
+        width: 100%;
+        height: calc(100vh - 160px);
+        overflow: hidden;
+    }
+
+    .character-svg {
+        position: absolute;
+        width: 120px;
+        height: auto;
+        cursor: pointer;
+        transition: transform 0.2s;
+        z-index: 1;
+    }
+
+    .character-svg:hover {
+        transform: scale(1.05);
+        z-index: 3;
+    }
+
+    .character-svg {
+        width: 150px;
+        height: auto;
+        cursor: pointer;
+        z-index: 1;
+    }
+
+
+    /* 1) Make arrows visible by default as a flexed button */
+    .carousel-nav {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 2) Hide them again in stage-3 & stage-4 */
+    body.stage-3 .carousel-nav,
+    body.stage-4 .carousel-nav {
+        display: none !important;
+    }

@@ -1,0 +1,1780 @@
+/* ---------------------------------------
+   1) FONT
+--------------------------------------- */
+@font-face {
+  font-family: 'PP Mori';
+  src: url('./assets/fonts/PPMori-SemiBold.otf') format('opentype');
+}
+
+/* ---------------------------------------
+   2) RESET & BASE
+--------------------------------------- */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+
+  font-family: 'PP Mori', sans-serif;
+  background: white;
+  color: #2a9df4;
+  box-sizing: border-box;
+
+  /* background: linear-gradient(to bottom,
+      #ffffff 0%,
+      #ffffff 75%,
+      rgba(244, 182, 61, 0.3) 100%); */
+}
+
+.homepage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* height: 100vh; */
+}
+
+.char-page {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+/* ---------------------------------------
+   3) REUSABLE CIRCLE BUTTON
+--------------------------------------- */
+.circle-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border 0.3s ease, color 0.3s ease;
+}
+
+.circle-button.extrasmall {
+  width: 30px;
+  height: 30px;
+  font-size: 1.0rem;
+}
+
+.circle-button.small {
+  width: 50px;
+  height: 50px;
+  font-size: 1.5rem;
+}
+
+.circle-button.medium {
+  width: 70px;
+  height: 70px;
+  font-size: 1.8rem;
+}
+
+.circle-button:hover {
+  background-color: transparent;
+  border: 3px solid currentColor;
+  color: currentColor;
+}
+
+/* COLOR HELPERS */
+.blue-bg {
+  background-color: #58aaf7;
+  color: white;
+}
+
+.orange-bg {
+  background-color: #e85e24;
+  color: white;
+}
+
+.yellow-bg {
+  background-color: #f4b63d;
+  color: white;
+}
+
+/* ---------------------------------------
+   4) HEADER
+--------------------------------------- */
+.header {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 120px;
+  flex: 1 1 16.666%;
+  /* 1/6 */
+}
+
+.header-top {
+  position: absolute;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+
+.back-buttons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.text-back {
+  background: #2a9df4;
+  border: none;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 12px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.text-back:hover {
+  opacity: 0.9;
+}
+
+
+/* ---------------------------------------
+   5) HEADER TITLE SECTION
+--------------------------------------- */
+
+.title-section {
+  text-align: center;
+  /* max-width: 600px; */
+}
+
+.title-section h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.title-section h2 {
+  margin: 0;
+  padding: 0;
+}
+
+.steps {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.step {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 4px solid #2a9df4;
+  margin: 0 8px;
+}
+
+.step.active {
+  background: #2a9df4;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* ---------------------------------------
+   6.2) BUILDER SECTION (CHARACTER PAGE)
+--------------------------------------- */
+.builder-section {
+  position: relative;
+  /* <== important! */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  width: 100%;
+  flex: 1 1 66.666%;
+  /* 4/6 */
+  overflow: hidden;
+  /* optional: avoid accidental overflow */
+}
+
+#rig {
+  border: none;
+  /* z-index: 99; */
+}
+
+/* .carousel-nav {
+  display: none !important;
+} */
+
+/* show nav buttons only in stage-1 & stage-2 */
+/* body.stage-1 .carousel-nav,
+body.stage-2 .carousel-nav {
+  display: inline-flex !important;
+} */
+
+
+.rig-background {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 175px;
+  /* adjust width as needed */
+  height: 100%;
+  /* tall vertical bar */
+  /* background-color: #2a9df4; */
+  /* your blue */
+  z-index: 0;
+  /* behind SVG & carousels */
+  border-radius: 40px;
+  /* optional: rounded edges */
+}
+
+/* ensure builder-section is positioned relatively */
+.builder-section {
+  position: relative;
+  flex: 1 1 66.666%;
+  overflow: hidden;
+}
+
+/* let your SVG fill its parent */
+.svg-container svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* optional: cursor pointer on paths */
+.svg-container svg path {
+  cursor: pointer;
+}
+
+
+
+/* ---------------------------------------
+   6.1) BUILDER SECTION (SVG ASSETS)
+--------------------------------------- */
+/* === Assets Rows === */
+
+.list {
+  height: 150px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%)
+}
+
+.list li {
+  list-style-type: none;
+
+
+  opacity: 1;
+  position: absolute;
+  left: 50%;
+
+  border-radius: 2px;
+  /* background: #9C89B8; */
+  transition: transform 1s, opacity 1s;
+
+}
+
+
+.legs {
+  transform: translateY(50px)translateX(-400px);
+}
+
+.shoes {
+  transform: translateY(190px)translateX(-400px);
+}
+
+.head {
+  position: absolute;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+}
+
+.torso {
+  position: absolute;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+}
+
+
+
+
+.head li {
+  width: 130px;
+  height: 130px;
+  margin-left: -65px;
+}
+
+/* .torso li{
+width: 250px;
+  height: 250px;
+  margin-left: -125px;
+} */
+
+.torso li {
+  width: 240px;
+  height: 240px;
+  margin-left: -120px;
+}
+
+.legs li {
+  width: 250px;
+  height: 250px;
+  margin-left: -125px;
+}
+
+/* .legs li{
+  width: 180px;
+  height: 180px;
+  margin-left: -90px;
+} */
+
+
+.shoes li {
+  width: 180px;
+  height: 180px;
+  margin-left: -90px;
+}
+
+.head {
+  position: absolute;
+  z-index: 4;
+}
+
+.torso {
+  position: absolute;
+  z-index: 3;
+}
+
+.legs {
+  /* position: absolute; */
+  z-index: 2;
+}
+
+.shoes {
+  /* position: absolute; */
+  z-index: 1;
+}
+
+
+
+
+
+.list .act {
+  opacity: 1;
+}
+
+.list .prev,
+.list .next {
+  cursor: pointer;
+}
+
+.list .prev {
+  transform: translateX(-220px) scale(.70);
+}
+
+.list .next {
+  transform: translateX(220px) scale(.70);
+}
+
+.list .hide {
+  transform: translateX(-420px) scale(.70);
+}
+
+.list .new-next {
+  transform: translateX(420px) scale(.70);
+}
+
+.list .hide,
+.list .new-next {
+  opacity: 0;
+  transition: opacity .5s, transform .5s;
+}
+
+/* base state: fully visible */
+.list .svg-container {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* when the UL has is-animating, fade out & shrink */
+.list.is-animating .svg-container {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+
+
+.swipe {
+  width: 270px;
+  height: 200px;
+  position: absolute;
+  background-color: green;
+  border-radius: 2px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+
+.builder-section {
+  position: relative;
+}
+
+/* Stage-3: hide everything but the head, center & zoom it */
+body.stage-3 {
+  overflow: hidden;
+  /* prevent scrollbars when we blow it up */
+}
+
+
+/* body.stage-3 .torso, */
+body.stage-3 .legs,
+body.stage-3 .shoes,
+body.stage-3 .rig-background {
+  /* display: none; */
+  opacity: 0;
+  /* transition: opacity   0.7s ease; */
+}
+
+
+/* Stage 2: rig background becomes white with blue border */
+/* body.stage-2 .rig-background {
+  background: white;
+  border: 3px solid #2a9df4;
+  height: 100%;
+  border-radius: 40px;
+  opacity: 1;
+} */
+
+
+
+body.stage-3 main.builder-section {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  /* fill screen */
+}
+
+
+
+/* if you still need to fade this zoom like your carousels: */
+body.stage-3 .head {
+  /* transition: transform 0.3s ease, opacity 0.3s ease; */
+}
+
+
+
+
+/* hide every <li> except the .act one in the head carousel */
+body.stage-3 .head .list li:not(.act),
+body.stage-3 .torso .list li:not(.act) {
+  display: none !important;
+}
+
+/* hide the swipe area if you like */
+body.stage-3 .head .swipe,
+body.stage-3 .torso .swipe {
+  display: none !important;
+}
+
+body.stage-3 .head {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translateX(-50%) scale(3);
+  transform-origin: center center;
+  /* transition: transform 0.7s ease;  */
+  z-index: 1000 !important;
+}
+
+body.stage-3 .torso {
+  position: fixed !important;
+  top: 80% !important;
+  left: 50% !important;
+  transform: translateX(-50%) scale(3);
+  transform-origin: center center;
+  /* transition: transform 0.7s ease;  */
+  z-index: 0 !important;
+}
+
+
+/* ---------------------------------------
+   STAGE-3: FLOAT NEXT/BACK OVER TORSO
+--------------------------------------- */
+
+
+/* keep footer in its normal spot but on top of the torso in stage-3 */
+body.stage-3 .footer-section {
+  position: relative;
+  /* make z-index apply without re-positioning */
+  z-index: 1003 !important;
+  /* higher than head (1000), canvas (1001), toolbar (1002) */
+}
+
+
+body.stage-3 .footer-section .back-btn,
+body.stage-3 .footer-section .next-btn {
+  /* ensure they keep their pill shape */
+  display: inline-flex;
+}
+
+body.stage-3 .draw-toolbar {
+  position: fixed !important;
+
+  top: 50%;
+  transform: translateY(-50%);
+
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  z-index: 10;
+
+  width: 50%;
+  height: 20%;
+  border-radius: 30px;
+
+}
+
+body.stage-3 .draw-toolbar {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  padding: 16px;
+  background-color: none;
+  border-radius: 24px;
+  z-index: 10;
+}
+
+/* === Radial Fan Layout === */
+.color-picker {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-right: 20px;
+}
+
+/* Position swatches radially */
+.color-picker .color-swatch {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  /* border: 0px solid #2a9df4; */
+  border: none;
+  /* box-shadow: 0 0 2px rgba(0,0,0,0.3); */
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+/* Optional: highlight selected */
+.color-picker .color-swatch.selected {
+  border: 10px solid #f4b63d;
+}
+
+
+.button-row {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.arc-button {
+  position: absolute;
+  background: #e85e24;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+#clearBtn {
+  border-radius: 999px;
+  width: auto;
+  padding: 8px 16px;
+  margin-left: 20px;
+  font-size: 1.5rem;
+}
+
+/* ensure each card can position its corner circle */
+/* body.stage-3 .draw-toolbar .card-wrapper {
+  position: relative;
+}
+
+body.stage-3 .draw-toolbar .card-wrapper {
+  width: 150px;    
+  height: 150px;   
+  transform: none; 
+} */
+
+/* body.stage-3 .draw-toolbar .card-wrapper .card-bg {
+  width: 100%;
+  height: 100%;
+} */
+
+/* body.stage-3 .draw-toolbar .card-content {
+  padding: 8px; 
+   }
+     /* tighten up text/swatches */
+
+/* optionally shrink the corner icon a bit */
+/* body.stage-3 .draw-toolbar .corner-circle {
+  transform: scale(0.6);
+} */
+
+/*  show carousel arrows in stage-1 & stage-2 */
+body:not(.stage-3):not(.stage-4) .carousel-nav {
+  display: inline-flex !important;
+}
+
+
+
+
+
+
+/* override the orange corner (color-picker card) */
+body.stage-3 .draw-toolbar .corner-circle.orange-bg {
+  top: -15px !important;
+  right: -15px !important;
+  bottom: auto !important;
+  left: auto !important;
+}
+
+/* make sure your prev/next buttons are visible in stage-2 */
+body.stage-2 .carousel-nav {
+  display: inline-flex !important;
+  /* or `flex` if you’re using `display: flex` elsewhere */
+}
+
+
+/* ---------------------------------------
+   6.3) STAGE 3 TOOLBAR
+--------------------------------------- */
+
+
+#faceCanvas {
+  position: fixed;
+  z-index: 1001;
+  background: tr ansparent;
+  touch-action: none;
+  cursor: crosshair;
+  cursor: url('assets/icons/brush.cur') 16 16, auto;
+  transform: none !important;
+}
+
+
+
+
+/* only hide carousel arrows (and nothing else) once we’re in stage-3 */
+body.stage-3 .carousel-nav {
+  display: none !important;
+}
+
+/* .color-picker {
+  display: grid !important;
+  grid-template-columns: repeat(2, auto);
+  grid-auto-rows: auto;
+  gap: 8px;
+  justify-content: center;
+} */
+/* .color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 2px rgba(0,0,0,0.3);
+  cursor: pointer;
+} */
+/* .color-swatch.selected {
+  border: 2px solid #000;
+} */
+
+/* body.stage-3 .draw-toolbar #undoBtn,
+body.stage-3 .draw-toolbar #redoBtn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  background: #58aaf7;     
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+body.stage-3 .draw-toolbar #clearBtn {
+  background: #fff;
+  color: #58aaf7;
+  border: 2px solid #58aaf7;
+  border-radius: 999px;      
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+ */
+
+
+/*  ❌ turn off all nav buttons & extra slides */
+body.stage-4 .carousel-nav,
+body.stage-4 .list .prev,
+body.stage-4 .list .next,
+body.stage-4 .list .hide,
+body.stage-4 .list .new-next {
+  display: none !important;
+}
+
+/*  ✅ keep only the active <li> visible */
+body.stage-4 .list .act {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+body.stage-4 #faceCanvas {
+  display: block !important;
+  transform: none !important;
+}
+
+
+body.stage-3 .carousel-nav,
+body.stage-4 .carousel-nav,
+body.stage-3 .list li:not(.act),
+body.stage-4 .list li:not(.act) {
+  display: none !important;
+}
+
+/* 
+.head,
+.torso,
+.legs,
+.shoes,
+#faceCanvas {
+  transition:
+    transform 0.7s ease,
+    top       0.7s ease,
+    left      0.7s ease,
+    width     0.7s ease,
+    height    0.7s ease,
+    opacity   0.7s ease;  
+} */
+
+
+/* body.stage-4 .legs,
+body.stage-4 .shoes,
+body.stage-4 .rig-background {
+  opacity: 1;
+   transition: opacity   0.9s ease;
+} */
+
+
+
+/* after stage-3 zoom, stage-4 sends everything back to “normal” */
+body.stage-4 .head,
+body.stage-4 .torso {
+  position: absolute !important;
+  /* top: 100px   !important;
+  left: 50%    !important; */
+  transform: translateX(-50%) scale(1) !important;
+
+}
+
+/* if your torso/legs have different top offsets in the default stage, replace `top:100px` with those values */
+
+
+/* make sure the canvas has no leftover scale */
+body.stage-4 #faceCanvas {
+  transform: none !important;
+}
+
+body.stage-4 .rig-background {
+  /* background: linear-gradient(to top, #2a9df4, transparent); */
+  opacity: 0;
+
+  /* transition: background 0.7s ease, opacity 0.7s ease, width 0.7s ease; */
+}
+
+.rig-background {
+  transition: background 0.7s ease, opacity 0.7s ease;
+}
+
+
+/* body.stage-4 main.builder-section {
+  
+  transform: translateX(-120px);
+  transition: transform 0.7s ease;
+} */
+
+
+/* ---------------------------------------
+   6.3) INPUT PANEL
+--------------------------------------- */
+
+
+
+/* base styling, hidden by default */
+.left-panel,
+.right-panel {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%) translateX(100px);
+  opacity: 0;
+  pointer-events: none;
+  width: 280px;
+  background: rgba(255, 255, 255, 0.95);
+  background: #f4b63d;
+  padding: 20px;
+  border-radius: 30px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  z-index: 1005;
+  /* above everything else */
+}
+
+.left-panel {
+  left: 200px;
+}
+
+.right-panel {
+  right: 200px;
+}
+
+
+/* only show & slide in on stage-4 */
+body.stage-4 .left-panel,
+body.stage-4 .right-panel {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* form groups */
+.left-panel .form-group,
+.right-panel .form-group {
+  margin-bottom: 16px;
+}
+
+.left-panel .form-group label,
+.right-panel .form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #fff;
+}
+
+.left-panel .input-field,
+.right-panel .input-field {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #58aaf7;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.left-panel .input-field:focus,
+.right-panel .input-field:focus {
+  border-color: #e85e24;
+}
+
+/* traits section */
+.left-panel .traits-section p,
+.right-panel .traits-section p {
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: #2a9df4;
+}
+
+.left-panel .tags,
+.right-panel .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.left-panel .tag,
+.right-panel .tag {
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: white;
+}
+
+.left-panel .tag.pink {
+  background: #e91e63;
+}
+
+.left-panel .tag.blue {
+  background: #1e3a8a;
+}
+
+.left-panel .add-tag {
+  margin-top: 4px;
+}
+
+
+.card-input {
+  position: absolute;
+  background: #f4b63d;
+  padding: 14px 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-weight: bold;
+  color: white;
+  transform: rotate(-5deg);
+  z-index: 1000;
+  max-width: 200px;
+  text-align: left;
+}
+
+.card-input input,
+.card-input textarea {
+  width: 100%;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.card-input .icon {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  background: #e91e63;
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.trait-card {
+  font-size: 0.85rem;
+  line-height: 1.1;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  transform: rotate(-10deg);
+  width: auto;
+  max-width: 160px;
+}
+
+.trait-card.blue {
+  background: #2a9df4;
+}
+
+.trait-card.pink {
+  background: #e91e63;
+}
+
+
+.info-card {
+  background: #f7931e;
+  color: #fff;
+  border-radius: 20px;
+  transform: rotate(3deg);
+  position: fixed;
+  top: 60px;
+  right: 50px;
+  padding: 16px;
+  text-align: center;
+  max-width: 300px;
+  z-index: 1000;
+}
+
+
+
+.info-card h2 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.info-card p {
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+}
+
+.info-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.info-buttons .text-back {
+  background-color: white;
+  border: 2px solid #e53935;
+  border-radius: 20px;
+  color: #e85e24;
+  text-decoration: none;
+  display: inline-block;
+  padding: 8px 16px;
+  flex: 1;
+}
+
+
+
+
+
+.card-input {
+  display: none;
+  /* default hidden */
+}
+
+body.stage-4 .card-input {
+  display: block;
+}
+
+
+body.stage-4 .name-card {
+  top: 75px;
+  left: 450px;
+  transform: rotate(-10deg);
+}
+
+body.stage-4 .fav-card {
+  top: 150px;
+  right: 400px;
+  transform: rotate(8deg);
+}
+
+body.stage-4 .trait-card.blue {
+  bottom: 190px;
+  left: 460px;
+  transform: rotate(-8deg);
+}
+
+body.stage-4 .trait-card.pink {
+  bottom: 150px;
+  left: 520px;
+  transform: rotate(8deg);
+}
+
+
+
+body.stage-4 .email-card {
+  bottom: 50px;
+  right: 440px;
+  transform: rotate(-6deg);
+}
+
+.red-bg {
+  background-color: #e53935 !important;
+  color: white;
+}
+
+.red-bg:hover {
+  background-color: transparent;
+  border: 3px solid #e53935;
+  color: #f4b63d;
+}
+
+
+
+
+/* ---------------------------------------
+   6.3) FOOTER
+--------------------------------------- */
+
+.footer-section {
+  flex: 1 1 16.666%;
+  /* 1/6 */
+  display: flex;
+  align-items: center;
+  transition: all .3s ease;
+}
+
+
+/* stage 1: only next button, center it */
+.footer-section.stage-1 {
+  justify-content: center;
+}
+
+.footer-section.stage-1 .back-btn {
+  display: none;
+}
+
+/* stage 2: two buttons side-by-side, centered */
+.footer-section.stage-2 {
+  justify-content: center;
+  gap: 20px;
+  /* space between buttons */
+}
+
+.footer-section.stage-2 .back-btn {
+  display: inline-block;
+  /* make sure it’s visible */
+}
+
+
+
+
+
+/* ---------------------------------------
+   7) HOME PAGE CONTAINER & CARDS
+--------------------------------------- */
+.container {
+  text-align: center;
+}
+
+.hello {
+  color: orange;
+  font-size: 1.2rem;
+}
+
+.title {
+  color: #4a90e2;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.card-wrapper {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.card-wrapper:hover {
+  transform: scale(1.05);
+}
+
+.card-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: block;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.card-content {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  z-index: 1;
+  color: white;
+  font-weight: bold;
+  text-align: left;
+}
+
+.card-content h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+.card-content p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+/* Reuse circle button for corner circles */
+.corner-circle {
+  position: absolute;
+  z-index: 2;
+}
+
+.corner-circle .icon {
+  font-size: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+.card-wrapper:hover .corner-circle .icon {
+  color: currentColor;
+}
+
+/* Specific corner positions */
+.corner-circle.blue-bg {
+  bottom: 0;
+  left: 0;
+}
+
+.corner-circle.orange-bg {
+  top: 0;
+  right: 0;
+}
+
+.corner-circle.yellow-bg {
+  bottom: 0;
+  right: 0;
+}
+
+
+
+
+/* ---------------------------------------
+   8) CHARACTERS (IMAGES)
+--------------------------------------- */
+.character {
+  position: absolute;
+  width: 100px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.character-1 {
+  bottom: -50px;
+  right: 10px;
+}
+
+.character-2 {
+  bottom: -60px;
+  right: 0;
+  transform: rotate(10deg);
+}
+
+.character-3 {
+  width: 80px;
+  top: -60px;
+  right: -40px;
+  transform: rotate(-15deg);
+}
+
+.card-wrapper:hover .character {
+  animation: wiggle 0.4s ease-in-out;
+}
+
+
+
+
+
+/* ---------------------------------------
+   9) ANIMATIONS
+--------------------------------------- */
+@keyframes wiggle {
+  0% {
+    transform: rotate(0turn);
+  }
+
+  25% {
+    transform: rotate(-0.05turn);
+  }
+
+  75% {
+    transform: rotate(0.05turn);
+  }
+
+  100% {
+    transform: rotate(0turn);
+  }
+}
+
+.footer-section .back-btn {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.footer-section .back-btn.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+
+.character-grid {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 160px);
+  overflow: hidden;
+}
+
+.character-svg {
+  position: absolute;
+  width: 120px;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.2s;
+  z-index: 1;
+}
+
+.character-svg:hover {
+  transform: scale(1.05);
+  z-index: 3;
+}
+
+.tooltip {
+  position: fixed;
+  background: #2a9df4;
+  color: white;
+  padding: 12px;
+  border-radius: 12px;
+  max-width: 180px;
+  font-size: 0.85rem;
+  z-index: 9999;
+  /* ✨ ensures it's on top of everything */
+  display: none;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.tooltip .tag {
+  display: inline-block;
+  background-color: #eabec5;
+  border-radius: 10px;
+  padding: 2px 8px;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: white;
+}
+
+.character-svg {
+  width: 150px;
+  height: auto;
+  cursor: pointer;
+  z-index: 1;
+}
+
+
+/* 1) Make arrows visible by default as a flexed button */
+.carousel-nav {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 2) Hide them again in stage-3 & stage-4 */
+body.stage-3 .carousel-nav,
+body.stage-4 .carousel-nav {
+  display: none !important;
+}
+
+
+/* add to your styles.css or <style> */
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid #2a9df4;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+  margin-top: 50px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+/* ---------------------------------------
+   10) RESPONSIVE
+--------------------------------------- */
+@media (max-width: 768px) {
+
+  html,
+  body {
+    width: 100vw;
+    height: 100vh;
+    touch-action: manipulation;
+    /* disables pinch-zoom but keeps scrolling */
+    -ms-touch-action: manipulation;
+    overflow-x: hidden;
+  }
+
+
+
+  .homepage {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    /* min-height: 100vh;   */
+    padding: 40px 20px;
+    /* safe space top/bottom */
+  }
+
+  .char-page {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .card-wrapper {
+    position: relative;
+    width: 170px;
+    height: 170px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+
+  }
+
+  .card-wrapper:active {
+    transform: scale(0.98);
+  }
+
+  .cards {
+    flex-direction: column;
+    align-items: center;
+    gap: 35px;
+    /* slightly tighter gap than 100px for mobile comfort */
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .hello {
+    font-size: 1.2rem;
+  }
+
+  .card-content h3 {
+    font-size: 0.8rem;
+    line-height: 1.1;
+  }
+
+  .character {
+    width: 100px;
+  }
+
+  .character-1 {
+    bottom: -20px;
+    right: -70px;
+  }
+
+  .character-2 {
+    bottom: -10px;
+    right: 140px;
+    transform: rotate(-10deg);
+  }
+
+  .character-3 {
+    top: -30px;
+    right: -40px;
+    transform: rotate(15deg);
+  }
+
+  .circle-button.extrasmall {
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
+  }
+
+  .circle-button.small {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+
+  .circle-button.medium {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+
+  .text-back {
+    font-size: 0.9rem;
+    padding: 10px 20px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 30px 20px;
+  }
+
+  .header-top {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: static;
+    transform: none;
+  }
+
+  .back-buttons {
+    width: 100%;
+    /* optional: make it span full width */
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    /* keep your spacing */
+  }
+
+  /* steps now inline with back buttons on mobile */
+  .title-section {
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .title-section h1 {
+    font-size: 1.5em;
+  }
+
+  .subtitle {
+    font-size: 0.8rem;
+  }
+
+  builder-section {
+    max-width: 100vw;
+    padding: 0px;
+    margin: 0px;
+    overflow: hidden;
+  }
+
+  /* make the svg rig scale to viewport */
+  #rig {
+    width: 90vw;
+    height: auto;
+    max-width: 100vw;
+  }
+
+  #blob-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    /* ✅ behind carousels but above blue bar */
+    pointer-events: none;
+    /* so it doesn't block clicks */
+  }
+
+
+
+
+
+  .list {
+    height: 150px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%)
+  }
+
+  .list li {
+    list-style-type: none;
+
+    /* width: 100px;
+    height: 100px; */
+    opacity: 1;
+    position: absolute;
+    left: 50%;
+    /* margin-left: -50px; */
+    border-radius: 2px;
+    /* background: #9C89B8; */
+    transition: transform 1s, opacity 1s;
+  }
+
+  .head li {
+    width: 100px;
+    height: 100px;
+    margin-left: -50px;
+  }
+
+  .torso li {
+    width: 130px;
+    height: 130px;
+    margin-left: -65px;
+  }
+
+  .legs li {
+    width: 130px;
+    height: 130px;
+    margin-left: -65px;
+  }
+
+  .shoes li {
+    width: 100px;
+    height: 100px;
+    margin-left: -50px;
+  }
+
+  .list .prev {
+    transform: translateX(-100px) scale(.85);
+  }
+
+  .list .next {
+    transform: translateX(100px) scale(.85);
+  }
+
+  .list .hide {
+    transform: translateX(-420px) scale(.85);
+  }
+
+  .list .new-next {
+    transform: translateX(420px) scale(.85);
+  }
+
+  .legs {
+    transform: translateY(50px) translateX(-150px);
+  }
+
+  .shoes {
+    transform: translateY(150px) translateX(-150px);
+  }
+
+
+  /* 3.1 header-top flex layout & info button */
+  .header-top {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    left: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+    padding: 12px 16px;
+  }
+
+  .header-top .back-buttons {
+    order: 1;
+  }
+
+  .header-top h1 {
+    order: 2;
+    flex: 1;
+    text-align: center;
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  #info-toggle {
+    order: 3;
+  }
+
+  /* 3.2 info‑drawer off‑canvas */
+  .info-card {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 80vw;
+    height: 80vh;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 2000;
+  }
+
+  body.info-open .info-card {
+    transform: translateX(0);
+  }
+
+  .info-card {
+    position: fixed;
+    top: 0;
+    right: 0;
+    /* your existing width/height/transform rules */
+  }
+
+  .info-card #info-close {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+  }
+
+  /* 3.3 hide info‑card on load (for smaller screens) */
+  @media (max-width: 768px) {
+    .info-card {
+      display: block;
+    }
+
+    /* ensure it’s present for slide-in */
+  }
+
+  /* 3.4 preserve existing stage‑visibility */
+  body.stage-2 .info-card,
+  body.stage-3 .info-card,
+  body.stage-4 .info-card {
+    /* your existing rules still apply */
+  }
+
+  /* 3.5 carousel & rig scaling */
+  #rig {
+    width: 90vw;
+    height: auto;
+  }
+
+  .list li.act {
+    transform: scale(1) !important;
+  }
+
+  .list .prev {
+    transform: translateX(-100px) scale(.7) !important;
+  }
+
+  .list .next {
+    transform: translateX(100px) scale(.7) !important;
+  }
+
+  /* 3.6 toolbar above head */
+  body.stage-3 .draw-toolbar {
+    top: auto !important;
+    bottom: auto !important;
+    left: 50% !important;
+    transform: translate(-50%, -120%) !important;
+    /* ~above the head */
+  }
+
+  /* 3.7 reserve bottom 1/3vh for bottom‑sheet in stage‑4 */
+  @media (max-width: 768px) {
+    body.stage-4 .builder-section {
+      padding-bottom: 33vh;
+    }
+  }
+
+  body.stage-4 .bottom-sheet,
+  body.stage-4 .card-input {
+    display: none !important;
+  }
+
+  /* push builder content up so it isn’t covered */
+  body.stage-4 .builder-section {
+    padding-bottom: 33vh;
+    /* same as sheet height */
+  }
+
+
+
+
+}

@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"/> -->
+  <meta name="viewport" content="width=device-width,
+                 initial-scale=1.0,
+                 maximum-scale=1.0,
+                 minimum-scale=1.0,
+                 user-scalable=no">
+  <title>Create Your Character</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* 
+        body {
+        display: flex;
+        flex-direction: column;
+        } */
+  </style>
+
+
+
+
+
+</head>
+
+<body class="char-page">
+  <!-- HEADER: 1/6 -->
+  <header class="header">
+    <div class="header-top">
+      <div class="back-buttons">
+        <button id="goBackMain" class="circle-button small blue-bg" onclick="goBack()">←</button>
+        <!-- <h3 class="header-text">CREATE AN AVATAR!</h3> -->
+        <button id="info-toggle" class="circle-button small yellow-bg" aria-label="info">?</button>
+        <button class="text-back" onclick="goBack()">BACK TO MAIN PAGE</button>
+      </div>
+
+    </div>
+
+
+    </div>
+
+    <div class="title-section">
+      <div class="steps">
+        <div class="step active"></div>
+        <div class="step"></div>
+        <div class="step"></div>
+        <div class="step"></div>
+      </div>
+      <h1>CHOOSE YOUR CHARACTER'S BASIC OUTFIT.</h1>
+
+      <p class="subtitle">Use the left and right arrows for each section to choose.</p>
+
+    </div>
+  </header>
+
+  <!-- BUILDER: 4/6 -->
+  <main id=" avatarExport" class="builder-section">
+    <div class="rig-background"></div>
+    <svg id="rig" width="800" height="800" viewBox="0 0 800 800"></svg>
+
+    <div class="head">
+      <ul class="list">
+        <li class="hide"></li>
+        <li class="prev"></li>
+        <li class="act"></li>
+        <li class="next"></li>
+        <li class="next new-next"></li>
+      </ul>
+      <div class="swipe"></div>
+    </div>
+
+    <div class="torso">
+      <ul class="list">
+        <li class="hide"></li>
+        <li class="prev"></li>
+        <li class="act"></li>
+        <li class="next"></li>
+        <li class="next new-next"></li>
+      </ul>
+      <div class="swipe"></div>
+    </div>
+
+    <div class="legs">
+      <ul class="list">
+        <li class="hide"></li>
+        <li class="prev"></li>
+        <li class="act"></li>
+        <li class="next"></li>
+        <li class="next new-next"></li>
+      </ul>
+      <div class="swipe"></div>
+    </div>
+
+    <div class="shoes">
+      <ul class="list">
+        <li class="hide"></li>
+        <li class="prev"></li>
+        <li class="act"></li>
+        <li class="next"></li>
+        <li class="next new-next"></li>
+      </ul>
+      <div class="swipe"></div>
+    </div>
+
+    <canvas id="faceCanvas"></canvas>
+
+    <!-- LEFT PANEL (details about the character) -->
+    <!-- <div class="left-panel">
+  <div class="form-group">
+    <label for="charName">Name your character!</label>
+    <input id="charName" type="text" class="input-field" />
+  </div>
+
+  <div class="form-group">
+    <label for="favThing">What is your character’s favourite thing to do in Punggol?</label>
+    <textarea id="favThing" class="input-field"></textarea>
+  </div>
+
+  <div class="traits-section">
+    <p>Character Traits</p>
+    <div class="tags">
+      <span class="tag pink">Nature Lover</span>
+      <span class="tag blue">Creative</span>
+      <button class="circle-button extrasmall blue-bg add-tag">+</button>
+    </div>
+  </div>
+</div> -->
+
+    <!-- RIGHT PANEL (consent & email) -->
+    <!-- <div class="right-panel">
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil labore, laudantium minus.</p>
+  <div class="form-group">
+    <label for="emailConsent">Can we send you a copy of your avatar?</label>
+    <input type="checkbox" id="emailConsent" />
+  </div>
+
+  <div class="form-group">
+    <label for="emailAddress">Email address</label>
+    <input id="emailAddress" type="email" class="input-field" placeholder="your@email.com" />
+  </div>
+</div> -->
+
+
+    <!-- STAGE-4 floating cards -->
+    <div class="card-input name-card">
+      <p>HELLO, MY NAME IS</p>
+      <input type="text" id="charName" />
+    </div>
+
+    <div class="card-input fav-card">
+      <p>MY FAVOURITE THING TO DO IN PUNGGOL IS</p>
+      <textarea id="favThing"></textarea>
+      <div class="icon">🛵</div>
+    </div>
+
+    <div class="card-input trait-card blue">
+      <span>URBAN<br />ENTHUSIAST</span>
+    </div>
+
+    <div class="card-input trait-card pink">
+      <span>CYCLE LOVER</span>
+    </div>
+
+    <div class="card-input email-card">
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="emailConsent" />
+        <label for="emailConsent">
+          I agree to receive updates and newsletters from Shaping Hearts.
+        </label>
+      </div>
+      <!-- <p style="padding: 0%; margin: 0%;">YOUR EMAIL</p> -->
+      <input type="text" id="emailAddress" placeholder="your@email.com" disabled />
+      <p>
+        You avatar will be emailed to the address above soon :)
+      </p>
+    </div>
+
+
+
+
+
+
+
+    <div class="draw-toolbar">
+      <div class="color-picker">
+        <div class="color-swatch" data-color="#234ea8" style="background:#234ea8"></div>
+        <div class="color-swatch" data-color="#605259" style="background:#605259"></div>
+        <div class="color-swatch" data-color="#c45a48" style="background:#c45a48"></div>
+        <div class="color-swatch" data-color="#859c8e" style="background:#859c8e"></div>
+        <div class="color-swatch" data-color="#40904d" style="background:#40904d"></div>
+      </div>
+      <div class="button-row">
+        <button class="arc-button" id="undoBtn">↶</button>
+        <button class="arc-button" id="clearBtn">CLEAR</button>
+        <button class="arc-button" id="redoBtn">↷</button>
+      </div>
+
+
+    </div>
+
+
+  </main>
+  <script src="https://hammerjs.github.io/dist/hammer.js"></script>
+
+  <!-- FOOTER: 1/6 -->
+  <footer class="footer-section">
+    <button class="back-btn">BACK</button>
+    <button class="next-btn " style="margin-left: 20px;">
+      NEXT
+    </button>
+
+
+  </footer>
+
+  <div id="custom-alert" class="custom-alert">
+    <div class="custom-alert__content">
+      <p id="custom-alert__message"></p>
+      <div class="custom-alert__buttons">
+        <button id="custom-alert__gallery">VISIT THE GALLERY</button>
+        <button id="custom-alert__another">MAKE ANOTHER AVATAR</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="info-card">
+    <button id="info-close" class="circle-button small yellow-bg" aria-label="close info">←</button>
+    <h2>FEATURING ARTWORKS BY SHAPING HEARTS ARTISTS!</h2>
+    <p>Each clothing and print is built from artwork created by Shaping Hearts Artists Simeon and Ezra. Learn more
+      about
+      them below.</p>
+    <div class="info-buttons">
+      <a href="https://shapinghearts.cdc.gov.sg/simeon-tan-rui-en/" target="_blank" rel="noopener"
+        class="text-back">Simeon</a>
+      <a href="https://shapinghearts.cdc.gov.sg/ezra-chan-yi/" target="_blank" rel="noopener" class="text-back">Ezra</a>
+    </div>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+
+  <script type="module">
+    // 1️⃣ core
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+    // 2️⃣ Firestore (database) APIs
+    import {
+      getFirestore,
+      serverTimestamp,
+      collection,
+      addDoc,
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    // 3️⃣ Storage APIs
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL,
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+
+    // 4️⃣ your config (keep yours here)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwpNjnDFAA_5P64zMOt-GTSOdETx2xKJQ",
+      authDomain: "people-of-pdd-website.firebaseapp.com",
+      projectId: "people-of-pdd-website",
+      storageBucket: "people-of-pdd-website.firebasestorage.app",
+      messagingSenderId: "685048567158",
+      appId: "1:685048567158:web:abc51754b5b785219c1657",
+      measurementId: "G-1VRMYRMXKN"
+    };
+
+    // 5️⃣ init
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // 6️⃣ expose for your non‑module scripts
+    window.db = db;
+    window.storage = storage;
+    window.serverTimestamp = serverTimestamp;
+    window.collection = collection;
+    window.addDoc = addDoc;
+    window.ref = ref;
+    window.uploadBytes = uploadBytes;
+    window.getDownloadURL = getDownloadURL;
+  </script>
+
+
+
+</body>
+
+
+<script>
+
+
+
+  const root = document.body;
+  const canvasEl = document.getElementById('faceCanvas');
+  const toolbarEl = document.querySelector('.draw-toolbar');
+
+  // hide them until stage-3
+  canvasEl.style.display = 'none';
+  toolbarEl.style.display = 'none';
+
+
+
+  function goBack() {
+    window.location.href = "./index.html";
+  }
+
+  // === CONFIG ===
+
+  const baseRig = {
+    head: { x: 0, y: 0 },
+    neck: { x: 0, y: 30 },
+    shoulderL: { x: -40, y: 40 },
+    shoulderR: { x: 40, y: 40 },
+    elbowL: { x: -70, y: 100 },
+    elbowR: { x: 70, y: 100 },
+    handL: { x: -80, y: 160 },
+    handR: { x: 80, y: 160 },
+    hipL: { x: -20, y: 170 },
+    hipR: { x: 20, y: 170 },
+    kneeL: { x: -30, y: 260 },
+    kneeR: { x: 30, y: 260 },
+    footL: { x: -40, y: 330 },
+    footR: { x: 40, y: 330 }
+  };
+
+  const bones = [
+    ['head', 'neck'],
+    ['neck', 'shoulderL'],
+    ['neck', 'shoulderR'],
+    ['shoulderL', 'elbowL'],
+    ['shoulderR', 'elbowR'],
+    ['elbowL', 'handL'],
+    ['elbowR', 'handR'],
+    ['neck', 'hipL'],
+    ['neck', 'hipR'],
+    ['hipL', 'kneeL'],
+    ['hipR', 'kneeR'],
+    ['kneeL', 'footL'],
+    ['kneeR', 'footR']
+  ];
+
+
+
+
+
+  const svg = document.getElementById('rig');
+  const svgWidth = svg.viewBox.baseVal.width;
+  const svgHeight = svg.viewBox.baseVal.height;
+
+  let scale;
+  let yspacing = 70;
+  window.addEventListener('resize', setScaleForViewport);
+
+
+  function svgPointToClient(x, y) {
+    const pt = svg.createSVGPoint()
+    pt.x = x; pt.y = y
+    const screenPt = pt.matrixTransform(svg.getScreenCTM())
+    return { x: screenPt.x, y: screenPt.y }
+  }
+
+
+  function setScaleForViewport() {
+    if (window.innerWidth <= 768) {
+      scale = 1.9;
+      console.log("check mobile")
+    } else {
+      scale = 1.3;
+    }
+
+    // updateNodes();
+  }
+
+  setScaleForViewport();
+
+
+  let origin = { x: svgWidth / 2, y: 100 };
+
+  // Live nodes
+  const nodes = {};
+  updateNodes();
+
+  // Create bones & joints
+  const lines = [];
+  const circles = [];
+
+  bones.forEach(([a, b]) => {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('stroke', 'red');
+    line.setAttribute('stroke-width', 3);
+    //svg.appendChild(line);
+    lines.push({ line, a, b });
+  });
+
+  Object.keys(nodes).forEach(name => {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('r', 8);
+    circle.setAttribute('fill', 'red');
+    circle.style.cursor = 'pointer';
+    //svg.appendChild(circle);
+    circles.push({ circle, name });
+  });
+
+  // Store original bone lengths:
+  const boneLengths = {};
+  bones.forEach(([a, b]) => {
+    const dx = nodes[a].x - nodes[b].x;
+    const dy = nodes[a].y - nodes[b].y;
+    boneLengths[`${a}-${b}`] = Math.hypot(dx, dy);
+    boneLengths[`${b}-${a}`] = boneLengths[`${a}-${b}`]; // symmetric
+  });
+
+
+  // CAROUSEL
+
+
+
+  // === DRAGGING ===
+
+  let dragging = null;
+
+  circles.forEach(({ circle, name }) => {
+    circle.addEventListener('mousedown', e => startDrag(e, name));
+    circle.addEventListener('touchstart', e => startDrag(e, name));
+  });
+
+  window.addEventListener('mousemove', dragMove);
+  window.addEventListener('touchmove', dragMove, { passive: false });
+
+  window.addEventListener('mouseup', endDrag);
+  window.addEventListener('touchend', endDrag);
+
+  function startDrag(e, name) {
+    e.preventDefault();
+    dragging = name;
+  }
+
+  function dragMove(e) {
+    if (!dragging) return;
+    e.preventDefault();
+
+    const pt = getMousePos(e);
+
+    // Find its connected neighbors
+    const connected = bones.filter(([a, b]) => a === dragging || b === dragging)
+      .map(([a, b]) => (a === dragging ? b : a));
+
+    // For simplicity, we constrain to just the FIRST neighbor:
+    if (connected.length) {
+      const parent = connected[0];
+      const length = boneLengths[`${dragging}-${parent}`];
+
+      const dx = pt.x - nodes[parent].x;
+      const dy = pt.y - nodes[parent].y;
+      const dist = Math.hypot(dx, dy) || 1;
+
+      const newX = nodes[parent].x + dx / dist * length;
+      const newY = nodes[parent].y + dy / dist * length;
+
+      nodes[dragging].x = newX;
+      nodes[dragging].y = newY;
+    } else {
+      // If no connected parent, allow free drag (e.g. head)
+      nodes[dragging].x = pt.x;
+      nodes[dragging].y = pt.y;
+    }
+  }
+
+
+
+  function endDrag() {
+    dragging = null;
+  }
+
+  function getMousePos(e) {
+    let clientX, clientY;
+    if (e.touches && e.touches.length) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
+    const rect = svg.getBoundingClientRect();
+    return {
+      x: ((clientX - rect.left) / rect.width) * svg.viewBox.baseVal.width,
+      y: ((clientY - rect.top) / rect.height) * svg.viewBox.baseVal.height
+    };
+  }
+
+  // === UPDATE LOOP ===
+
+  function animate() {
+    lines.forEach(({ line, a, b }) => {
+      line.setAttribute('x1', nodes[a].x);
+      line.setAttribute('y1', nodes[a].y);
+      line.setAttribute('x2', nodes[b].x);
+      line.setAttribute('y2', nodes[b].y);
+    });
+
+    circles.forEach(({ circle, name }) => {
+      circle.setAttribute('cx', nodes[name].x);
+      circle.setAttribute('cy', nodes[name].y);
+    });
+
+    if (!root.classList.contains('stage-4')) {
+      // positionCarousels();
+    }
+
+    requestAnimationFrame(animate);
+
+  }
+  animate();
+
+  // === INIT ===
+
+
+
+  function updateNodes() {
+    Object.entries(baseRig).forEach(([name, pos]) => {
+      if (window.innerWidth <= 768)
+        yspacing = 0;
+      else
+        yspacing = 100;
+
+      nodes[name] = {
+        x: origin.x + pos.x * scale,
+        y: origin.y + yspacing + pos.y * scale
+      };
+    });
+  }
+
+  function loadInlineSVG(src, targetEl) {
+    // clear old content and show spinner
+    targetEl.innerHTML = '';
+    const spinner = document.createElement('div');
+    spinner.classList.add('spinner');
+    targetEl.appendChild(spinner);
+
+    fetch(src)
+      .then(res => res.text())
+      .then(svgText => {
+        // replace spinner with svg
+        targetEl.innerHTML = svgText;
+        // optional: turn white fills to black
+        targetEl.querySelectorAll('[fill="#fff"], [fill="#ffffff"], [fill="white"]')
+          .forEach(el => el.setAttribute('fill', 'black'));
+      })
+      .catch(err => {
+        console.error('failed to load SVG:', src, err);
+        // remove spinner on error
+        spinner.remove();
+      });
+  }
+
+
+
+  class Carousel {
+    constructor({ listEl, swipeEl, images, category, spacing = 320, prevBtnColor = 'blue-bg', nextBtnColor = 'blue-bg', btnSize = 'extrasmall' }) {
+      this.listEl = listEl;
+      this.swipeEl = swipeEl;
+      this.images = images;
+      this.currentIndex = 0;
+      this.category = category;
+      this.spacing = window.innerWidth <= 768 ? 150 : spacing;
+      this.prevBtnColor = prevBtnColor;
+      this.nextBtnColor = nextBtnColor;
+      this.btnSize = btnSize;
+
+      this.init();
+    }
+
+    init() {
+      this.buildSlides()
+      this.bindEvents()
+      this.createNavButtons()
+      this.updateClasses()         // first pass
+      setTimeout(() => {
+        this.updateClasses()       // second pass after svg fetch/layout
+      }, 10)                       // you can lower this delay if it's too long
+    }
+
+    buildSlides() {
+      this.listEl.innerHTML = '';
+      this.images.forEach(src => {
+        const li = document.createElement('li');
+        const svgContainer = document.createElement('div');
+        svgContainer.classList.add('svg-container');
+        svgContainer.style.width = '100%';
+        svgContainer.style.height = '100%';
+        loadInlineSVG(src, svgContainer);
+        li.appendChild(svgContainer);
+        this.listEl.appendChild(li);
+      });
+    }
+
+    updateClasses() {
+      const items = Array.from(this.listEl.children);
+      const len = items.length;
+      items.forEach((li, i) => {
+        li.className = '';
+        const offset = (i - this.currentIndex + len) % len;
+        if (offset === 0) li.classList.add('act');
+        else if (offset === 1) li.classList.add('next');
+        else if (offset === 2) li.classList.add('new-next');
+        else if (offset === len - 1) li.classList.add('prev');
+        else if (offset === len - 2) li.classList.add('hide');
+      });
+
+      // Defer repositioning so DOM updates complete
+      requestAnimationFrame(() => this.positionNavButtons());
+    }
+
+
+
+    next() {
+      this.currentIndex = (this.currentIndex + 1) % this.images.length;
+      this.updateClasses();
+    }
+
+    prev() {
+      this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+      this.updateClasses();
+    }
+
+    bindEvents() {
+      this.listEl.addEventListener('click', e => {
+        const li = e.target.closest('li');
+        if (!li) return;
+        if (li.classList.contains('next')) this.next();
+        else if (li.classList.contains('prev')) this.prev();
+      });
+
+      const hammer = new Hammer(this.swipeEl);
+      hammer.on('swipeleft', () => this.next());
+      hammer.on('swiperight', () => this.prev());
+    }
+
+    createNavButtons() {
+      this.prevBtn = document.createElement('button');
+      this.nextBtn = document.createElement('button');
+
+      this.prevBtn.classList.add('circle-button', this.btnSize, this.prevBtnColor, 'carousel-nav');
+      this.nextBtn.classList.add('circle-button', this.btnSize, this.nextBtnColor, 'carousel-nav');
+
+      this.prevBtn.innerText = '←';
+      this.nextBtn.innerText = '→';
+
+      this.prevBtn.addEventListener('click', () => this.prev());
+      this.nextBtn.addEventListener('click', () => this.next());
+
+      document.body.appendChild(this.prevBtn);
+      document.body.appendChild(this.nextBtn);
+    }
+
+    positionNavButtons() {
+      const rect = this.listEl.getBoundingClientRect();
+      const btnW = this.prevBtn.offsetWidth;
+      const btnH = this.prevBtn.offsetHeight;
+
+      Object.assign(this.prevBtn.style, {
+        position: 'absolute',
+        left: `${rect.left - this.spacing}px`,
+        top: `${rect.top + (rect.height - btnH) / 2}px`,
+        zIndex: '10'
+      });
+
+      Object.assign(this.nextBtn.style, {
+        position: 'absolute',
+        left: `${rect.right + this.spacing - btnW}px`,
+        top: `${rect.top + (rect.height - btnH) / 2}px`,
+        zIndex: '10'
+      });
+    }
+  }
+
+  // example usage:
+
+
+  const hats = [
+    './assets/char/hair-hat/hair-hat-01.svg',
+    './assets/char/hair-hat/hair-hat-02.svg',
+    './assets/char/hair-hat/hair-hat-03.svg',
+    './assets/char/hair-hat/hair-hat-04.svg',
+    './assets/char/hair-hat/hair-hat-05.svg'
+  ];
+  const torsos = [
+    './assets/char/torso/torso-01.svg',
+    './assets/char/torso/torso-02.svg',
+    './assets/char/torso/torso-03.svg',
+    './assets/char/torso/torso-04.svg',
+    './assets/char/torso/torso-05.svg'
+
+  ];
+  const legs = [
+    './assets/char/legs/legs-01.svg',
+    './assets/char/legs/legs-02.svg',
+    './assets/char/legs/legs-03.svg',
+    './assets/char/legs/legs-04.svg',
+    './assets/char/legs/legs-05.svg'
+  ];
+  const shoes = [
+    './assets/char/shoes/shoes-01.svg',
+    './assets/char/shoes/shoes-02.svg',
+    './assets/char/shoes/shoes-03.svg',
+    './assets/char/shoes/shoes-04.svg',
+    './assets/char/shoes/shoes-05.svg'
+  ];
+
+  // 2. build imageSets with those named arrays
+  const imageSets = [hats, torsos, legs, shoes];
+
+  // document.querySelectorAll('.list').forEach((listEl, i) => {
+  //   const swipeEl = document.querySelectorAll('.swipe')[i]
+  //   new Carousel({ listEl, swipeEl, images: imageSets[i] })
+  // })
+
+  function positionCarousels() {
+
+    // if (stage === 4) return;
+
+    // head node
+    const headPos = svgPointToClient(nodes.head.x, nodes.head.y)
+    const headDiv = document.querySelector('.head')
+    headDiv.style.left = `${headPos.x}px`
+
+    if (window.innerWidth <= 768)
+      headDiv.style.top = `${headPos.y - (yspacing + 250)}px`
+    else
+      headDiv.style.top = `${headPos.y - (yspacing + 100)}px`
+
+
+
+    // torso center = average of shoulderL, shoulderR, hipR, hipL
+    const keys = ['shoulderL', 'shoulderR', 'hipR', 'hipL']
+    const sum = keys.reduce((acc, k) => {
+      acc.x += nodes[k].x
+      acc.y += nodes[k].y
+      return acc
+    }, { x: 0, y: 0 })
+    const avg = { x: sum.x / 4, y: sum.y / 4 }
+    const torsoPos = svgPointToClient(avg.x, avg.y)
+    const torsoDiv = document.querySelector('.torso')
+    torsoDiv.style.left = `${torsoPos.x}px`
+
+    if (window.innerWidth <= 768)
+      torsoDiv.style.top = `${torsoPos.y - (yspacing + 260)}px`
+    else
+      torsoDiv.style.top = `${torsoPos.y - (yspacing + 150)}px`
+
+    //leg 
+    const kneeLClient = svgPointToClient(nodes.kneeL.x, nodes.kneeL.y);
+    const kneeRClient = svgPointToClient(nodes.kneeR.x, nodes.kneeR.y);
+    const kneeAvgX = (kneeLClient.x + kneeRClient.x) / 2;
+    const kneeAvgY = (kneeLClient.y + kneeRClient.y) / 2;
+    const legsDiv = document.querySelector('.legs');
+    legsDiv.style.left = `${kneeAvgX}px`;
+    // adjust the vertical offset as needed; using same −250 for now
+    legsDiv.style.top = `${kneeAvgY + 0}px`;
+
+
+  }
+
+
+
+
+
+
+
+
+  // collect your carousels
+  const carousels = [];
+  const categories = ['hair-hat', 'torso', 'legs', 'shoes'];
+
+  document.querySelectorAll('.list').forEach((listEl, i) => {
+    const swipeEl = document.querySelectorAll('.swipe')[i];
+    const carousel = new Carousel({
+      listEl,
+      swipeEl,
+      images: imageSets[i],
+      category: categories[i]
+    });
+    // keep a copy of the non-patterned set
+    carousel.originalImages = [...carousel.images];
+    carousels.push(carousel);
+  });
+
+  let stage = 1;
+  const footer = document.querySelector('.footer-section');
+  const backBtn = document.querySelector('.back-btn');
+  const nextBtn = document.querySelector('.next-btn');
+  const titleEl = document.querySelector('.title-section h1');
+  const subtitleEl = document.querySelector('.subtitle');
+  const originalSubtitle = subtitleEl.textContent.trim();
+  const stepEls = Array.from(document.querySelectorAll('.steps .step'));
+
+
+  footer.classList.add('stage-1');
+
+  // helper: swap all carousels into their patterned variants
+  function applyPatterned(carousels) {
+    carousels.forEach(carousel => {
+      // save user’s outline choice
+      carousel.originalIndex = carousel.currentIndex;
+
+      // figure out which pattern folder to load
+      const activeSrc = carousel.images[carousel.currentIndex];
+      const baseName = activeSrc.match(/\/([^\/]+)\.svg$/)[1]; // e.g. "torso-02"
+      const idx = baseName.split('-').pop();              // "02"
+
+      // build the patterned paths
+      const patterned = Array.from({ length: 5 }, (_, i) => {
+        const kk = String(i + 1).padStart(2, '0');
+        return `./assets/patterned/${carousel.category}/${idx}/${baseName}-${kk}.svg`;
+      });
+
+      // animate the swap, then reset to pattern #1
+      animateCarouselSwap(carousel, patterned, () => {
+        carousel.currentIndex = 0;
+      });
+    });
+  }
+
+
+  // helper: restore each carousel’s original images + selection
+  function restoreOriginals(carousels) {
+    carousels.forEach(carousel => {
+      const originals = [...carousel.originalImages];
+
+      // animate back to the originals, then restore the chosen index
+      animateCarouselSwap(carousel, originals, () => {
+        carousel.currentIndex = carousel.originalIndex;
+      });
+    });
+  }
+
+  function setStep(activeIndex) {
+    stepEls.forEach((el, i) => {
+      el.classList.toggle('active', i === activeIndex);
+    });
+  }
+
+  function updateTitleSection(stage) {
+    const titleSection = document.querySelector('.title-section');
+    const h1 = titleSection.querySelector('h1');
+    const subtitle = titleSection.querySelector('.subtitle');
+    const steps = Array.from(titleSection.querySelectorAll('.step'));
+
+    // update step active state
+    steps.forEach((el, i) => {
+      el.classList.toggle('active', i === stage - 1);
+    });
+
+    // update text content
+    if (stage === 1) {
+      h1.textContent = "CHOOSE YOUR CHARACTER'S BASIC OUTFIT.";
+      subtitle.textContent = "Use the left and right arrows for each section to choose.";
+    } else if (stage === 2) {
+      h1.textContent = "LET'S ADD SOME FUN PRINTS AND PATTERNS!";
+      subtitle.textContenqt = "Use the left and right arrows for each section to choose.";
+    } else if (stage === 3) {
+      h1.textContent = "GIVE YOUR CHARACTER A FACE!";
+      subtitle.textContent = "Click and drag over the face. You can add eyes, a nose, a mouth or whatever else you please.";
+    } else if (stage === 4) {
+      h1.textContent = "LET'S ADD A FEW MORE DETAILS!";
+      subtitle.textContent = "Tell us your character's name, and their favourite thing to do in Punggol.";
+    }
+  }
+
+  // Arc layout for color swatches
+  function layoutSwatchesInArc() {
+    const swatches = document.querySelectorAll('.color-picker .color-swatch');
+    const radius = 200;
+    const arcStart = 90 + 45 + 10;     // start angle in degrees
+    const arcEnd = 270 - 45 - 10;    // end angle in degrees
+    const step = (arcEnd - arcStart) / (swatches.length - 1);
+
+    // detect mobile
+    const isMobile = window.innerWidth <= 768;
+    const rotationOffset = isMobile ? 90 : 0;  // add 90° on mobile
+
+    swatches.forEach((swatch, i) => {
+      // compute base angle then add offset
+      const angleDeg = arcStart + step * i + rotationOffset;
+      const angle = angleDeg * Math.PI / 180;
+
+      // you can leave your centers the same
+      const x = radius * Math.cos(angle) + 275;
+      const y = radius * Math.sin(angle) + 60;
+
+      swatch.style.left = `${x}px`;
+      swatch.style.top = `${y}px`;
+    });
+  }
+
+  // don't forget to re‑run on resize if your layout can change:
+  window.addEventListener('resize', () => {
+    layoutSwatchesInArc();
+  });
+
+
+  function layoutButtonsInArc() {
+    const buttons = document.querySelectorAll('.button-row .arc-button');
+    const radius = 200;
+    const arcStart = 90 - 45 - 25;    // start angle in degrees
+    const arcEnd = -90 + 45 + 25;    // end angle in degrees
+    const step = (arcEnd - arcStart) / (buttons.length - 1);
+
+    // detect mobile
+    const isMobile = window.innerWidth <= 768;
+    const rotationOffset = isMobile ? 90 : 0;  // add 90° on mobile only
+
+    buttons.forEach((btn, i) => {
+      // compute the base angle + offset
+      const angleDeg = arcStart + step * i + rotationOffset;
+      const angle = angleDeg * Math.PI / 180;
+
+      // lay out as before
+      const x = radius * Math.cos(angle) + 275;  // adjust centerX if needed
+      const y = radius * Math.sin(angle) + 60;  // adjust centerY if needed
+
+      btn.style.left = `${x}px`;
+      btn.style.top = `${y}px`;
+    });
+  }
+
+  // rerun on resize to keep things in sync
+  window.addEventListener('resize', layoutButtonsInArc);
+  window.addEventListener('DOMContentLoaded', layoutButtonsInArc);
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    layoutSwatchesInArc();
+    layoutButtonsInArc();
+  });
+
+
+
+
+
+
+
+  /**
+   * fades out, swaps images, runs callback (e.g. set index), then fades back in
+   *
+   * @param {Carousel} carousel
+   * @param {string[]} newImages
+   * @param {Function} onSwapComplete — called after images have been swapped but before fade-in
+   */
+  function animateCarouselSwap(carousel, newImages, onSwapComplete) {
+    const listEl = carousel.listEl;
+
+    // 1) kick off the fade-out
+    listEl.classList.add('is-animating');
+
+    setTimeout(() => {
+      // 2) swap your data & set whatever index you need
+      carousel.images = newImages;
+      if (onSwapComplete) onSwapComplete();
+
+      // rebuild all the <li>/.svg-container DOM
+      carousel.buildSlides();
+      carousel.updateClasses();
+
+      // 3) wait until the next frame so the browser has
+      //    actually applied `opacity: 0` to the new containers
+      requestAnimationFrame(() => {
+        // now remove the class → transitions back to opacity:1
+        listEl.classList.remove('is-animating');
+      });
+    }, 300);  // matches your 0.3s CSS fade-out
+  }
+
+
+
+
+
+  // 1. grab canvas & ctx
+  const canvas = document.getElementById('faceCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // 2. resize helper
+  function resizeCanvasToFace() {
+    const container = document.querySelector('.head .list li.act .svg-container');
+    if (!container) return;
+
+    // measure
+    const box = container.getBoundingClientRect();
+    const newW = box.width, newH = box.height;
+    const oldW = canvasEl.width, oldH = canvasEl.height;
+
+    if (oldW && oldH) {
+      const xScale = newW / oldW;
+      const yScale = newH / oldH;
+      const avgScale = (xScale + yScale) / 2;
+
+      strokes.forEach(stroke => {
+        stroke.points.forEach(pt => {
+          pt.x *= xScale;
+          pt.y *= yScale;
+        });
+        stroke.width *= avgScale;
+      });
+    }
+
+    // manual vertical tweak (negative = move up, positive = move down)
+    const manualYAdjust = -25;  // ← tweak this value!
+
+    // resize & reposition
+    canvasEl.width = newW;
+    canvasEl.height = newH;
+    Object.assign(canvasEl.style, {
+      position: 'fixed',
+      left: `${box.left}px`,
+      top: `${box.top + manualYAdjust}px`,  // <-- apply your adjustment here
+      width: `${newW}px`,
+      height: `${newH}px`
+    });
+
+    drawAllStrokes();
+  }
+
+
+
+
+
+  window.addEventListener('resize', () => {
+    if (root.classList.contains('stage-3')) resizeCanvasToFace();
+  });
+
+
+  window.addEventListener('resize', resizeCanvasToFace);
+
+  // 3. strokes data
+  const strokes = [];
+  let currentStroke = null;
+  let brushColor = '#000';
+  const brushSize = 10;
+
+  // 4. draw all saved strokes
+  function drawAllStrokes() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    strokes.forEach(stroke => {
+      drawSmoothStroke(stroke);
+    });
+  }
+
+  function drawSmoothStroke(stroke) {
+    if (stroke.points.length < 3) {
+      // just draw a straight line for very short strokes, then return
+      const pts = stroke.points
+      if (pts.length === 2) {
+        ctx.beginPath()
+        ctx.moveTo(pts[0].x, pts[0].y)
+        ctx.lineTo(pts[1].x, pts[1].y)
+        ctx.strokeStyle = stroke.color
+        ctx.lineWidth = stroke.width
+        ctx.stroke()
+      }
+      return
+    }
+    ctx.beginPath();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = stroke.color;
+    ctx.lineWidth = stroke.width;
+
+    const pts = stroke.points;
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length - 2; i++) {
+      const xc = (pts[i].x + pts[i + 1].x) / 2;
+      const yc = (pts[i].y + pts[i + 1].y) / 2;
+      ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+    }
+    // curve through the last two points
+    const n = pts.length;
+    ctx.quadraticCurveTo(
+      pts[n - 2].x, pts[n - 2].y,
+      pts[n - 1].x, pts[n - 1].y
+    );
+    ctx.stroke();
+  }
+
+
+  // 5. pointer events on canvas
+  canvas.addEventListener('pointerdown', e => {
+    currentStroke = { color: brushColor, width: brushSize, points: [] };
+    const x = e.offsetX, y = e.offsetY;
+    currentStroke.points.push({ x, y });
+    ctx.beginPath();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = brushSize;
+    ctx.strokeStyle = brushColor;
+    ctx.moveTo(x, y);
+    canvasEl.setPointerCapture(e.pointerId);
+  });
+
+  // canvas.addEventListener('pointermove', e => {
+  //   if (!currentStroke) return;
+  //   const x = e.offsetX, y = e.offsetY;
+  //   currentStroke.points.push({ x, y });
+  //   ctx.lineTo(x,y);
+  //   ctx.stroke();
+  // });
+
+  canvas.addEventListener('pointerup', e => {
+    if (!currentStroke) return;
+    canvas.releasePointerCapture(e.pointerId);
+    strokes.push(currentStroke);
+    currentStroke = null;
+  });
+
+  // 6. undo & clear
+  document.getElementById('undoBtn').onclick = () => {
+    strokes.pop();
+    drawAllStrokes();
+  };
+  document.getElementById('clearBtn').onclick = () => {
+    strokes.length = 0;
+    drawAllStrokes();
+  };
+
+  let lastMidpoint = null;
+
+  canvasEl.addEventListener('pointermove', e => {
+    if (!currentStroke) return;
+    const x = e.offsetX, y = e.offsetY;
+    currentStroke.points.push({ x, y });
+
+    if (currentStroke.points.length > 2) {
+      const len = currentStroke.points.length;
+      const p1 = currentStroke.points[len - 3];
+      const p2 = currentStroke.points[len - 2];
+      const midX = (p1.x + p2.x) / 2;
+      const midY = (p1.y + p2.y) / 2;
+
+      if (lastMidpoint) {
+        ctx.beginPath();
+        ctx.moveTo(lastMidpoint.x, lastMidpoint.y);
+        ctx.quadraticCurveTo(p1.x, p1.y, midX, midY);
+        ctx.stroke();
+      }
+      lastMidpoint = { x: midX, y: midY };
+    }
+  });
+  canvasEl.addEventListener('pointerup', () => {
+    lastMidpoint = null;
+  });
+
+
+
+
+  // grab all swatches
+  const swatches = document.querySelectorAll('.color-swatch')
+  // set initial selected
+  swatches[0].classList.add('selected')
+  brushColor = swatches[0].dataset.color
+
+  swatches.forEach(s => {
+    s.addEventListener('click', () => {
+      // clear old selection
+      swatches.forEach(x => x.classList.remove('selected'))
+      // mark new
+      s.classList.add('selected')
+      // update brushColor
+      brushColor = s.dataset.color
+    })
+  })
+
+  // call this instead of relying on .head/.torso divs
+  function drawFinalRig() {
+    const svgNS = "http://www.w3.org/2000/svg";
+
+    // hide carousel UI
+    ['head', 'torso', 'legs', 'shoes'].forEach(cat => {
+      const el = document.querySelector(`.${cat}`);
+      if (el) el.style.display = 'none';
+    });
+    document.querySelectorAll('.carousel-nav').forEach(btn => {
+      btn.style.display = 'none';
+    });
+
+    // clear previous final images & base shape
+    svg.querySelectorAll('image.final-img, g.base-shape').forEach(el => el.remove());
+
+    // get the four printed SVG URLs
+    const selections = carousels.map(c => c.images[c.currentIndex]);
+
+    // compute joint centers
+    const headCtr = nodes.head;
+    const torsoCtr = {
+      x: (nodes.shoulderL.x + nodes.shoulderR.x + nodes.hipL.x + nodes.hipR.x) / 4,
+      y: (nodes.shoulderL.y + nodes.shoulderR.y + nodes.hipL.y + nodes.hipR.y) / 4 + 10
+    };
+    const legsCtr = {
+      x: (nodes.kneeL.x + nodes.kneeR.x) / 2,
+      y: (nodes.kneeL.y + nodes.kneeR.y) / 2 - 30
+    };
+    const shoesCtr = {
+      x: (nodes.footL.x + nodes.footR.x) / 2,
+      y: (nodes.footL.y + nodes.footR.y) / 2 - 30
+    };
+
+    const centers = [shoesCtr, legsCtr, torsoCtr, headCtr];
+    const sizes = [180, 250, 240, 130];
+
+    // append outfit layers: shoes → legs → torso → head
+    centers.forEach((ctr, i) => {
+      const img = document.createElementNS(svgNS, 'image');
+      img.classList.add('final-img');
+      img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', selections[3 - i]);
+      img.setAttribute('width', sizes[i]);
+      img.setAttribute('height', sizes[i]);
+      img.setAttribute('x', ctr.x - sizes[i] / 2);
+      img.setAttribute('y', ctr.y - sizes[i] / 2);
+      svg.appendChild(img);
+    });
+
+    // overlay face strokes on the head
+    const faceCanvas = document.getElementById('faceCanvas');
+    if (faceCanvas.width && faceCanvas.height) {
+      const faceImg = document.createElementNS(svgNS, 'image');
+      faceImg.classList.add('final-img', 'face-overlay');
+      faceImg.setAttributeNS('http://www.w3.org/1999/xlink', 'href', faceCanvas.toDataURL('image/png'));
+      faceImg.setAttribute('width', sizes[3]);
+      faceImg.setAttribute('height', sizes[3]);
+      faceImg.setAttribute('x', headCtr.x - sizes[3] / 2);
+      faceImg.setAttribute('y', headCtr.y - 10 - sizes[3] / 2);
+      svg.appendChild(faceImg);
+    }
+
+
+  }
+
+
+
+  function gatherCharacterData() {
+    const selections = carousels.map(c => c.images[c.currentIndex]);
+    const name = document.getElementById('charName').value;
+    const favThing = document.getElementById('favThing').value;
+
+    // capture strokes as a png data‑url
+    const faceCanvas = document.getElementById('faceCanvas');
+    const faceData = faceCanvas.toDataURL('image/png');
+
+    return { selections, name, favThing, faceData };
+  }
+
+  async function uploadCharacter({ name, favThing, selections, faceData }) {
+    // 1) fetch the PNG blob
+    const blob = await (await fetch(faceData)).blob();
+
+    // 2) upload to Storage
+    const fileRef = window.ref(window.storage, `avatars/${Date.now()}.png`);
+    await window.uploadBytes(fileRef, blob);
+    const faceUrl = await window.getDownloadURL(fileRef);
+
+    // 3) save metadata to Firestore
+    await window.addDoc(
+      window.collection(window.db, "galleryCharacters"),
+      {
+        name,
+        favThing,
+        selections,
+        faceUrl,
+        createdAt: window.serverTimestamp()
+      }
+    );
+  }
+
+  // call this **after** you write the avatar to galleryCharacters
+  async function subscribeEmail(email) {
+    if (!email) return;
+    await addDoc(
+      collection(db, "subscribers"),
+      {
+        email,
+        createdAt: serverTimestamp()
+      }
+    );
+  }
+
+
+
+
+
+  async function exportAvatarAsPNG() {
+    // 1) export dimensions & viewBox
+    const CANVAS_W = 1200, CANVAS_H = 1800;
+    const vbW = svg.viewBox.baseVal.width;    // 800
+    const vbH = svg.viewBox.baseVal.height;   // 800
+
+    // 2) compute export scale & rig vertical nudge
+    const baseScale = CANVAS_W / vbW;     // 1.5×
+    const fillMultiplier = 2;                 // overall zoom factor
+    const s = baseScale * fillMultiplier;
+    const xOff = (CANVAS_W - vbW * s) / 2;
+    const baseYOff = (CANVAS_H - vbH * s) / 2;
+    const manualYOffset = 500;                 // your rig’s vertical nudge in px
+    const yOff = baseYOff + manualYOffset;
+
+    // 3) stage‑4 stroke y‑tweak (in screen px)
+    const manualYAdjust = -25;                // “move strokes up 25px” exactly
+
+    // 4) compute part centers in viewBox coords
+    const originVB = { x: vbW / 2, y: 100 };
+    const headVB = { x: originVB.x, y: originVB.y };
+    const torsoVB = {
+      x: originVB.x + (baseRig.shoulderL.x + baseRig.shoulderR.x + baseRig.hipL.x + baseRig.hipR.x) / 4,
+      y: originVB.y + (baseRig.shoulderL.y + baseRig.shoulderR.y + baseRig.hipL.y + baseRig.hipR.y) / 4 + 10
+    };
+    const legsVB = {
+      x: originVB.x + (baseRig.kneeL.x + baseRig.kneeR.x) / 2,
+      y: originVB.y + (baseRig.kneeL.y + baseRig.kneeR.y) / 2 + 20
+    };
+    const shoesVB = {
+      x: originVB.x + (baseRig.footL.x + baseRig.footR.x) / 2,
+      y: originVB.y + (baseRig.footL.y + baseRig.footR.y) / 2 + 20
+    };
+    const centersVB = [shoesVB, legsVB, torsoVB, headVB];
+    const liSizesVB = [180, 200, 240, 130];
+
+    // 5) load the four patterned SVGs
+    const urls = carousels.map(c => c.images[c.currentIndex]);
+    const imgs = await Promise.all(
+      urls.map(u => new Promise(res => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => res(img);
+        img.src = u;
+      }))
+    );
+
+    // 6) prepare output canvas & draw gradient
+    const out = document.createElement('canvas');
+    out.width = CANVAS_W;
+    out.height = CANVAS_H;
+    const ctx = out.getContext('2d');
+    const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_H);
+    grad.addColorStop(0, 'white');
+    grad.addColorStop(1, '#f4b63d');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+    // 7) draw outfits (shoes→legs→torso→head)
+    for (let i = 0; i < 4; i++) {
+      const img = imgs[3 - i];
+      const vbSize = liSizesVB[i];
+      const pxW = vbSize * s;
+      const pxH = img.naturalHeight / img.naturalWidth * pxW;
+      const ctrVB = centersVB[i];
+      const x = ctrVB.x * s - pxW / 2 + xOff;
+      const y = ctrVB.y * s - pxH / 2 + yOff;
+      ctx.drawImage(img, x, y, pxW, pxH);
+    }
+
+    // 8) stamp the faceCanvas (with strokes) at head
+    const faceCanvas = document.getElementById('faceCanvas');
+    if (!faceCanvas.width || !faceCanvas.height) {
+      resizeCanvasToFace();
+      drawAllStrokes();
+    }
+    const fcW = faceCanvas.width, fcH = faceCanvas.height;
+    if (fcW && fcH) {
+      // headVB is centersVB[3]
+      const headCtr = centersVB[3];
+      const xF = headCtr.x * s - (fcW * s) / 2 + xOff;
+      // **apply manualYAdjust in px, NOT scaled**
+      const yF = headCtr.y * s - (fcH * s) / 2 + yOff + manualYAdjust;
+      ctx.drawImage(faceCanvas, 0, 0, fcW, fcH, xF, yF, fcW * s, fcH * s);
+    }
+
+    // 9) download the PNG
+    const link = document.createElement('a');
+    link.download = 'my-character.png';
+    link.href = out.toDataURL('image/png');
+    link.click();
+  }
+
+  const infoToggle = document.getElementById('info-toggle');
+  infoToggle.addEventListener('click', () => {
+    document.body.classList.toggle('info-open');
+  });
+
+  const infoClose = document.getElementById('info-close');
+  infoClose.addEventListener('click', () => {
+    document.body.classList.remove('info-open');
+  });
+
+
+  const emailConsent = document.getElementById('emailConsent');
+  const emailInput = document.getElementById('emailAddress');
+
+  emailConsent.addEventListener('change', () => {
+    emailInput.disabled = !emailConsent.checked;
+    if (!emailConsent.checked) {
+      emailInput.value = '';
+    }
+  });
+
+  const alertBox = document.getElementById('custom-alert');
+  const alertMsg = document.getElementById('custom-alert__message');
+  const btnGallery = document.getElementById('custom-alert__gallery');
+  const btnAnother = document.getElementById('custom-alert__another');
+
+  function showAlert(message) {
+    alertMsg.textContent = message;
+    alertBox.style.display = 'flex';
+  }
+
+  // wire up the two buttons
+  btnGallery.addEventListener('click', () => {
+    alertBox.style.display = 'none';
+    window.location.href = './gallery.html';
+  });
+
+  btnAnother.addEventListener('click', () => {
+    alertBox.style.display = 'none';
+    window.location.href = './char.html';
+  });
+
+
+
+
+
+
+  // click‐handler for NEXT in stage 1
+  nextBtn.addEventListener('click', () => {
+    if (stage === 1) {
+      // → stage-1 → stage-2  
+      applyPatterned(carousels);
+      // subtitleEl.textContent = "Next, pick patterns and prints!";
+
+      setStep(1);
+      stage = 2;
+      updateTitleSection(stage);
+      backBtn.classList.add('active');
+      footer.classList.replace('stage-1', 'stage-2');
+      document.body.classList.remove('stage-1');
+      document.body.classList.add('stage-2');
+
+      root.classList.remove('stage-1');
+      root.classList.add('stage-2');
+    }
+    else if (stage === 2) {
+      // → stage-2 → stage-3  
+      root.classList.remove('stage-2');
+      root.classList.add('stage-3');           // trigger zoom & hide other parts
+      // subtitleEl.textContent = "Now you should draw a face!";
+
+      setStep(2);
+      // show drawing tools
+      toolbarEl.style.display = 'flex';
+      canvasEl.style.display = 'block';
+      // size overlay AFTER zoom CSS finishes
+      setTimeout(resizeCanvasToFace, 300);
+      stage = 3;
+      updateTitleSection(stage);
+
+
+    }
+    else if (stage === 3) {
+      root.classList.replace('stage-3', 'stage-4');
+
+      // hide the palette but keep the canvas visible
+      toolbarEl.style.display = 'none';
+
+      // 1) resize & scale the face canvas to the head SVG
+      resizeCanvasToFace();
+      // 2) redraw strokes so they're scaled correctly
+      drawAllStrokes();
+
+      // 3) now draw just the four printed svgs on the rig
+      drawFinalRig();
+      canvasEl.style.display = 'none';
+
+      console.log("DATA", gatherCharacterData());
+      // 4) update UI
+      stage = 4;
+      updateTitleSection(stage);
+      nextBtn.textContent = 'SUBMIT';
+      nextBtn.classList.replace('blue-bg', 'red-bg');
+      nextBtn.type = 'submit';
+
+    }
+
+    else if (stage === 4) {
+      //exportAvatarAsPNG();
+      // const gallery = JSON.parse(localStorage.getItem('galleryCharacters') || '[]');
+      // // 2. add new entry
+      // gallery.push(gatherCharacterData());
+      // // 3. write back
+      // localStorage.setItem('galleryCharacters', JSON.stringify(gallery));
+
+      const data = gatherCharacterData();
+      const consent = document.getElementById("emailConsent").checked;
+      const email = document.getElementById("emailAddress").value.trim();
+      uploadCharacter(data)
+        .then(async () => {
+          if (consent && email) {
+            await subscribeEmail(email);
+          }
+          console.log("✅ upload successful");
+          showAlert('Successfully submitted your avatar!')
+
+          // alert("avatar uploaded to Firebase!");
+          // now you can manually verify in the console/console.firebase.google.com
+          // window.location.href = './gallery.html';
+        })
+        .catch(err => {
+          console.error("upload failed", err);
+          alert("upload failed—check console");
+        });
+
+      // 4. go to gallery page
+      //window.location.href = './gallery.html';
+    }
+
+  });
+
+
+  // click‐handler for BACK in stage 2
+  backBtn.addEventListener('click', () => {
+    if (stage === 3) {
+      // → stage-3 → stage-2
+      root.classList.remove('stage-3');
+      root.classList.add('stage-2');
+      // subtitleEl.textContent = "Next, pick patterns and prints!";
+      setStep(1);
+      toolbarEl.style.display = 'none';
+      canvasEl.style.display = 'none';
+      stage = 2;
+      updateTitleSection(stage);
+
+      // footer is already in stage-2, backBtn stays visible
+    }
+    else if (stage === 2) {
+      // → stage-2 → stage-1
+      root.classList.remove('stage-2');
+      root.classList.add('stage-1');
+      restoreOriginals(carousels);
+      subtitleEl.textContent = originalSubtitle;
+      setStep(0);
+      backBtn.classList.remove('active');
+      footer.classList.replace('stage-2', 'stage-1');
+      stage = 1;
+      updateTitleSection(stage);
+    }
+
+    else if (stage === 4) {
+      // → stage-4 → stage-3
+      // 1) swap CSS
+      root.classList.replace('stage-4', 'stage-3');
+
+      // 2) bring back the draw tools
+      toolbarEl.style.display = 'flex';
+      canvasEl.style.display = 'block';
+
+      // 3) un-hide the four divs
+      ['head', 'torso', 'legs', 'shoes'].forEach(cat => {
+        const el = document.querySelector(`.${cat}`);
+        if (el) el.style.display = '';
+      });
+      // 4) show nav buttons again
+      document.querySelectorAll('.carousel-nav').forEach(btn => {
+        btn.style.display = 'inline-flex';
+      });
+
+      // 5) remove the final <image> overlays
+      document.querySelectorAll('image.final-img').forEach(img => img.remove());
+
+      // 6) re-scale & redraw strokes
+      setTimeout(() => {
+        resizeCanvasToFace();
+        drawAllStrokes();
+      }, 0);
+
+      // 7) reset UI state
+      stage = 3;
+      updateTitleSection(stage);
+      nextBtn.textContent = 'NEXT';
+      nextBtn.classList.replace('red-bg', 'blue-bg');
+      nextBtn.type = 'button';
+
+    }
+  });
+
+
+</script>
+
+</html>

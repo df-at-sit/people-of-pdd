@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>People of PDD</title>
+  <link rel="stylesheet" href="styles.css" />
+
+
+</head>
+
+<body class="homepage">
+  <div class="container">
+    <div class="title-section">
+      <h2><span class="hello">hello to the</span><br><span class="title">PEOPLE OF PDD!</span></h2>
+    </div>
+
+
+    <div class="cards">
+      <!-- BLUE CARD -->
+      <div class="card-wrapper" onclick="createCharacter()">
+        <svg viewBox="0 0 340 340" class="card-bg">
+          <path
+            d="M275.5779,0H62.3638C27.9212,0,0,27.9212,0,62.3638v88.4862c0,34.4426,27.9212,62.3638,62.3638,62.3638h20.283c23.2407,0,42.0809,18.8403,42.0809,42.0809v20.283c0,34.4426,27.9212,62.3638,62.3638,62.3638h88.4863c34.4426,0,62.3638-27.9212,62.3638-62.3638V62.3638c0-34.4426-27.9212-62.3638-62.3638-62.3638Z"
+            fill="#58aaf7" />
+        </svg>
+        <div class="card-content">
+          <h3>CREATE YOUR<br />OWN CHARACTER!</h3>
+        </div>
+        <div class="corner-circle circle-button medium blue-bg">
+          <span class="icon bl">→</span>
+        </div>
+        <img src="./assets/home/character-01.png" class="character character-1" alt="Character 1" />
+
+
+      </div>
+
+      <!-- RED CARD -->
+      <div class="card-wrapper" onclick="visitGallery()">
+        <svg viewBox="0 0 340 340" class="card-bg">
+          <path
+            d="M62.3638,337.9417h213.2141c34.4426,0,62.3638-27.9212,62.3638-62.3638v-88.4862c0-34.4426-27.9212-62.3638-62.3638-62.3638h-20.283c-23.2407,0-42.0809-18.8403-42.0809-42.0809v-20.283C213.2139,27.9212,185.2927,0,150.8501,0H62.3638C27.9212,0,0,27.9212,0,62.3638v213.214c0,34.4426,27.9212,62.3638,62.3638,62.3638Z"
+            fill="#e85e24" />
+        </svg>
+        <div class="card-content">
+          <h3>VISIT THE<br />GALLERY!</h3>
+        </div>
+        <div class="corner-circle circle-button medium orange-bg">
+          <div class="icon">👁️</div>
+        </div>
+        <img src="./assets/home/character-02.png" class="character character-2" alt="Character 2" />
+
+      </div>
+
+      <!-- YELLOW CARD -->
+      <div class="card-wrapper" onclick="learnMore()">
+        <svg viewBox="0 0 340 340" class="card-bg">
+          <path
+            d="M0,62.3639v213.2141c0,34.4426,27.9213,62.3638,62.3639,62.3638h88.4862c34.4426,0,62.3638-27.9213,62.3638-62.3639v-20.283c0-23.2407,18.8403-42.0809,42.0809-42.0809h20.283c34.4426,0,62.3638-27.9213,62.3638-62.3639V62.3638c0-34.4426-27.9213-62.3638-62.3639-62.3638H62.3638C27.9212,0,0,27.9213,0,62.3639Z"
+            fill="#f4b63d" />
+        </svg>
+        <div class="card-content">
+          <h3>LEARN MORE<br />ABOUT PDD.</h3>
+        </div>
+        <div class="corner-circle circle-button medium yellow-bg">
+          <div class="icon">🔍</div>
+        </div>
+        <img src="./assets/home/character-03.png" class="character character-3" alt="Character 3" />
+
+      </div>
+    </div>
+
+
+
+  </div>
+
+  <script>
+
+    function createCharacter() {
+      // Redirect to character builder page
+      window.location.href = './char.html';
+    }
+
+    function visitGallery() {
+      // Redirect to community gallery page
+      window.location.href = 'gallery.html';
+    }
+
+    function learnMore() {
+      // Redirect to an about page:
+      window.location.href = 'about.html';
+    }
+  </script>
+  <!-- <script src="script.js"></script> -->
+  <div class="wavy-footer"></div>
+
+</body>
+
+</html>

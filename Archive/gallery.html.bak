@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width,
+                 initial-scale=1.0,
+                 maximum-scale=1.0,
+                 minimum-scale=1.0,
+                 user-scalable=no">
+  <title>Character Gallery</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'PP Mori', sans-serif;
+      background: white;
+      color: #2a9df4;
+    }
+    header {
+      padding: 20px;
+      text-align: center;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .title-section h1 {
+      font-size: 2rem;
+      margin: 0;
+    }
+    .subtitle {
+      font-size: 1rem;
+      color: #333;
+    }
+
+    /* make the gallery container a positioned box */
+    #gallery-container {
+      position: relative;
+      width: 100%;
+      /* height = viewport minus header (≈80px) minus footer (≈60px) */
+      height: calc(100vh - 140px);
+      overflow: hidden;
+    }
+
+    /* each card is absolutely positioned */
+    .gallery-card {
+      position: absolute;
+      width: 200px;
+      height: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .gallery-card h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      text-align: center;
+    }
+    .gallery-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .tooltip {
+  position: absolute;
+  top: 0;                     /* anchor at top of card */
+  left: 50%;                 /* center horizontally */
+  transform: translate(-50%, -110%); /* lift it fully above */
+  padding: 8px 12px;
+  background-color: #2a9df4; /* PDD blue */
+  color: white;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  white-space: nowrap;       /* prevent wrapping */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  display: none;
+  z-index: 3;
+}
+
+.gallery-card:hover .tooltip {
+  display: block;
+}
+
+/* .debug-box {
+  outline: 1px dashed red;
+  transform: scale(2.5);
+  transform-origin: top left;
+} */
+
+/* ———————— debugging only ———————— */
+.gallery-card {
+  border: 2px dashed red;   /* box around each character card */
+   overflow: hidden;
+}
+
+.gallery-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* if you want to preserve aspect ratio instead of stretching:
+     preserveAspectRatio: "xMidYMid meet" on the svg element */
+}
+
+/* if you want per‑layer boxes too: */
+.gallery-svg image {
+  outline: 1px dotted lime;
+}
+/* ————— remove these when you’re done ————— */
+
+
+   
+    .tag {
+      display: inline-block;
+      background-color: #eabec5;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.7rem;
+      color: #fff;
+      margin-top: 5px;
+      margin-right: 5px;
+    }
+    .circle-button {
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      background-color: #2a9df4;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .text-back {
+      background: none;
+      border: none;
+      color: #2a9df4;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    footer {
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="header-top">
+      <button class="circle-button" onclick="goBack()">←</button>
+      <button class="text-back" onclick="goBack()">BACK TO MAIN PAGE</button>
+    </div>
+    <div class="title-section">
+      <h1>GALLERY</h1>
+      <p class="subtitle">Step into the characters of the PDD Community!<br>
+        Hover over characters to find out more.
+      </p>
+    </div>
+  </header>
+
+  <main id="gallery-container">
+    <!-- cards will be injected here -->
+  </main>
+
+  <footer>
+    <button id="shuffle-btn" class="text-back">SHUFFLE</button>
+  </footer>
+
+  <script>
+    const container = document.getElementById('gallery-container');
+    const headerEl  = document.querySelector('header');
+    const footerEl  = document.querySelector('footer');
+
+    // adjust container height in case header/footer sizes change
+    function resizeContainer() {
+      const avail = window.innerHeight - headerEl.offsetHeight - footerEl.offsetHeight;
+      container.style.height = avail + 'px';
+    }
+    window.addEventListener('resize', resizeContainer);
+
+    function goBack() {
+      window.location.href = 'index.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      resizeContainer();
+
+      const gallery = JSON.parse(localStorage.getItem('galleryCharacters') || '[]');
+      gallery.forEach((data, i) => renderAvatar(data, i));
+
+      document.getElementById('shuffle-btn')
+        .addEventListener('click', shufflePositions);
+    });
+
+    function renderAvatar({ selections, name, favThing }, index) {
+  // 1) build the card
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('gallery-card');
+  wrapper.classList.add('debug-box');
+
+
+  const title = document.createElement('h3');
+  title.textContent = name + ' – ' + favThing;
+  wrapper.appendChild(title);
+
+  // 2) the 800×800 SVG, scaled down
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg   = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('class', 'gallery-svg');
+  // svg.setAttribute('width', 200);
+  // svg.setAttribute('height', 200);
+  svg.removeAttribute('width');
+svg.removeAttribute('height');
+svg.style.width  = '100%';
+svg.style.height = '100%';
+
+  svg.setAttribute('viewBox', '0 0 800 800');
+svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+
+
+  const baseRig = {
+    head:      { x: 400, y: 100 },
+    shoulderL: { x: 360, y: 140 },
+    shoulderR: { x: 440, y: 140 },
+    hipL:      { x: 380, y: 270 },
+    hipR:      { x: 420, y: 270 },
+    kneeL:     { x: 370, y: 430 },
+    kneeR:     { x: 430, y: 430 },
+    footL:     { x: 360, y: 580 },
+    footR:     { x: 440, y: 580 }
+  };
+  const centers = [
+    { ctr: baseRig.footL, size: 180 },
+    { ctr: { x:(baseRig.kneeL.x+baseRig.kneeR.x)/2, y:(baseRig.kneeL.y+baseRig.kneeR.y)/2 }, size: 250 },
+    { ctr: { x:(baseRig.shoulderL.x+baseRig.shoulderR.x+baseRig.hipL.x+baseRig.hipR.x)/4,
+             y:(baseRig.shoulderL.y+baseRig.shoulderR.y+baseRig.hipL.y+baseRig.hipR.y)/4 }, size: 240 },
+    { ctr: baseRig.head, size: 130 }
+  ];
+
+  centers.forEach((cfg,i) => {
+    const img = document.createElementNS(svgNS, 'image');
+    img.setAttributeNS('http://www.w3.org/1999/xlink','href', selections[3 - i]);
+    img.setAttribute('width',  cfg.size);
+    img.setAttribute('height', cfg.size);
+    img.setAttribute('x', cfg.ctr.x - cfg.size/2);
+    img.setAttribute('y', cfg.ctr.y - cfg.size/2);
+    svg.appendChild(img);
+  });
+
+  wrapper.appendChild(svg);
+
+  // 3) add the tooltip
+  const tooltip = document.createElement('div');
+  tooltip.classList.add('tooltip');
+  tooltip.innerHTML = `<strong>${name}</strong><br>favourite in punggol: ${favThing}`;
+  wrapper.appendChild(tooltip);
+
+  // 4) append & position
+  container.appendChild(wrapper);
+  positionCard(wrapper);
+}
+
+
+  
+    function positionCard(card) {
+      const cw = container.clientWidth  - card.clientWidth;
+      const ch = container.clientHeight - card.clientHeight;
+      const x  = Math.random() * cw;
+      const y  = Math.random() * ch;
+      card.style.left = x + 'px';
+      card.style.top  = y + 'px';
+    }
+
+    function shufflePositions() {
+      document.querySelectorAll('.gallery-card').forEach(positionCard);
+    }
+  </script>
+</body>
+</html>

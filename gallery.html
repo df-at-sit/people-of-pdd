@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+  <title>Character Gallery</title>
+  <!-- <link rel="stylesheet" href="styles.css" /> -->
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'PP Mori', sans-serif;
+      background: white;
+      color: #2a9df4;
+    }
+
+    /* HEADER */
+    .header {
+      width: 100%;
+      padding-top: 30px;
+      position: sticky;
+      top: 0;
+      z-index: 6000;
+      /* background: white; */
+      /* border: 4px solid rgba(0, 0, 0, 0.1); */
+      /* ensures it's not transparent */
+    }
+
+
+
+    .header-top {
+      display: flex;
+      /* background-color: #ffe699; */
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+
+      /* no horizontal padding */
+      /* width: 100%; */
+      position: relative;
+    }
+
+
+    /* Center section is absolutely centered, unaffected by side widths */
+    .header-center {
+      /* position: absolute; */
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      background: #f4b63d;
+
+      border-radius: 20px;
+      padding: 20px 30px;
+      transform-origin: center center;
+      transform: rotate(-2deg) !important;
+    }
+
+    /* Left and right columns */
+    .header-left,
+    .header-right {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      /* prevent shrinking */
+    }
+
+    .header-left {
+      /* background-color: #2a9df4; */
+      padding: 15px 20px 15px 20px;
+      background-color: #58aaf7;
+      border-radius: 20px;
+    }
+
+    /* BUTTONS */
+    .circle-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      color: #2a9df4;
+      background-color: #fff;
+      font-size: 1.2rem;
+      border: none;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    .text-back {
+      padding: 10px 20px;
+      border-radius: 20px;
+      color: #2a9df4;
+      background-color: white;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* TITLE */
+    .header-center h1 {
+      color: #c13a00;
+      text-transform: uppercase;
+      font-size: 2rem;
+      /* letter-spacing: 2px; */
+      margin: 0;
+    }
+
+    .subtitle {
+      color: #fff;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin: 5px 0 0;
+    }
+
+    /* SEARCH */
+    .search-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-container input {
+      padding: 8px 14px;
+      border: 2px solid #2a9df4;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-family: 'PP Mori', sans-serif;
+      text-transform: uppercase;
+      color: #2a9df4;
+      outline: none;
+      width: 200px;
+    }
+
+    .search-container input::placeholder {
+      color: #2a9df4;
+      opacity: 0.8;
+    }
+
+    .search-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #2a9df4;
+      background-color: #2a9df4;
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+
+    .search-btn:hover {
+      background-color: #1e7fd1;
+    }
+
+    /* FOOTER */
+    .footer-section {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 50px;
+      text-align: center;
+      background: url("./assets/wave-gallery.svg") no-repeat bottom center;
+      background-position: center calc(100% + 40px);
+      background-size: 100% auto;
+      z-index: 20;
+      /* keeps it on top of other elements */
+    }
+
+    /* GALLERY */
+    #gallery-container {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 140px);
+      overflow: visible;
+      z-index: 2;
+      /* padding-bottom: 300px; */
+      margin-bottom: 500px;
+    }
+
+    .gallery-card {
+      position: absolute;
+      transform-origin: center center;
+      transition:
+        left 0.4s ease,
+        top 0.4s ease,
+        opacity 0.3s ease,
+        transform 0.3s ease;
+      /* start with full opacity */
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .gallery-card:hover {
+      transform: scale(1.5) !important;
+    }
+
+    /* TOOLTIP */
+    .tooltip {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -110%) scale(0.1);
+      padding: 6px 6px;
+      /* less padding → shorter height */
+      background-color: #2a9df4;
+      border-radius: 8px;
+      /* slightly smaller corner radius */
+      border: 2px solid #fff;
+      /* white border */
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+      min-width: 100px;
+      /* wider base width */
+      max-width: 140px;
+      /* optional: cap width */
+      text-align: center;
+      /* ensure centered text */
+    }
+
+    .tooltip::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 7px 7px 0 7px;
+      border-style: solid;
+      border-color: #2a9df4 transparent transparent transparent;
+    }
+
+    .tooltip h3 {
+      margin: 0 0 4px;
+      color: #fff;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    .tooltip p {
+      margin: 0;
+      color: #ffe699;
+      font-size: 0.5rem;
+      text-align: center;
+    }
+
+    .gallery-card:hover .tooltip {
+      opacity: 1;
+      transform: translate(-50%, -110%) scale(1);
+      pointer-events: auto;
+    }
+
+    @media (max-width: 600px) {
+
+      /* stack header into 4 centred rows with more vertical spacing */
+      .header-top {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 24px 16px;
+        gap: 100px;
+        /* increased vertical gap */
+      }
+
+      /* 1) back-buttons row */
+      .header-left {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .header-center {
+        padding: 60px 0 0px 0;
+      }
+
+      /* 2) title row */
+      .header-center h1 {
+        font-size: 2.2rem;
+        /* margin: 0 0 4px 0; */
+      }
+
+      /* 3) subtitle row */
+      .header-center p.subtitle {
+        font-size: 3rem;
+        margin: 0 0 10px 0;
+      }
+
+      /* 4) search row: pill input + circle icon */
+      .search-container {
+        display: flex;
+        align-items: center;
+        width: 80%;
+        max-width: 360px;
+        gap: 10px;
+        margin-bottom: 12px;
+        /* extra space below search */
+      }
+
+      .search-container input {
+        flex: 1;
+        padding: 12px 16px;
+      }
+
+      .search-btn {
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        font-size: 1.2rem;
+      }
+
+      /* make all cards (and their svg + face overlays) 70% of their normal size */
+      .gallery-card {
+        transform: scale(0.7) !important;
+        transform-origin: center top !important;
+      }
+
+    }
+  </style>
+
+  <!-- firebase init -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      orderBy,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    // ← your config from the console
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwpNjnDFAA_5P64zMOt-GTSOdETx2xKJQ",
+      authDomain: "people-of-pdd-website.firebaseapp.com",
+      projectId: "people-of-pdd-website",
+      storageBucket: "people-of-pdd-website.firebasestorage.app",
+      messagingSenderId: "685048567158",
+      appId: "1:685048567158:web:abc51754b5b785219c1657",
+      measurementId: "G-1VRMYRMXKN"
+    };
+
+    // init
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // expose to your non-module script
+    window.db = db;
+    window.collection = collection;
+    window.query = query;
+    window.orderBy = orderBy;
+    window.getDocs = getDocs;
+  </script>
+
+</head>
+
+<body>
+  <header class="header">
+    <div class="header-top">
+      <!-- Left Column -->
+      <div class="header-left">
+        <button id="goBackMain" class="circle-button" onclick="goBack()">←</button>
+        <button class="text-back" onclick="goBack()">BACK TO MAIN PAGE</button>
+      </div>
+
+      <!-- Center Column -->
+      <div class="header-center">
+        <h1>GALLERY</h1>
+        <p class="subtitle">Step into the characters of the PDD Community!</p>
+      </div>
+
+      <!-- Right Column -->
+      <div class="header-right search-container">
+        <input type="text" id="search-input" placeholder="SEARCH NAME" autocomplete="off" />
+        <button id="search-btn" class="search-btn">&#128269;</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="gallery-container"></main>
+  <footer class="footer-section">
+    <!-- <button id="shuffle-btn" class="text-back next-btn">SHUFFLE</button> -->
+  </footer>
+
+
+
+  <script>
+
+    //localStorage.clear();
+
+    const CARD_W = 200 / 1.5;
+    const CARD_H = 360 / 1.5;
+    const container = document.getElementById('gallery-container');
+    const headerEl = document.querySelector('header');
+    const footerEl = document.querySelector('footer');
+
+    function resizeContainer() {
+      container.style.height = (window.innerHeight - headerEl.offsetHeight - footerEl.offsetHeight) + 'px';
+    }
+
+
+    window.addEventListener('resize', resizeContainer);
+
+
+
+    function goBack() { window.location.href = 'index.html'; }
+
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // resize the gallery container to fill the remaining viewport
+      resizeContainer();
+
+      // load saved characters and render
+      // fetch from Firestore instead of localStorage
+      const q = window.query(
+        window.collection(window.db, "galleryCharacters"),
+        window.orderBy("createdAt", "desc")
+      );
+      const snap = await window.getDocs(q);
+
+      let i = 0;
+      snap.forEach(doc => {
+        const d = doc.data();
+        // note: faceUrl → faceData, selections, name, favThing
+        renderAvatar(
+          {
+            selections: d.selections,
+            faceData: d.faceUrl,
+            name: d.name,
+            favThing: d.favThing
+          },
+          i++,
+          1
+        );
+      });
+
+      // now do your layout
+      brickLayout();
+
+
+      // re‑layout on window resize
+      window.addEventListener('resize', () => {
+        resizeContainer();
+        brickLayout();
+      });
+
+      // set up live search
+      const searchInput = document.getElementById('search-input');
+      const searchBtn = document.getElementById('search-btn');
+
+      if (searchInput) {
+        // live‑type filtering
+        searchInput.addEventListener('input', filterGallery);
+      }
+
+      // optional: still allow button click
+      if (searchBtn) {
+        searchBtn.addEventListener('click', filterGallery);
+      }
+
+      // shuffle button (if you keep it)
+      const shuffleBtn = document.getElementById('shuffle-btn');
+      if (shuffleBtn) {
+        shuffleBtn.addEventListener('click', brickLayout);
+      }
+    });
+
+
+
+
+    function drawStrokesOnCanvas(strokes, canvas) {
+      const ctx = canvas.getContext('2d');
+      strokes.forEach(stroke => {
+        const pts = stroke.points;
+        if (!pts || pts.length < 2) return;
+        ctx.beginPath();
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = stroke.color;
+        ctx.lineWidth = stroke.width;
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length - 1; i++) {
+          const xc = (pts[i].x + pts[i + 1].x) / 2;
+          const yc = (pts[i].y + pts[i + 1].y) / 2;
+          ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+        }
+        ctx.stroke();
+      });
+    }
+
+    function renderAvatar({ selections, faceData, name, favThing }, index, scale = 1) {
+      const wrapper = document.createElement('div');
+      wrapper.classList.add('gallery-card');
+      wrapper.dataset.name = name.trim().toLowerCase();
+      wrapper.style.width = CARD_W + 'px';
+      wrapper.style.height = CARD_H + 'px';
+      wrapper.style.transform = `scale(${scale})`;
+
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('viewBox', `0 0 ${CARD_W} ${CARD_H}`);
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+      svg.setAttribute('width', CARD_W);
+      svg.setAttribute('height', CARD_H);
+      svg.style.position = 'absolute';
+      svg.style.left = '0';
+      svg.style.top = '0';
+      svg.style.zIndex = '1';
+
+      const group = document.createElementNS(svgNS, 'g');
+      group.setAttribute('transform', `translate(${CARD_W / 2}, 10)`);
+
+      // Add random base shape first
+      const baseShape = createBaseShape(svgNS, CARD_W);
+      // Move it further down by 20px
+      baseShape.setAttribute(
+        'transform',
+        (baseShape.getAttribute('transform') || '') + ' translate(0, 20)'
+      );
+      group.appendChild(baseShape);
+
+      // Define body-part centers
+      const baseRig = {
+        head: { x: 0, y: 20 },
+        neck: { x: 0, y: 20 },
+        shoulderL: { x: -40, y: 20 },
+        shoulderR: { x: 40, y: 20 },
+        hipL: { x: 0, y: 75 },
+        hipR: { x: 0, y: 75 },
+        kneeL: { x: 0, y: 140 },
+        kneeR: { x: 0, y: 140 },
+        footL: { x: 0, y: 180 },
+        footR: { x: 0, y: 180 }
+      };
+
+      const centers = [
+        { ctr: baseRig.footL, size: 80 },
+        { ctr: baseRig.kneeL, size: 100 },
+        { ctr: baseRig.hipL, size: 90 },
+        { ctr: baseRig.head, size: 60 }
+      ];
+
+      // Add character images
+      centers.forEach((cfg, i) => {
+        const img = document.createElementNS(svgNS, 'image');
+        img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', selections[3 - i]);
+        img.setAttribute('width', cfg.size);
+        img.setAttribute('height', cfg.size);
+        img.setAttribute('x', cfg.ctr.x - cfg.size / 2);
+        img.setAttribute('y', cfg.ctr.y - cfg.size / 2);
+        group.appendChild(img);
+      });
+
+      svg.appendChild(group);
+      wrapper.appendChild(svg);
+
+      // Overlay face strokes
+      if (faceData) {
+        const headCfg = centers[3];
+        const overlay = document.createElement('img');
+        overlay.src = faceData;
+        overlay.width = headCfg.size;
+        overlay.height = headCfg.size;
+        overlay.style.position = 'absolute';
+        const offsetX = CARD_W / 2 + headCfg.ctr.x - headCfg.size / 2;
+        const offsetY = 5 + headCfg.ctr.y - headCfg.size / 2;
+        overlay.style.left = `${offsetX}px`;
+        overlay.style.top = `${offsetY}px`;
+        overlay.style.zIndex = '2';
+        wrapper.appendChild(overlay);
+      }
+
+      // Tooltip with name and favorite thing
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('tooltip');
+      tooltip.innerHTML = `
+    <h3>${name.toUpperCase()}</h3>
+    <p>"${favThing}"</p>
+  `;
+      wrapper.appendChild(tooltip);
+
+      container.appendChild(wrapper);
+    }
+
+    function filterGallery() {
+      const term = document.getElementById('search-input')
+        .value.trim()
+        .toLowerCase();
+
+      const cards = Array.from(document.querySelectorAll('.gallery-card'));
+
+      if (!term) {
+        // no search → show all and re‑layout
+        cards.forEach(card => card.style.display = '');
+        brickLayout();
+        return;
+      }
+
+      const matching = [];
+      const nonMatching = [];
+
+      cards.forEach(card => {
+        if (card.dataset.name.includes(term)) {
+          matching.push(card);
+          card.style.display = '';
+        } else {
+          nonMatching.push(card);
+          card.style.display = 'none';
+        }
+      });
+
+      // clear & re‑append: matching first, then hidden ones
+      container.innerHTML = '';
+      [...matching, ...nonMatching].forEach(card => {
+        container.appendChild(card);
+      });
+
+      brickLayout();
+    }
+
+    function brickLayout() {
+
+
+      const cards = Array.from(document.querySelectorAll('.gallery-card'));
+      if (cards.length === 0) return;
+
+      const cardW = cards[0].offsetWidth;
+      const cardH = cards[0].offsetHeight;
+      const containerWidth = container.clientWidth;
+
+      const isMobile = window.matchMedia('(max-width: 600px)').matches;
+      const margin = isMobile ? 20 : 100;           // less side‑margin on phones
+      const gapX = isMobile ? 10 : container.clientWidth / 9;
+      const gapY = isMobile ? 10 : 60;
+
+      // Calculate how many cards can fit in the widest row
+      const usableWidth = containerWidth - 2 * margin;
+      const maxCardsPerRow = Math.floor((usableWidth + gapX) / (cardW + gapX));
+
+      let x = 0;
+      let y = 0;
+      let row = 0;
+      let col = 0;
+
+      cards.forEach((card, i) => {
+        // For odd rows, apply half offset
+        const offsetX = (row % 2 === 0) ? 0 : (cardW / 2 + gapX / 2);
+
+        // Compute position
+        card.style.left = `${margin + x + offsetX}px`;
+        card.style.top = `${margin + y}px`;
+
+        // Advance column
+        col++;
+        x += cardW + gapX;
+
+        // If next card exceeds usable width, break to next row
+        if (col >= maxCardsPerRow || (margin + x + cardW + offsetX > containerWidth - margin)) {
+          row++;
+          col = 0;
+          x = 0;
+          y += cardH + gapY;
+        }
+      });
+    }
+
+
+    function createBaseShape(svgNS) {
+      const shapes = [
+        {
+          type: 'ellipse',
+          cx: 68.41, cy: 28.33, rx: 53.5, ry: 16.59
+        },
+        {
+          type: 'path',
+          d: 'M101.97,31.92l-35.5,17.77c-5.41,2.71-11.77,2.77-17.24.17L11.98,32.14c-3.41-1.62-3.41-6.48,0-8.1L48.4,6.69c5.31-2.53,11.47-2.55,16.79-.05l36.67,17.2c3.39,1.59,3.46,6.4.1,8.08Z'
+        },
+        {
+          type: 'path',
+          d: 'M94.9,36l4.47,8.76c2.07,4.04-8.4,7.25-17.15,5.25l-18.94-4.34c-1.52-.35-3.38-.34-4.9.03l-18.85,4.55c-8.7,2.11-19.24-1-17.26-5.1l4.28-8.86c.34-.71-.24-1.44-1.53-1.93l-16.12-6.02c-7.44-2.79-3.49-7.93,6.48-8.43l21.59-1.07c1.73-.09,3.24-.54,3.95-1.2l8.88-8.23c4.1-3.79,17.08-3.82,21.27-.04l9.06,8.16c.73.66,2.24,1.1,3.97,1.18l21.61.93c9.98.43,14.04,5.5,6.66,8.32l-15.99,6.1c-1.29.49-1.85,1.22-1.49,1.93Z'
+        }
+      ];
+
+      const colors = ['#9e005d', '#3fa9f5', '#22b573', '#e85e24', '#f7931e'];
+
+      // Pick random shape and color
+      const shapeData = shapes[Math.floor(Math.random() * shapes.length)];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      // Create SVG element
+      const base = document.createElementNS(svgNS, shapeData.type);
+      base.setAttribute('fill', color);
+
+      // Apply attributes
+      if (shapeData.type === 'ellipse') {
+        base.setAttribute('cx', 0);
+        base.setAttribute('cy', 180);
+        base.setAttribute('rx', shapeData.rx);
+        base.setAttribute('ry', shapeData.ry);
+      } else if (shapeData.type === 'path') {
+        base.setAttribute('d', shapeData.d);
+        base.setAttribute('transform', 'translate(-60, 150)'); // adjust position
+      }
+
+      return base;
+    }
+
+
+
+
+
+
+    function positionCard(card) {
+      const cw = container.clientWidth - card.offsetWidth;
+      const ch = container.clientHeight - card.offsetHeight;
+      card.style.left = Math.random() * cw + 'px';
+      card.style.top = Math.random() * ch + 'px';
+    }
+
+    function shufflePositions() {
+      document.querySelectorAll('.gallery-card').forEach(positionCard);
+    }
+  </script>
+</body>
+
+</html>
