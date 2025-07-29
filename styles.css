@@ -1252,29 +1252,33 @@ body.stage-4 .card-input {
 
 
 body.stage-4 .name-card {
-  top: 25px;
-  left: 420px;
+  top: 5vh;
+  /* 5% of viewport height */
+  left: 20vw;
+  /* 20% of viewport width */
   transform: rotate(-6deg);
   background: #f7931e;
 }
 
 body.stage-4 .fav-card {
-  top: 155px;
-  left: 380px;
+  top: 20vh;
+  left: 18vw;
   transform: rotate(3deg);
   background: #9e005d;
 }
 
 body.stage-4 .trait-card.blue {
-  top: 365px;
-  left: 460px;
+  top: 45vh;
+  left: 25vw;
   transform: rotate(-8deg);
+  display: none;
 }
 
 body.stage-4 .trait-card.pink {
-  top: 425px;
-  left: 420px;
+  top: 55vh;
+  left: 20vw;
   transform: rotate(3deg);
+  display: none;
 }
 
 
@@ -1293,8 +1297,9 @@ body.stage-4 .trait-card.pink {
 }
 
 body.stage-4 .email-card {
-  right: 200px !important;
-  top: 165px;
+  top: 30vh;
+  right: 10vw;
+  /* instead of 200px */
   transform: translateX(-50%) rotate(-3deg);
 }
 
