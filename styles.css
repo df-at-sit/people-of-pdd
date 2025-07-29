@@ -1319,7 +1319,7 @@ small {
   flex: 1;
   /* 1/5 of the row */
   max-width: 10%;
-  transform: scale(1.2);
+  /* transform: scale(1.2); */
 
   accent-color: #e85e24;
   cursor: pointer;
