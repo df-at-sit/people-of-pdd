@@ -1254,7 +1254,7 @@ body.stage-4 .card-input {
 body.stage-4 .name-card {
   top: 5vh;
   /* 5% of viewport height */
-  left: 20vw;
+  left: 26vw;
   /* 20% of viewport width */
   transform: rotate(-6deg);
   background: #f7931e;
@@ -1262,7 +1262,7 @@ body.stage-4 .name-card {
 
 body.stage-4 .fav-card {
   top: 20vh;
-  left: 18vw;
+  left: 22vw;
   transform: rotate(3deg);
   background: #9e005d;
 }
