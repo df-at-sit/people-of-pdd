@@ -205,6 +205,11 @@
       transform: scale(1.5) !important;
     }
 
+    .gallery-card.zoomed {
+      transform: scale(1.5) !important;
+      z-index: 9999;
+    }
+
     /* TOOLTIP */
     .tooltip {
       position: absolute;
@@ -732,6 +737,34 @@
     function shufflePositions() {
       document.querySelectorAll('.gallery-card').forEach(positionCard);
     }
+
+
+    function enableTapZoom() {
+      const cards = document.querySelectorAll('.gallery-card');
+
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          if (card.classList.contains('zoomed')) {
+            card.classList.remove('zoomed');
+          } else {
+            cards.forEach(c => c.classList.remove('zoomed'));
+            card.classList.add('zoomed');
+          }
+        });
+      });
+
+      // Close zoom if tapped outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.gallery-card')) {
+          cards.forEach(c => c.classList.remove('zoomed'));
+        }
+      });
+    }
+
+    if ('ontouchstart' in window) {
+      document.addEventListener('DOMContentLoaded', enableTapZoom);
+    }
+
   </script>
 </body>
 
