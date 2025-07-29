@@ -1308,26 +1308,32 @@ small {
 }
 
 .checkbox-row {
-  display: flex;
+  /* display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
-  padding: 0%;
+  padding: 0%; */
+  display: flex;
+  align-items: center;
 }
 
 .checkbox-row input[type="checkbox"] {
-  flex: 1;
-  /* 1/5 of the row */
-  max-width: 10%;
-  /* transform: scale(1.2); */
-
+  /* stop it from flexing */
+  flex: 0 0 auto;
+  /* make it big enough without transform */
+  width: 1.2em;
+  height: 1.2em;
+  /* remove the scale-transform (optional) */
+  transform: none;
+  /* create consistent spacing */
+  margin-right: 0.5rem;
   accent-color: #e85e24;
   cursor: pointer;
 }
 
 .checkbox-row label {
-  flex: 5;
-  /* 4/5 of the row */
+  /* let the label fill the rest */
+  flex: 1 1 auto;
   font-size: 0.7rem;
   line-height: 1.2;
   color: white;
