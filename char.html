@@ -221,6 +221,7 @@
       <div class="custom-alert__buttons">
         <button id="custom-alert__gallery">VISIT THE GALLERY</button>
         <button id="custom-alert__another">MAKE ANOTHER AVATAR</button>
+        <button id="custom-alert__save">SAVE AVATAR</button>
       </div>
     </div>
   </div>
@@ -1326,7 +1327,7 @@
     };
     const shoesVB = {
       x: originVB.x + (baseRig.footL.x + baseRig.footR.x) / 2,
-      y: originVB.y + (baseRig.footL.y + baseRig.footR.y) / 2 + 20
+      y: originVB.y + (baseRig.footL.y + baseRig.footR.y) / 2 + 40
     };
     const centersVB = [shoesVB, legsVB, torsoVB, headVB];
     const liSizesVB = [180, 200, 240, 130];
@@ -1383,7 +1384,7 @@
 
     // 9) download the PNG
     const link = document.createElement('a');
-    link.download = 'my-character.png';
+    link.download = 'my-pdd-avatar.png';
     link.href = out.toDataURL('image/png');
     link.click();
   }
@@ -1413,6 +1414,11 @@
   const alertMsg = document.getElementById('custom-alert__message');
   const btnGallery = document.getElementById('custom-alert__gallery');
   const btnAnother = document.getElementById('custom-alert__another');
+
+  const btnSave = document.getElementById('custom-alert__save');
+  btnSave.addEventListener('click', () => {
+    exportAvatarAsPNG();
+  });
 
   function showAlert(message) {
     alertMsg.textContent = message;
