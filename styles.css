@@ -2289,3 +2289,57 @@ body.stage-4 .carousel-nav {
 
 
 }
+
+/* === 3480 × 2160 Ultra-Wide (16:9 or 16:10) === */
+/* @media screen and (width: 3480px) and (height: 2160px) {
+  .char-page {
+    transform: scale(0.65);
+    transform-origin: top center;
+  }
+
+  .builder-section {
+    max-width: 3000px;
+    margin: 0 auto;
+  }
+
+  .draw-toolbar {
+    transform: scale(0.8);
+    bottom: 60px;
+  }
+
+  .title-section h1 {
+    font-size: 2.5rem;
+  }
+} */
+
+/* === 2160 × 1620 High-Res 4:3 Display === */
+/* @media screen and (width: 2160px) and (height: 1620px) {
+  .char-page {
+    transform: scale(0.75);
+    transform-origin: top center;
+  }
+
+  .builder-section {
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+
+  .draw-toolbar {
+    transform: scale(0.85);
+    bottom: 50px;
+  }
+
+  .title-section h1 {
+    font-size: 2rem;
+  }
+} */
+
+/* @media (min-width: 2160px) {
+  html {
+   
+    transform: scale(1);
+    transform-origin: top left;
+    
+    width: 1920px;
+  }
+} */

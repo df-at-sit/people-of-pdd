@@ -280,6 +280,32 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
+    // // test helper — stick this anywhere after your imports
+    // async function testEnqueueMail() {
+    //   try {
+    //     const docRef = await addDoc(
+    //       collection(db, "mail"),
+    //       {
+    //         to: "aduneti.9626@gmail.com",
+    //         message: {
+    //           subject: "Test email 2 from Firebase",
+    //           html: "<p>Hello from Firebase!</p>"
+    //         },
+    //         createdAt: serverTimestamp()
+    //       }
+    //     );
+    //     console.log("✅ Mail enqueued! Doc ID:", docRef.id);
+    //   } catch (err) {
+    //     console.error("❌ Failed to enqueue mail:", err);
+    //   }
+    // }
+
+    // // call it immediately for testing
+    // testEnqueueMail();
+
+
+
+
     // 6️⃣ expose for your non‑module scripts
     window.db = db;
     window.storage = storage;
@@ -1278,6 +1304,8 @@
         createdAt: window.serverTimestamp()
       }
     );
+
+    return faceUrl;
   }
 
   // call this **after** you write the avatar to galleryCharacters
@@ -1292,6 +1320,94 @@
     );
   }
 
+
+  async function getAvatarDataURL() {
+    // 1) export dimensions & viewBox
+    const CANVAS_W = 1200, CANVAS_H = 1800;
+    const vbW = svg.viewBox.baseVal.width;    // 800
+    const vbH = svg.viewBox.baseVal.height;   // 800
+
+    // 2) compute export scale & rig vertical nudge
+    const baseScale = CANVAS_W / vbW;         // 1.5×
+    const fillMultiplier = 2;                 // overall zoom factor
+    const s = baseScale * fillMultiplier;
+    const xOff = (CANVAS_W - vbW * s) / 2;
+    const baseYOff = (CANVAS_H - vbH * s) / 2;
+    const manualYOffset = 500;                // your rig’s vertical nudge in px
+    const yOff = baseYOff + manualYOffset;
+
+    // 3) stage-4 stroke y-tweak (in screen px)
+    const manualYAdjust = -25;                // “move strokes up 25px” exactly
+
+    // 4) compute part centers in viewBox coords
+    const originVB = { x: vbW / 2, y: 100 };
+    const headVB = { x: originVB.x, y: originVB.y };
+    const torsoVB = {
+      x: originVB.x + (baseRig.shoulderL.x + baseRig.shoulderR.x + baseRig.hipL.x + baseRig.hipR.x) / 4,
+      y: originVB.y + (baseRig.shoulderL.y + baseRig.shoulderR.y + baseRig.hipL.y + baseRig.hipR.y) / 4 + 10
+    };
+    const legsVB = {
+      x: originVB.x + (baseRig.kneeL.x + baseRig.kneeR.x) / 2,
+      y: originVB.y + (baseRig.kneeL.y + baseRig.kneeR.y) / 2 + 20
+    };
+    const shoesVB = {
+      x: originVB.x + (baseRig.footL.x + baseRig.footR.x) / 2,
+      y: originVB.y + (baseRig.footL.y + baseRig.footR.y) / 2 + 40
+    };
+    const centersVB = [shoesVB, legsVB, torsoVB, headVB];
+    const liSizesVB = [180, 200, 240, 130];
+
+    // 5) load the four patterned SVGs
+    const urls = carousels.map(c => c.images[c.currentIndex]);
+    const imgs = await Promise.all(
+      urls.map(u => new Promise(res => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => res(img);
+        img.src = u;
+      }))
+    );
+
+    // 6) prepare output canvas & draw gradient
+    const out = document.createElement('canvas');
+    out.width = CANVAS_W;
+    out.height = CANVAS_H;
+    const ctx = out.getContext('2d');
+    const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_H);
+    grad.addColorStop(0, 'white');
+    grad.addColorStop(1, '#f4b63d');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+    // 7) draw outfits (shoes→legs→torso→head)
+    for (let i = 0; i < 4; i++) {
+      const img = imgs[3 - i];
+      const vbSize = liSizesVB[i];
+      const pxW = vbSize * s;
+      const pxH = img.naturalHeight / img.naturalWidth * pxW;
+      const ctrVB = centersVB[i];
+      const x = ctrVB.x * s - pxW / 2 + xOff;
+      const y = ctrVB.y * s - pxH / 2 + yOff;
+      ctx.drawImage(img, x, y, pxW, pxH);
+    }
+
+    // 8) stamp the faceCanvas (with strokes) at head
+    const faceCanvas = document.getElementById('faceCanvas');
+    if (!faceCanvas.width || !faceCanvas.height) {
+      resizeCanvasToFace();
+      drawAllStrokes();
+    }
+    const fcW = faceCanvas.width, fcH = faceCanvas.height;
+    if (fcW && fcH) {
+      const headCtr = centersVB[3];
+      const xF = headCtr.x * s - (fcW * s) / 2 + xOff;
+      const yF = headCtr.y * s - (fcH * s) / 2 + yOff + manualYAdjust;
+      ctx.drawImage(faceCanvas, 0, 0, fcW, fcH, xF, yF, fcW * s, fcH * s);
+    }
+
+    // 9) return the PNG data-URL
+    return out.toDataURL('image/png');
+  }
 
 
 
@@ -1513,21 +1629,67 @@
       const consent = document.getElementById("emailConsent").checked;
       const email = document.getElementById("emailAddress").value.trim();
       uploadCharacter(data)
-        .then(async () => {
+        .then(async faceUrl => {                  // ← receive the URL here
           if (consent && email) {
-            await subscribeEmail(email);
-          }
-          console.log("✅ upload successful");
-          showAlert('Successfully submitted your avatar!')
+            // enqueue the mail for the extension
+            // 1) generate the full-avatar PNG data-url
+            const dataUrl = await getAvatarDataURL();
+            const base64 = dataUrl.split(',')[1];
 
-          // alert("avatar uploaded to Firebase!");
-          // now you can manually verify in the console/console.firebase.google.com
-          // window.location.href = './gallery.html';
+            // 2) enqueue mail with attachment
+            await addDoc(collection(db, "mail"), {
+              to: email,
+              message: {
+                subject: "🎉 Your PDD avatar is ready!",
+                html: `<p>Hi there,</p>
+
+<p>Your PDD avatar is ready, and it’s attached to this email as an image. We hope you had fun creating it!</p>
+
+<hr>
+
+<h3>🎨 Meet the Artists Behind the Mural</h3>
+<p>
+Your avatar’s outfit, shapes, and patterns are inspired by the beautiful works of <a href="https://shapinghearts.cdc.gov.sg/ezra-chan-yi/" target="_blank">Ezra Chan Yi</a> and <a href="https://shapinghearts.cdc.gov.sg/simeon-tan-rui-en/" target="_blank">Simeon Tan Rui En</a>, two talented artists with disabilities from Shaping Hearts. 
+Their creative contributions are part of a collaborative mural celebrating inclusivity, expression, and the power of community through art.
+</p>
+
+<hr>
+
+<h3>✨ See Your Avatar Come to Life</h3>
+<p>
+Your character will be featured in an epic <strong>132-metre mural</strong> at the Punggol Digital District Community Promenade, launching on <strong>16 November 2025</strong>.
+</p>
+<p>
+With the help of Augmented Reality (AR), you’ll even be able to see your avatar move and interact right on the mural itself! So make sure to come on down and visit.
+</p>
+
+<p>
+Thank you for being part of this community experience, and we can’t wait for you to see it live!
+</p>
+
+<p>With Love, <br> The People of PDD Team</p>
+`,
+                attachments: [
+                  {
+                    filename: "your-avatar.png",
+                    content: base64,
+                    encoding: "base64",
+                    type: "image/png"
+                  }
+                ]
+              },
+              createdAt: serverTimestamp()
+            });
+
+          }
+          console.log("✅ upload + mail enqueue successful");
+          showAlert('Successfully submitted your avatar!');
         })
         .catch(err => {
-          console.error("upload failed", err);
+          console.error("upload or mail enqueue failed", err);
           alert("upload failed—check console");
         });
+
 
       // 4. go to gallery page
       //window.location.href = './gallery.html';
