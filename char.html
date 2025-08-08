@@ -272,6 +272,11 @@
       serverTimestamp,
       collection,
       addDoc,
+      query,
+      where,
+      getDocs,
+      deleteDoc,
+      Timestamp
     } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
     // 3️⃣ Storage APIs
@@ -333,14 +338,50 @@
     window.ref = ref;
     window.uploadBytes = uploadBytes;
     window.getDownloadURL = getDownloadURL;
+
+
+
+    async function deleteAvatarsCreatedOnAug8() {
+      const start = Timestamp.fromDate(new Date('2025-08-08T00:00:00Z'));
+      const end = Timestamp.fromDate(new Date('2025-08-09T00:00:00Z'));
+
+      const avatarRef = collection(db, "galleryCharacters");
+      const q = query(
+        avatarRef,
+        where("createdAt", ">=", start),
+        where("createdAt", "<", end)
+      );
+
+      try {
+        const snapshot = await getDocs(q);
+        console.log(`Found ${snapshot.size} avatars to delete.`);
+
+        snapshot.forEach(async (doc) => {
+          await deleteDoc(doc.ref);
+          console.log(`🗑️ Deleted: ${doc.id}`);
+        });
+
+      } catch (err) {
+        console.error("❌ Error deleting avatars:", err);
+      }
+    }
+
+    window.deleteAvatarsCreatedOnAug8 = deleteAvatarsCreatedOnAug8;
+
   </script>
+
 
 
 
 </body>
 
 
+
 <script>
+
+
+
+
 
   // map filename → trait
   const hairHatTraits = {
@@ -1437,119 +1478,37 @@
   }
 
 
+
+
   async function getAvatarDataURL() {
-    // 1) export dimensions & viewBox
+    // 1) export dimensions & ViewBox
     const CANVAS_W = 1200, CANVAS_H = 1800;
-    const vbW = svg.viewBox.baseVal.width;    // 800
-    const vbH = svg.viewBox.baseVal.height;   // 800
+    const vbW = svg.viewBox.baseVal.width;   // 800
+    const vbH = svg.viewBox.baseVal.height;  // 800
 
-    // 2) compute export scale & rig vertical nudge
-    const baseScale = CANVAS_W / vbW;         // 1.5×
-    const fillMultiplier = 2;                 // overall zoom factor
-    const s = baseScale * fillMultiplier;
-    const xOff = (CANVAS_W - vbW * s) / 2;
-    const baseYOff = (CANVAS_H - vbH * s) / 2;
-    const manualYOffset = 500;                // your rig’s vertical nudge in px
-    const yOff = baseYOff + manualYOffset;
-
-    // 3) stage-4 stroke y-tweak (in screen px)
-    const manualYAdjust = -25;                // “move strokes up 25px” exactly
-
-    // 4) compute part centers in viewBox coords
-    const originVB = { x: vbW / 2, y: 100 };
-    const headVB = { x: originVB.x, y: originVB.y };
-    const torsoVB = {
-      x: originVB.x + (baseRig.shoulderL.x + baseRig.shoulderR.x + baseRig.hipL.x + baseRig.hipR.x) / 4,
-      y: originVB.y + (baseRig.shoulderL.y + baseRig.shoulderR.y + baseRig.hipL.y + baseRig.hipR.y) / 4 + 10
-    };
-    const legsVB = {
-      x: originVB.x + (baseRig.kneeL.x + baseRig.kneeR.x) / 2,
-      y: originVB.y + (baseRig.kneeL.y + baseRig.kneeR.y) / 2 + 20
-    };
-    const shoesVB = {
-      x: originVB.x + (baseRig.footL.x + baseRig.footR.x) / 2,
-      y: originVB.y + (baseRig.footL.y + baseRig.footR.y) / 2 + 40
-    };
-    const centersVB = [shoesVB, legsVB, torsoVB, headVB];
-    const liSizesVB = [180, 200, 240, 130];
-
-    // 5) load the four patterned SVGs
-    const urls = carousels.map(c => c.images[c.currentIndex]);
-    const imgs = await Promise.all(
-      urls.map(u => new Promise(res => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => res(img);
-        img.src = u;
-      }))
-    );
-
-    // 6) prepare output canvas & draw gradient
-    const out = document.createElement('canvas');
-    out.width = CANVAS_W;
-    out.height = CANVAS_H;
-    const ctx = out.getContext('2d');
-    const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_H);
-    grad.addColorStop(0, 'white');
-    grad.addColorStop(1, '#f4b63d');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-
-    // 7) draw outfits (shoes→legs→torso→head)
-    for (let i = 0; i < 4; i++) {
-      const img = imgs[3 - i];
-      const vbSize = liSizesVB[i];
-      const pxW = vbSize * s;
-      const pxH = img.naturalHeight / img.naturalWidth * pxW;
-      const ctrVB = centersVB[i];
-      const x = ctrVB.x * s - pxW / 2 + xOff;
-      const y = ctrVB.y * s - pxH / 2 + yOff;
-      ctx.drawImage(img, x, y, pxW, pxH);
-    }
-
-    // 8) stamp the faceCanvas (with strokes) at head
-    const faceCanvas = document.getElementById('faceCanvas');
-    if (!faceCanvas.width || !faceCanvas.height) {
-      resizeCanvasToFace();
-      drawAllStrokes();
-    }
-    const fcW = faceCanvas.width, fcH = faceCanvas.height;
-    if (fcW && fcH) {
-      const headCtr = centersVB[3];
-      const xF = headCtr.x * s - (fcW * s) / 2 + xOff;
-      const yF = headCtr.y * s - (fcH * s) / 2 + yOff + manualYAdjust;
-      ctx.drawImage(faceCanvas, 0, 0, fcW, fcH, xF, yF, fcW * s, fcH * s);
-    }
-
-    // 9) return the PNG data-URL
-    return out.toDataURL('image/png');
-  }
-
-
-
-
-  async function exportAvatarAsPNG() {
-    // 1) export dimensions & viewBox
-    const CANVAS_W = 1200, CANVAS_H = 1800;
-    const vbW = svg.viewBox.baseVal.width;    // 800
-    const vbH = svg.viewBox.baseVal.height;   // 800
-
+    // grab character name
     const charName = document.getElementById('charName').value.trim();
 
+    // 0) grab the selected SVG URLs & filenames
+    const selections = carousels.map(c => c.images[c.currentIndex]);
+    const hatFile = selections[0].split('/').pop();
+    const torsoFile = selections[1].split('/').pop();
+    const legsFile = selections[2].split('/').pop();
+    const shoesFile = selections[3].split('/').pop();
 
-    // 2) compute export scale & rig vertical nudge
-    const baseScale = CANVAS_W / vbW;     // 1.5×
-    const fillMultiplier = 2;                 // overall zoom factor
+    // 2) compute export scale & vertical nudge
+    const baseScale = CANVAS_W / vbW;       // 1.5×
+    const fillMultiplier = 2;                    // overall zoom
     const s = baseScale * fillMultiplier;
     const xOff = (CANVAS_W - vbW * s) / 2;
     const baseYOff = (CANVAS_H - vbH * s) / 2;
-    const manualYOffset = 500;                 // your rig’s vertical nudge in px
+    const manualYOffset = 500;                  // rig’s vertical nudge
     const yOff = baseYOff + manualYOffset;
 
-    // 3) stage‑4 stroke y‑tweak (in screen px)
-    const manualYAdjust = -25;                // “move strokes up 25px” exactly
+    // 3) stroke y-tweak
+    const manualYAdjust = -25;
 
-    // 4) compute part centers in viewBox coords
+    // 4) compute part centers in VB coords
     const originVB = { x: vbW / 2, y: 100 };
     const headVB = { x: originVB.x, y: originVB.y };
     const torsoVB = {
@@ -1568,9 +1527,8 @@
     const liSizesVB = [180, 200, 240, 130];
 
     // 5) load the four patterned SVGs
-    const urls = carousels.map(c => c.images[c.currentIndex]);
     const imgs = await Promise.all(
-      urls.map(u => new Promise(res => {
+      selections.map(u => new Promise(res => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => res(img);
@@ -1578,38 +1536,78 @@
       }))
     );
 
-    // 6) prepare output canvas & draw gradient
+    // 6) prepare canvas
     const out = document.createElement('canvas');
     out.width = CANVAS_W;
     out.height = CANVAS_H;
     const ctx = out.getContext('2d');
+
+    // 6a) gradient background with random bottom color
+    const colors = ['#9e005d', '#3fa9f5', '#22b573', '#e85e24', '#f7931e'];
+    const bottomColor = colors[Math.floor(Math.random() * colors.length)];
     const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_H);
     grad.addColorStop(0, 'white');
-    grad.addColorStop(1, '#f4b63d');
+    grad.addColorStop(0.45, 'white');
+    grad.addColorStop(1, bottomColor);
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-    // draw character name at top center
+    // 6b) header SVG
+    const headerImg = new Image();
+    headerImg.src = './assets/header-avatarexport.svg';
+    await new Promise(res => headerImg.onload = res);
+    const headerW = CANVAS_W;
+    const headerH = headerImg.naturalHeight / headerImg.naturalWidth * headerW;
+    ctx.drawImage(headerImg, 0, 0, headerW, headerH);
+
+    // 7) character name
     ctx.font = 'bold 164px "PP Mori"';
     ctx.fillStyle = '#22b573';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText(charName, CANVAS_W / 2, 150);
+    ctx.fillText(charName, CANVAS_W / 2, headerH + 0);
 
-
-    // 7) draw outfits (shoes→legs→torso→head)
+    // 8) draw body parts with consistent max VB size
     for (let i = 0; i < 4; i++) {
       const img = imgs[3 - i];
-      const vbSize = liSizesVB[i];
-      const pxW = vbSize * s;
-      const pxH = img.naturalHeight / img.naturalWidth * pxW;
+      const maxVB = liSizesVB[i];
+      const aspect = img.naturalWidth / img.naturalHeight;
+
+      // compute VB dimensions preserving aspect ratio
+      let partVBW, partVBH;
+      if (aspect >= 1) {
+        partVBW = maxVB;
+        partVBH = maxVB / aspect;
+      } else {
+        partVBH = maxVB;
+        partVBW = maxVB * aspect;
+      }
+
+      // per-part extra scale
+      let extraScale = 1;
+      if (i === 0) extraScale = 0.95;  // hat smaller
+      if (i === 1) extraScale = 1.08;
+      if (i === 2) extraScale = 0.9;
+      if (i === 3) extraScale = 0.90;  // head smaller
+
+      // final pixel sizes
+      const pxW = partVBW * s * extraScale;
+      const pxH = partVBH * s * extraScale;
+
+      // center in VB coords
       const ctrVB = centersVB[i];
-      const x = ctrVB.x * s - pxW / 2 + xOff;
-      const y = ctrVB.y * s - pxH / 2 + yOff;
-      ctx.drawImage(img, x, y, pxW, pxH);
+      const baseX = ctrVB.x * s - pxW / 2 + xOff;
+      let baseY = ctrVB.y * s - pxH / 2 + yOff;
+
+      // apply vertical offsets
+      if (i === 2) baseY += 10;   // legs down a bit
+      if (i === 1) baseY -= 40;   // torso up
+      if (i === 0) baseY -= 20;   // hat up
+
+      ctx.drawImage(img, baseX, baseY, pxW, pxH);
     }
 
-    // 8) stamp the faceCanvas (with strokes) at head
+    // 9) stamp face strokes
     const faceCanvas = document.getElementById('faceCanvas');
     if (!faceCanvas.width || !faceCanvas.height) {
       resizeCanvasToFace();
@@ -1617,60 +1615,251 @@
     }
     const fcW = faceCanvas.width, fcH = faceCanvas.height;
     if (fcW && fcH) {
-      // headVB is centersVB[3]
       const headCtr = centersVB[3];
       const xF = headCtr.x * s - (fcW * s) / 2 + xOff;
-      // **apply manualYAdjust in px, NOT scaled**
       const yF = headCtr.y * s - (fcH * s) / 2 + yOff + manualYAdjust;
       ctx.drawImage(faceCanvas, 0, 0, fcW, fcH, xF, yF, fcW * s, fcH * s);
     }
 
-    // draw trait cards at top-left
+    // 10) trait labels around avatar (same as exportAvatarAsPNG)
+    function drawRoundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+    }
+    const traits = [
+      { text: hairHatTraits[hatFile] || '', color: '#22b573' },
+      { text: torsoTraits[torsoFile] || '', color: '#e91e63' },
+      { text: legsTraits[legsFile] || '', color: '#f4b63d' },
+      { text: shoesTraits[shoesFile] || '', color: '#2a9df4' }
+    ];
+    const centerX = CANVAS_W / 2, centerY = CANVAS_H / 2;
+    const positions = [
+      { x: centerX + 350, y: centerY + 0 },
+      { x: centerX - 400, y: centerY + 250 },
+      { x: centerX - 300, y: centerY + 500 },
+      { x: centerX + 400, y: centerY + 620 }
+    ];
+    ctx.font = 'bold 40px "PP Mori"';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    traits.forEach((t, i) => {
+      if (!t.text) return;
+      const pos = positions[i];
+      const label = t.text.toUpperCase();
+      const m = ctx.measureText(label);
+      const pad = 12;
+      const boxW = m.width + pad * 6;
+      const boxH = 100;
+      const radius = boxH / 2;
+      const angle = (Math.random() * 16 - 8) * Math.PI / 180;
+      ctx.save();
+      ctx.translate(pos.x, pos.y);
+      ctx.rotate(angle);
+      ctx.fillStyle = t.color;
+      drawRoundRect(-boxW / 2, -boxH / 2, boxW, boxH, radius);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.fillText(label, 0, 0);
+      ctx.restore();
+    });
+
+    // 11) return Data URL
+    return out.toDataURL('image/png');
+  }
+
+  async function exportAvatarAsPNG() {
+    // 1) export dimensions & ViewBox
+    const CANVAS_W = 1200, CANVAS_H = 1800;
+    const vbW = svg.viewBox.baseVal.width;  // 800
+    const vbH = svg.viewBox.baseVal.height; // 800
+
+    // grab character name
+    const charName = document.getElementById('charName').value.trim();
+
+    // 0) grab the selected SVG URLs & filenames
     const selections = carousels.map(c => c.images[c.currentIndex]);
     const hatFile = selections[0].split('/').pop();
     const torsoFile = selections[1].split('/').pop();
-    const hatTrait = hairHatTraits[hatFile] || '';
-    const torsoTrait = torsoTraits[torsoFile] || '';
+    const legsFile = selections[2].split('/').pop();
+    const shoesFile = selections[3].split('/').pop();
 
-    // const ctx = out.getContext('2d');
-    const pad = 12;
-    const cardW = 240;
-    const cardH = 60;
-    let x = 20;
-    let y = 20;
+    // 2) compute export scale & vertical nudge
+    const baseScale = CANVAS_W / vbW;       // 1.5×
+    const fillMultiplier = 2;                   // overall zoom
+    const s = baseScale * fillMultiplier;
+    const xOff = (CANVAS_W - vbW * s) / 2;
+    const baseYOff = (CANVAS_H - vbH * s) / 2;
+    const manualYOffset = 500;                  // rig’s vertical nudge
+    const yOff = baseYOff + manualYOffset;
 
-    // blue card
-    ctx.fillStyle = '#234ea8';
-    ctx.fillRect(x, y, cardW, cardH);
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 18px sans-serif';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(hatTrait, x + pad, y + cardH / 2);
+    // 3) stroke y-tweak
+    const manualYAdjust = -25;                   // move strokes up
 
-    // pink card
-    y += cardH + 10;
-    ctx.fillStyle = '#c45a48';
-    ctx.fillRect(x, y, cardW, cardH);
-    ctx.fillStyle = '#fff';
-    ctx.fillText(torsoTrait, x + pad, y + cardH / 2);
+    // 4) compute part centers in VB coords
+    const originVB = { x: vbW / 2, y: 100 };
+    const headVB = { x: originVB.x, y: originVB.y };
+    const torsoVB = {
+      x: originVB.x + (baseRig.shoulderL.x + baseRig.shoulderR.x + baseRig.hipL.x + baseRig.hipR.x) / 4,
+      y: originVB.y + (baseRig.shoulderL.y + baseRig.shoulderR.y + baseRig.hipL.y + baseRig.hipR.y) / 4 + 10
+    };
+    const legsVB = {
+      x: originVB.x + (baseRig.kneeL.x + baseRig.kneeR.x) / 2,
+      y: originVB.y + (baseRig.kneeL.y + baseRig.kneeR.y) / 2 + 20
+    };
+    const shoesVB = {
+      x: originVB.x + (baseRig.footL.x + baseRig.footR.x) / 2,
+      y: originVB.y + (baseRig.footL.y + baseRig.footR.y) / 2 + 40
+    };
+    const centersVB = [shoesVB, legsVB, torsoVB, headVB];
+    const liSizesVB = [180, 200, 200, 130];  // max VB dimension per part
 
-    // after drawing pink card
-    y += cardH + 10;
-    // green legs card
-    ctx.fillStyle = '#2d7a2e';  // pick a green
-    ctx.fillRect(x, y, cardW, cardH);
-    ctx.fillStyle = '#fff';
-    ctx.fillText(legsTraits[legsFile] || '', x + pad, y + cardH / 2);
+    // 5) load the four pattern images
+    const urls = selections;
+    const imgs = await Promise.all(
+      urls.map(u => new Promise(res => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => res(img);
+        img.src = u;
+      }))
+    );
 
-    y += cardH + 10;
-    // yellow shoes card
-    ctx.fillStyle = '#c4971a';  // pick a yellow
-    ctx.fillRect(x, y, cardW, cardH);
-    ctx.fillStyle = '#fff';
-    ctx.fillText(shoesTraits[shoesFile] || '', x + pad, y + cardH / 2);
+    // 6) prepare canvas
+    const out = document.createElement('canvas');
+    out.width = CANVAS_W;
+    out.height = CANVAS_H;
+    const ctx = out.getContext('2d');
+
+    // 6a) gradient background with random bottom color
+    const colors = ['#9e005d', '#3fa9f5', '#22b573', '#e85e24', '#eabec5'];
+    const bottomColor = colors[Math.floor(Math.random() * colors.length)];
+    const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_H);
+    grad.addColorStop(0, 'white');
+    grad.addColorStop(0.45, 'white');
+    grad.addColorStop(1, bottomColor);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+    // 6b) header SVG
+    const headerImg = new Image();
+    headerImg.src = './assets/header-avatarexport.svg';
+    await new Promise(res => headerImg.onload = res);
+    const headerW = CANVAS_W;
+    const headerH = headerImg.naturalHeight / headerImg.naturalWidth * headerW;
+    ctx.drawImage(headerImg, 0, 0, headerW, headerH);
+
+    // 7) character name
+    ctx.font = 'bold 164px "PP Mori"';
+    ctx.fillStyle = '#22b573';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(charName, CANVAS_W / 2, headerH + 10);
+
+    // 8) draw body parts with consistent max VB size
+    for (let i = 0; i < 4; i++) {
+      const img = imgs[3 - i];
+      const maxVB = liSizesVB[i];
+      const aspect = img.naturalWidth / img.naturalHeight;
+
+      // compute VB dimensions preserving aspect ratio
+      let partVBW, partVBH;
+      if (aspect >= 1) {
+        partVBW = maxVB;
+        partVBH = maxVB / aspect;
+      } else {
+        partVBH = maxVB;
+        partVBW = maxVB * aspect;
+      }
+
+      // per-part extra scale
+      let extraScale = 1;
+      if (i === 0) extraScale = 0.95;  // pants +10%
+      if (i === 1) extraScale = 1.08;  // pants +10%
+      if (i === 3) extraScale = 0.90;  // head –10%
+
+      // final pixel sizes
+      const pxW = partVBW * s * extraScale;
+      const pxH = partVBH * s * extraScale;
+
+      // center in VB coords
+      const ctrVB = centersVB[i];
+      const baseX = ctrVB.x * s - pxW / 2 + xOff;
+      let baseY = ctrVB.y * s - pxH / 2 + yOff;
+
+      // move pants up by 50px
+      if (i === 2) baseY += 10;
+      if (i === 1) baseY -= 40;
+      if (i === 0) baseY -= 20;
+
+      ctx.drawImage(img, baseX, baseY, pxW, pxH);
+    }
 
 
-    // 9) download the PNG
+
+    // 9) face strokes
+    const faceCanvas = document.getElementById('faceCanvas');
+    if (!faceCanvas.width || !faceCanvas.height) {
+      resizeCanvasToFace();
+      drawAllStrokes();
+    }
+    const fcW = faceCanvas.width, fcH = faceCanvas.height;
+    if (fcW && fcH) {
+      const headCtr = centersVB[3];
+      const xF = headCtr.x * s - (fcW * s) / 2 + xOff;
+      const yF = headCtr.y * s - (fcH * s) / 2 + yOff + manualYAdjust;
+      ctx.drawImage(faceCanvas, 0, 0, fcW, fcH, xF, yF, fcW * s, fcH * s);
+    }
+
+    // 10) trait labels around avatar
+    const traits = [
+      { text: hairHatTraits[hatFile] || '', color: '#22b573' },
+      { text: torsoTraits[torsoFile] || '', color: '#e91e63' },
+      { text: legsTraits[legsFile] || '', color: '#f4b63d' },
+      { text: shoesTraits[shoesFile] || '', color: '#2a9df4' }
+    ];
+    const centerX = CANVAS_W / 2, centerY = CANVAS_H / 2;
+    const positions = [
+      { x: centerX + 350, y: centerY + 0 },
+      { x: centerX - 400, y: centerY + 250 },
+      { x: centerX - 300, y: centerY + 500 },
+      { x: centerX + 400, y: centerY + 620 }
+    ];
+    // helper
+    function drawRoundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+    }
+    ctx.font = 'bold 40px "PP Mori"'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+    traits.forEach((t, i) => {
+      if (!t.text) return;
+      const pos = positions[i];
+      const label = t.text.toUpperCase();
+      const metrics = ctx.measureText(label);
+      const padding = 12;
+      const boxW = metrics.width + padding * 6;
+      const boxH = 100;
+      const radius = boxH / 2;
+      // random tilt ±8°
+      const deg = Math.random() * 16 - 8;
+      const angle = deg * Math.PI / 180;
+      ctx.save();
+      ctx.translate(pos.x, pos.y);
+      ctx.rotate(angle);
+      ctx.fillStyle = t.color;
+      drawRoundRect(-boxW / 2, -boxH / 2, boxW, boxH, radius);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.fillText(label, 0, 0);
+      ctx.restore();
+    });
+
+    // 11) trigger download
     const link = document.createElement('a');
     link.download = 'my-pdd-avatar.png';
     link.href = out.toDataURL('image/png');

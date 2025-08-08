@@ -87,6 +87,7 @@ body {
   border: none;
   color: white;
   cursor: pointer;
+  background-color: #f7931e;
   transition: background-color 0.3s ease, border 0.3s ease, color 0.3s ease;
 }
 
