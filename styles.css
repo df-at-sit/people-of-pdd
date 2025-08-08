@@ -1168,8 +1168,71 @@ body.stage-4 .right-panel {
   justify-content: center;
 }
 
+/* 1) the wrapper card */
+.traits-card {
+  /* reuse your .card-input rules (or copy them here) */
+  background: #ffa2b1;
+  padding: 16px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: rotate(-6deg);
+  position: absolute;
+  top: 42vh;
+  /* tweak as needed */
+  left: 24vw;
+  /* tweak as needed */
+  max-width: 240px;
+  text-align: center;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: white;
+}
 
-.trait-card {
+/* 2) optionally style the heading */
+.traits-card h3 {
+  margin: 0;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* 3) the inner list flexbox */
+.traits-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* 4) reset the individual cards so they flow */
+.traits-card .trait-card {
+  transform: none;
+  /* remove the rotate on each trait */
+  margin: 0;
+  /* cancel any absolute positioning */
+  width: auto;
+  /* let them size to their text */
+  padding: 8px 12px;
+  /* tighten them up */
+  font-size: 0.8rem;
+  line-height: 1.2;
+  text-transform: none;
+  border-radius: 10px;
+}
+
+/* 5) stage-4 only shows the wrapper */
+.card-input.traits-card {
+  display: none;
+}
+
+body.stage-4 .card-input.traits-card {
+  display: flex;
+}
+
+
+/* .trait-card {
   font-size: 0.85rem;
   line-height: 1.1;
   padding: 10px 16px;
@@ -1180,7 +1243,7 @@ body.stage-4 .right-panel {
   transform: rotate(-10deg);
   width: auto;
   max-width: 160px;
-}
+} */
 
 .trait-card.blue {
   background: #2a9df4;
@@ -1188,6 +1251,14 @@ body.stage-4 .right-panel {
 
 .trait-card.pink {
   background: #e91e63;
+}
+
+.trait-card.green {
+  background: #22b573;
+}
+
+.trait-card.yellow {
+  background: #e85e24;
 }
 
 
@@ -1267,19 +1338,33 @@ body.stage-4 .fav-card {
   background: #9e005d;
 }
 
-body.stage-4 .trait-card.blue {
+/* body.stage-4 .trait-card.blue {
   top: 45vh;
   left: 25vw;
   transform: rotate(-8deg);
-  display: none;
+
 }
 
 body.stage-4 .trait-card.pink {
-  top: 55vh;
-  left: 20vw;
+  top: 50vh;
+  left: 23vw;
   transform: rotate(3deg);
-  display: none;
+  
 }
+
+body.stage-4 .trait-card.green {
+  top: 47vh;
+  left: 32vw;
+  transform: rotate(3deg);
+ 
+}
+
+body.stage-4 .trait-card.yellow {
+  top: 52vh;
+  left: 30vw;
+  transform: rotate(3deg);
+  
+} */
 
 
 .card-input.email-card {
@@ -1297,8 +1382,8 @@ body.stage-4 .trait-card.pink {
 }
 
 body.stage-4 .email-card {
-  top: 30vh;
-  right: 10vw;
+  top: 25vh;
+  right: 15vw;
   /* instead of 200px */
   transform: translateX(-50%) rotate(-3deg);
 }

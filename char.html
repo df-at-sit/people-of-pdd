@@ -155,13 +155,31 @@
       <div class="icon">🛵</div>
     </div>
 
-    <div class="card-input trait-card blue">
+    <!-- <div class="card-input trait-card blue">
       <span>URBAN<br />ENTHUSIAST</span>
     </div>
 
     <div class="card-input trait-card pink">
       <span>CYCLE LOVER</span>
     </div>
+
+    <div class="card-input trait-card green">
+      <span></span>
+    </div>
+    <div class="card-input trait-card yellow">
+      <span></span>
+    </div> -->
+
+    <div class="card-input traits-card">
+      <h3>your traits!</h3>
+      <div class="traits-list">
+        <div class="trait-card blue"><span><!-- hat trait --></span></div>
+        <div class="trait-card pink"><span><!-- torso trait --></span></div>
+        <div class="trait-card green"><span><!-- legs trait --></span></div>
+        <div class="trait-card yellow"><span><!-- shoes trait --></span></div>
+      </div>
+    </div>
+
 
     <div class="card-input email-card">
 
@@ -323,6 +341,90 @@
 
 
 <script>
+
+  // map filename → trait
+  const hairHatTraits = {
+    'hair-hat-01-01.svg': 'Precision',
+    'hair-hat-01-02.svg': 'Humanity',
+    'hair-hat-01-03.svg': 'Energy',
+    'hair-hat-01-04.svg': 'Sustainability',
+    'hair-hat-01-05.svg': 'Versatility',
+    'hair-hat-02-01.svg': 'Playfulness',
+    'hair-hat-02-02.svg': 'Balance',
+    'hair-hat-02-03.svg': 'Clarity',
+    'hair-hat-02-04.svg': 'Resilience',
+    'hair-hat-02-05.svg': 'Curiosity',
+    'hair-hat-03-01.svg': 'Focus',
+    'hair-hat-03-02.svg': 'Agility',
+    'hair-hat-03-03.svg': 'Rhythm',
+    'hair-hat-03-04.svg': 'Empathy',
+    'hair-hat-03-05.svg': 'Inventiveness',
+    'hair-hat-04-01.svg': 'Connectivity',
+    'hair-hat-04-02.svg': 'Synergy',
+    'hair-hat-04-03.svg': 'Adaptability',
+    'hair-hat-04-04.svg': 'Continuity',
+    'hair-hat-04-05.svg': 'Openness',
+    'hair-hat-05-01.svg': 'Clarity',
+    'hair-hat-05-02.svg': 'Harmony',
+    'hair-hat-05-03.svg': 'Ingenuity',
+    'hair-hat-05-04.svg': 'Precision',
+    'hair-hat-05-05.svg': 'Inclusivity'
+  };
+
+  const torsoTraits = {
+    'torso-01-01.svg': 'Strength',
+    'torso-01-02.svg': 'Structure',
+    'torso-01-03.svg': 'Flow',
+    'torso-01-04.svg': 'Support',
+    'torso-01-05.svg': 'Stability',
+    'torso-02-01.svg': 'Movement',
+    'torso-02-02.svg': 'Precision',
+    'torso-02-03.svg': 'Connectivity',
+    'torso-02-04.svg': 'Functionality',
+    'torso-02-05.svg': 'Integrity',
+    'torso-03-01.svg': 'Modularity',
+    'torso-03-02.svg': 'Expression',
+    'torso-03-03.svg': 'Symmetry',
+    'torso-03-04.svg': 'Transparency',
+    'torso-03-05.svg': 'Security',
+    'torso-04-01.svg': 'Interconnection',
+    'torso-04-02.svg': 'Play',
+    'torso-04-03.svg': 'Flowstate',
+    'torso-04-04.svg': 'Balance',
+    'torso-04-05.svg': 'Uplift',
+    'torso-05-01.svg': 'Supportive',
+    'torso-05-02.svg': 'Creative',
+    'torso-05-03.svg': 'Durable',
+    'torso-05-04.svg': 'Grounded',
+    'torso-05-05.svg': 'Open-minded'
+  };
+
+  // after torsoTraits
+  const legsTraits = {
+    'legs-01-01.svg': 'Momentum', 'legs-01-02.svg': 'Flexibility', 'legs-01-03.svg': 'Drive',
+    'legs-01-04.svg': 'Balance', 'legs-01-05.svg': 'Exploration', 'legs-02-01.svg': 'Pace',
+    'legs-02-02.svg': 'Adaptability', 'legs-02-03.svg': 'Initiative', 'legs-02-04.svg': 'Focus',
+    'legs-02-05.svg': 'Reach', 'legs-03-01.svg': 'Navigation', 'legs-03-02.svg': 'Resilience',
+    'legs-03-03.svg': 'Purpose', 'legs-03-04.svg': 'Discovery', 'legs-03-05.svg': 'Freedom',
+    'legs-04-01.svg': 'Exploration', 'legs-04-02.svg': 'Alignment', 'legs-04-03.svg': 'Endurance',
+    'legs-04-04.svg': 'Support', 'legs-04-05.svg': 'Initiation', 'legs-05-01.svg': 'Steadiness',
+    'legs-05-02.svg': 'Mobility', 'legs-05-03.svg': 'Courage', 'legs-05-04.svg': 'Stability',
+    'legs-05-05.svg': 'Perspective'
+  };
+  const shoesTraits = {
+    'shoes-01-01.svg': 'Agility', 'shoes-01-02.svg': 'Confidence', 'shoes-01-03.svg': 'Determination',
+    'shoes-01-04.svg': 'Stamina', 'shoes-01-05.svg': 'Curiosity',
+    'shoes-02-01.svg': 'Agility', 'shoes-02-02.svg': 'Confidence', 'shoes-02-03.svg': 'Determination',
+    'shoes-02-04.svg': 'Stamina', 'shoes-02-05.svg': 'Curiosity',
+    'shoes-03-01.svg': 'Agility', 'shoes-03-02.svg': 'Confidence', 'shoes-03-03.svg': 'Determination',
+    'shoes-03-04.svg': 'Stamina', 'shoes-03-05.svg': 'Curiosity',
+    'shoes-04-01.svg': 'Agility', 'shoes-04-02.svg': 'Confidence', 'shoes-04-03.svg': 'Determination',
+    'shoes-04-04.svg': 'Stamina', 'shoes-04-05.svg': 'Curiosity',
+    'shoes-05-01.svg': 'Agility', 'shoes-05-02.svg': 'Confidence', 'shoes-05-03.svg': 'Determination',
+    'shoes-05-04.svg': 'Stamina', 'shoes-05-05.svg': 'Curiosity'
+  };
+
+
 
 
 
@@ -904,6 +1006,20 @@
     }
   }
 
+  function updateTraitCards() {
+    const selections = carousels.map(c => c.images[c.currentIndex]);
+    const hatFile = selections[0].split('/').pop();
+    const torsoFile = selections[1].split('/').pop();
+    const legsFile = selections[2].split('/').pop();
+    const shoesFile = selections[3].split('/').pop();
+
+    document.querySelector('.trait-card.blue span').textContent = hairHatTraits[hatFile] || '';
+    document.querySelector('.trait-card.pink span').textContent = torsoTraits[torsoFile] || '';
+    document.querySelector('.trait-card.green span').textContent = legsTraits[legsFile] || '';
+    document.querySelector('.trait-card.yellow span').textContent = shoesTraits[shoesFile] || '';
+  }
+
+
   // Arc layout for color swatches
   function layoutSwatchesInArc() {
     const swatches = document.querySelectorAll('.color-picker .color-swatch');
@@ -1418,6 +1534,9 @@
     const vbW = svg.viewBox.baseVal.width;    // 800
     const vbH = svg.viewBox.baseVal.height;   // 800
 
+    const charName = document.getElementById('charName').value.trim();
+
+
     // 2) compute export scale & rig vertical nudge
     const baseScale = CANVAS_W / vbW;     // 1.5×
     const fillMultiplier = 2;                 // overall zoom factor
@@ -1470,6 +1589,14 @@
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
+    // draw character name at top center
+    ctx.font = 'bold 164px "PP Mori"';
+    ctx.fillStyle = '#22b573';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(charName, CANVAS_W / 2, 150);
+
+
     // 7) draw outfits (shoes→legs→torso→head)
     for (let i = 0; i < 4; i++) {
       const img = imgs[3 - i];
@@ -1497,6 +1624,51 @@
       const yF = headCtr.y * s - (fcH * s) / 2 + yOff + manualYAdjust;
       ctx.drawImage(faceCanvas, 0, 0, fcW, fcH, xF, yF, fcW * s, fcH * s);
     }
+
+    // draw trait cards at top-left
+    const selections = carousels.map(c => c.images[c.currentIndex]);
+    const hatFile = selections[0].split('/').pop();
+    const torsoFile = selections[1].split('/').pop();
+    const hatTrait = hairHatTraits[hatFile] || '';
+    const torsoTrait = torsoTraits[torsoFile] || '';
+
+    // const ctx = out.getContext('2d');
+    const pad = 12;
+    const cardW = 240;
+    const cardH = 60;
+    let x = 20;
+    let y = 20;
+
+    // blue card
+    ctx.fillStyle = '#234ea8';
+    ctx.fillRect(x, y, cardW, cardH);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(hatTrait, x + pad, y + cardH / 2);
+
+    // pink card
+    y += cardH + 10;
+    ctx.fillStyle = '#c45a48';
+    ctx.fillRect(x, y, cardW, cardH);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(torsoTrait, x + pad, y + cardH / 2);
+
+    // after drawing pink card
+    y += cardH + 10;
+    // green legs card
+    ctx.fillStyle = '#2d7a2e';  // pick a green
+    ctx.fillRect(x, y, cardW, cardH);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(legsTraits[legsFile] || '', x + pad, y + cardH / 2);
+
+    y += cardH + 10;
+    // yellow shoes card
+    ctx.fillStyle = '#c4971a';  // pick a yellow
+    ctx.fillRect(x, y, cardW, cardH);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(shoesTraits[shoesFile] || '', x + pad, y + cardH / 2);
+
 
     // 9) download the PNG
     const link = document.createElement('a');
@@ -1611,6 +1783,7 @@
       // 4) update UI
       stage = 4;
       updateTitleSection(stage);
+      updateTraitCards();
       nextBtn.textContent = 'SUBMIT';
       nextBtn.classList.replace('blue-bg', 'red-bg');
       nextBtn.type = 'submit';
