@@ -1172,16 +1172,14 @@ body.stage-4 .right-panel {
 /* 1) the wrapper card */
 .traits-card {
   /* reuse your .card-input rules (or copy them here) */
-  background: #ffa2b1;
+  background: none;
   padding: 16px;
   border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: rotate(-6deg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0);
+  transform: rotate(6deg);
   position: absolute;
-  top: 42vh;
-  /* tweak as needed */
-  left: 24vw;
-  /* tweak as needed */
+  top: 0vh;
+  right: 24vw;
   max-width: 240px;
   text-align: center;
   z-index: 1000;
@@ -1197,6 +1195,7 @@ body.stage-4 .right-panel {
   font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  color: #e91e63;
 }
 
 /* 3) the inner list flexbox */
@@ -1223,6 +1222,15 @@ body.stage-4 .right-panel {
   border-radius: 10px;
 }
 
+.trait-card img {
+  display: block;
+  margin: 0 auto;
+  /* remove these if you're setting width/height in JS */
+  max-width: 100%;
+  height: auto;
+}
+
+
 /* 5) stage-4 only shows the wrapper */
 .card-input.traits-card {
   display: none;
@@ -1246,7 +1254,7 @@ body.stage-4 .card-input.traits-card {
   max-width: 160px;
 } */
 
-.trait-card.blue {
+/* .trait-card.blue {
   background: #2a9df4;
 }
 
@@ -1260,7 +1268,7 @@ body.stage-4 .card-input.traits-card {
 
 .trait-card.yellow {
   background: #e85e24;
-}
+} */
 
 
 .info-card {
@@ -1333,8 +1341,8 @@ body.stage-4 .name-card {
 }
 
 body.stage-4 .fav-card {
-  top: 20vh;
-  left: 22vw;
+  top: 22vh;
+  left: 24vw;
   transform: rotate(3deg);
   background: #9e005d;
 }
@@ -1383,7 +1391,7 @@ body.stage-4 .trait-card.yellow {
 }
 
 body.stage-4 .email-card {
-  top: 25vh;
+  top: 35vh;
   right: 15vw;
   /* instead of 200px */
   transform: translateX(-50%) rotate(-3deg);
@@ -1454,8 +1462,8 @@ small {
 
 /* tilt the alert, increase overall font size */
 .custom-alert__content {
-  background: #58aaf7;
-  color: #fff;
+  background: #fff;
+  color: #1e3a8a;
   border-radius: 20px;
   padding: 2rem;
   max-width: 90%;
@@ -1465,13 +1473,19 @@ small {
   font-size: 1.25rem;
 }
 
+
 /* message text */
 .custom-alert__content p {
   margin: 0;
   line-height: 1.4;
+  white-space: normal;
+  /* ensures text wraps */
+  word-break: break-word;
+  /* breaks long words if needed */
 }
 
-/* stack buttons vertically */
+
+/* 
 .custom-alert__buttons {
   display: flex;
   flex-direction: column;
@@ -1479,7 +1493,7 @@ small {
   margin-top: 1.5rem;
 }
 
-/* base button styles */
+
 .custom-alert__buttons button {
   padding: 0.75rem 1rem;
   border: 2px solid;
@@ -1488,19 +1502,75 @@ small {
   font-weight: bold;
   cursor: pointer;
   background: #fff;
-}
+} */
 
-/* first button: green outline & text */
-#custom-alert__gallery {
+
+/* #custom-alert__gallery {
   border-color: #22b573;
   color: #22b573;
 }
 
-/* second button: magenta outline & text */
 #custom-alert__another {
   border-color: #9e005d;
   color: #9e005d;
+} */
+/* arrange buttons in a 2x2 grid */
+.custom-alert__buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 150px);
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
 }
+
+/* make buttons square */
+.custom-alert__buttons button {
+  width: 150px;
+  height: 150px;
+  padding: 0;
+  border: 2px solid;
+  border-radius: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  /* background: #fff; */
+  display: flex;
+  align-items: start;
+  justify-content: left;
+  text-align: left;
+  padding: 20px;
+  line-height: 1.2;
+  border: none;
+}
+
+/* first button: green outline & text */
+#custom-alert__gallery {
+  background-color: #22b573;
+  color: #fff;
+  transform: rotate(2deg);
+}
+
+/* second button: magenta outline & text */
+#custom-alert__another {
+  background-color: #9e005d;
+  color: #fff;
+  transform: rotate(3deg);
+}
+
+/* third button: blue outline & text */
+#custom-alert__save {
+  background-color: #2a9df4;
+  color: #fff;
+  transform: rotate(4deg);
+}
+
+/* fourth button: orange outline & text */
+#custom-alert__home {
+  background-color: #f7941d;
+  color: #fff;
+  transform: rotate(-1deg);
+}
+
 
 
 .modal-overlay {
@@ -1529,7 +1599,7 @@ small {
   margin-top: 0;
 }
 
-.modal-content button {
+/* .modal-content button {
   padding: 0.75em 1.5em;
   border: none;
   color: #fff;
@@ -1537,21 +1607,55 @@ small {
   cursor: pointer;
   border-radius: 8px;
   transition: background-color 0.3s;
-}
+} */
 
-.modal-content button:hover {
+/* .modal-content button:hover {
   background-color: #fff;
-  /* green on hover */
-}
+} */
 
 #tc-agree {
-  border-radius: 8px;
+  padding: 10px 20px 10px 20px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 30px;
   transition: background-color 0.3s;
 }
 
 #tc-agree:hover {
-  color: #22b573;
+  background-color: #22b573;
 }
+
+.tc-close {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: red;
+  color: white;
+  border: none;
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 20px;
+  text-align: center;
+  padding: 0;
+  transition: background-color 0.3s;
+  transition: color 0.3s;
+}
+
+.tc-close:hover {
+  background: darkred;
+  color: #e53935;
+  transition: background-color 0.3s;
+  transition: color 0.3s;
+}
+
+.modal-content {
+  position: relative;
+  /* so the button positions relative to this box */
+}
+
 
 
 
@@ -1703,6 +1807,10 @@ small {
   bottom: 0;
   right: 0;
 }
+
+
+
+
 
 
 

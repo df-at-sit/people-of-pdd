@@ -236,6 +236,7 @@
   <!-- TERMS & CONDITIONS MODAL (hidden by default) -->
   <div id="tc-modal" class="modal-overlay" style="display:none">
     <div class="modal-content">
+      <button class="tc-close">&times;</button>
       <h2>Terms &amp; Conditions</h2>
       <div class="tc-text" style="font-size:0.8rem; max-height:300px; overflow-y:auto; margin-bottom:1em">
         <p>By submitting your artwork in connection with the Shaping Hearts Placemaking Series held at the National Day
@@ -285,9 +286,11 @@
         <button id="custom-alert__gallery">VISIT THE GALLERY</button>
         <button id="custom-alert__another">MAKE ANOTHER AVATAR</button>
         <button id="custom-alert__save">SAVE AVATAR</button>
+        <button id="custom-alert__home">GO TO HOMEPAGE</button>
       </div>
     </div>
   </div>
+
 
 
 
@@ -424,99 +427,146 @@
 
 </body>
 
+<script>
+  // start empty; we'll fill these from CSV
+  let hairHatTraits = {};
+  let torsoTraits = {};
+  let legsTraits = {};
+  let shoesTraits = {};
 
+  // tiny CSV → map(filename → trait). assumes headers: filename,trait
+  function csvToMap(text) {
+    const lines = text.trim().split(/\r?\n/);
+    // find header indexes in case order changes
+    const header = lines.shift().split(',');
+    const fi = header.findIndex(h => /filename/i.test(h));
+    const ti = header.findIndex(h => /trait/i.test(h));
+    const map = {};
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      // simple split is fine because no quoted commas in your data
+      const cols = line.split(',');
+      const file = cols[fi]?.trim();
+      const trait = cols[ti]?.trim();
+      if (file && trait) map[file] = trait;
+    }
+    return map;
+  }
+
+  // load all four csvs in parallel
+  async function loadAllTraits() {
+    const paths = {
+      hairHatTraits: './assets/traits/hair-hat.csv',
+      torsoTraits: './assets/traits/torso.csv',
+      legsTraits: './assets/traits/legs.csv',
+      shoesTraits: './assets/traits/shoes.csv'
+    };
+
+    const [hairCSV, torsoCSV, legsCSV, shoesCSV] = await Promise.all([
+      fetch(paths.hairHatTraits).then(r => r.text()),
+      fetch(paths.torsoTraits).then(r => r.text()),
+      fetch(paths.legsTraits).then(r => r.text()),
+      fetch(paths.shoesTraits).then(r => r.text()),
+    ]);
+
+    hairHatTraits = csvToMap(hairCSV);
+    torsoTraits = csvToMap(torsoCSV);
+    legsTraits = csvToMap(legsCSV);
+    shoesTraits = csvToMap(shoesCSV);
+  }
+
+  // call before UI needs traits
+  // if you already have other DOMContentLoaded work, just await this first
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      await loadAllTraits();
+      await loadKeywordIndex();
+
+      // optional: update trait cards immediately if items already selected
+      if (typeof updateTraitCards === 'function') updateTraitCards();
+    } catch (e) {
+      console.error('failed to load trait csvs', e);
+    }
+  });
+
+  // helper: hide duplicates but keep first occurrence
+  function dedupeList(list) {
+    const seen = new Set();
+    return list.map(t => {
+      const v = (t || '').trim();
+      if (!v || seen.has(v)) return '';   // blank out dups
+      seen.add(v);
+      return v;
+    });
+  }
+
+  // helper: for [{text,color}, ...]
+  function dedupeEntries(entries) {
+    const seen = new Set();
+    return entries.map(e => {
+      const v = (e.text || '').trim();
+      if (!v || seen.has(v)) return { ...e, text: '' };
+      seen.add(v);
+      return e;
+    });
+  }
+
+  // keyword -> index (lowercase keys)
+  let keywordIndexMap = {};
+
+  function csvToKeywordIndex(text) {
+    const lines = text.trim().split(/\r?\n/);
+    const header = lines.shift().split(',');
+    const ki = header.findIndex(h => /keyword/i.test(h));
+    const ii = header.findIndex(h => /(image\s*number|number|index)/i.test(h));
+    const map = {};
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const cols = line.split(',');
+      const kw = (cols[ki] || '').trim().toLowerCase();
+      const num = parseInt((cols[ii] || '').trim(), 10);
+      if (kw && Number.isFinite(num)) map[kw] = num;
+    }
+    return map;
+  }
+
+  async function loadKeywordIndex() {
+    const csv = await fetch('./assets/traits/pdd_keywords.csv').then(r => r.text());
+    keywordIndexMap = csvToKeywordIndex(csv);
+  }
+
+  // cache loaded badge images: number -> HTMLImageElement
+  const badgeCache = new Map();
+
+  function badgeUrlFromTrait(trait) {
+    const idx = keywordIndexMap[(trait || '').trim().toLowerCase()];
+    if (!idx) return null;
+    return `./assets/traits/badges/${idx}.svg`;
+  }
+
+  function loadBadgeImage(url) {
+    if (!url) return Promise.resolve(null);
+    // use cache key = url (or extracted number)
+    const key = url;
+    if (badgeCache.has(key)) return Promise.resolve(badgeCache.get(key));
+
+    return new Promise(resolve => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => { badgeCache.set(key, img); resolve(img); };
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
+  }
+</script>
 
 <script>
 
 
 
-
-
-  // map filename → trait
-  const hairHatTraits = {
-    'hair-hat-01-01.svg': 'Precision',
-    'hair-hat-01-02.svg': 'Humanity',
-    'hair-hat-01-03.svg': 'Energy',
-    'hair-hat-01-04.svg': 'Sustainability',
-    'hair-hat-01-05.svg': 'Versatility',
-    'hair-hat-02-01.svg': 'Playfulness',
-    'hair-hat-02-02.svg': 'Balance',
-    'hair-hat-02-03.svg': 'Clarity',
-    'hair-hat-02-04.svg': 'Resilience',
-    'hair-hat-02-05.svg': 'Curiosity',
-    'hair-hat-03-01.svg': 'Focus',
-    'hair-hat-03-02.svg': 'Agility',
-    'hair-hat-03-03.svg': 'Rhythm',
-    'hair-hat-03-04.svg': 'Empathy',
-    'hair-hat-03-05.svg': 'Inventiveness',
-    'hair-hat-04-01.svg': 'Connectivity',
-    'hair-hat-04-02.svg': 'Synergy',
-    'hair-hat-04-03.svg': 'Adaptability',
-    'hair-hat-04-04.svg': 'Continuity',
-    'hair-hat-04-05.svg': 'Openness',
-    'hair-hat-05-01.svg': 'Clarity',
-    'hair-hat-05-02.svg': 'Harmony',
-    'hair-hat-05-03.svg': 'Ingenuity',
-    'hair-hat-05-04.svg': 'Precision',
-    'hair-hat-05-05.svg': 'Inclusivity'
-  };
-
-  const torsoTraits = {
-    'torso-01-01.svg': 'Strength',
-    'torso-01-02.svg': 'Structure',
-    'torso-01-03.svg': 'Flow',
-    'torso-01-04.svg': 'Support',
-    'torso-01-05.svg': 'Stability',
-    'torso-02-01.svg': 'Movement',
-    'torso-02-02.svg': 'Precision',
-    'torso-02-03.svg': 'Connectivity',
-    'torso-02-04.svg': 'Functionality',
-    'torso-02-05.svg': 'Integrity',
-    'torso-03-01.svg': 'Modularity',
-    'torso-03-02.svg': 'Expression',
-    'torso-03-03.svg': 'Symmetry',
-    'torso-03-04.svg': 'Transparency',
-    'torso-03-05.svg': 'Security',
-    'torso-04-01.svg': 'Interconnection',
-    'torso-04-02.svg': 'Play',
-    'torso-04-03.svg': 'Flowstate',
-    'torso-04-04.svg': 'Balance',
-    'torso-04-05.svg': 'Uplift',
-    'torso-05-01.svg': 'Supportive',
-    'torso-05-02.svg': 'Creative',
-    'torso-05-03.svg': 'Durable',
-    'torso-05-04.svg': 'Grounded',
-    'torso-05-05.svg': 'Open-minded'
-  };
-
-  // after torsoTraits
-  const legsTraits = {
-    'legs-01-01.svg': 'Momentum', 'legs-01-02.svg': 'Flexibility', 'legs-01-03.svg': 'Drive',
-    'legs-01-04.svg': 'Balance', 'legs-01-05.svg': 'Exploration', 'legs-02-01.svg': 'Pace',
-    'legs-02-02.svg': 'Adaptability', 'legs-02-03.svg': 'Initiative', 'legs-02-04.svg': 'Focus',
-    'legs-02-05.svg': 'Reach', 'legs-03-01.svg': 'Navigation', 'legs-03-02.svg': 'Resilience',
-    'legs-03-03.svg': 'Purpose', 'legs-03-04.svg': 'Discovery', 'legs-03-05.svg': 'Freedom',
-    'legs-04-01.svg': 'Exploration', 'legs-04-02.svg': 'Alignment', 'legs-04-03.svg': 'Endurance',
-    'legs-04-04.svg': 'Support', 'legs-04-05.svg': 'Initiation', 'legs-05-01.svg': 'Steadiness',
-    'legs-05-02.svg': 'Mobility', 'legs-05-03.svg': 'Courage', 'legs-05-04.svg': 'Stability',
-    'legs-05-05.svg': 'Perspective'
-  };
-  const shoesTraits = {
-    'shoes-01-01.svg': 'Agility', 'shoes-01-02.svg': 'Confidence', 'shoes-01-03.svg': 'Determination',
-    'shoes-01-04.svg': 'Stamina', 'shoes-01-05.svg': 'Curiosity',
-    'shoes-02-01.svg': 'Agility', 'shoes-02-02.svg': 'Confidence', 'shoes-02-03.svg': 'Determination',
-    'shoes-02-04.svg': 'Stamina', 'shoes-02-05.svg': 'Curiosity',
-    'shoes-03-01.svg': 'Agility', 'shoes-03-02.svg': 'Confidence', 'shoes-03-03.svg': 'Determination',
-    'shoes-03-04.svg': 'Stamina', 'shoes-03-05.svg': 'Curiosity',
-    'shoes-04-01.svg': 'Agility', 'shoes-04-02.svg': 'Confidence', 'shoes-04-03.svg': 'Determination',
-    'shoes-04-04.svg': 'Stamina', 'shoes-04-05.svg': 'Curiosity',
-    'shoes-05-01.svg': 'Agility', 'shoes-05-02.svg': 'Confidence', 'shoes-05-03.svg': 'Determination',
-    'shoes-05-04.svg': 'Stamina', 'shoes-05-05.svg': 'Curiosity'
-  };
-
-
-
-
+  document.querySelector('.tc-close').addEventListener('click', () => {
+    document.getElementById('tc-modal').style.display = 'none';
+  });
 
   const root = document.body;
   const canvasEl = document.getElementById('faceCanvas');
@@ -1103,12 +1153,49 @@
     const legsFile = selections[2].split('/').pop();
     const shoesFile = selections[3].split('/').pop();
 
-    document.querySelector('.trait-card.blue span').textContent = hairHatTraits[hatFile] || '';
-    document.querySelector('.trait-card.pink span').textContent = torsoTraits[torsoFile] || '';
-    document.querySelector('.trait-card.green span').textContent = legsTraits[legsFile] || '';
-    document.querySelector('.trait-card.yellow span').textContent = shoesTraits[shoesFile] || '';
-  }
+    const raw = [
+      hairHatTraits[hatFile] || '',
+      torsoTraits[torsoFile] || '',
+      legsTraits[legsFile] || '',
+      shoesTraits[shoesFile] || ''
+    ];
 
+    // dedupe while keeping first seen
+    const seen = new Set();
+    const unique = raw.filter(t => {
+      const v = (t || '').trim();
+      if (!v || seen.has(v)) return false;
+      seen.add(v);
+      return true;
+    });
+
+    const list = document.querySelector('.traits-card .traits-list');
+    list.innerHTML = '';
+
+    unique.forEach(trait => {
+      const url = badgeUrlFromTrait(trait);
+      if (!url) return;
+
+      const img = document.createElement('img');
+      img.alt = trait;
+      img.src = url;
+      img.width = 96;
+      img.height = 96;
+
+      // random tilt between -20° and +20°
+      const tilt = (Math.random() * 40) - 20;
+
+      // random offset: shift up/down & left/right a bit (in px)
+      const offsetX = (Math.random() * 16) - 8;  // -8px → +8px
+      const offsetY = (Math.random() * 16) - 8;  // -8px → +8px
+
+      img.style.transform = `rotate(${tilt}deg) translate(${offsetX}px, ${offsetY}px)`;
+
+      list.appendChild(img);
+    });
+
+
+  }
 
   // Arc layout for color swatches
   function layoutSwatchesInArc() {
@@ -1671,49 +1758,110 @@
     }
 
     // 10) trait labels around avatar (same as exportAvatarAsPNG)
-    function drawRoundRect(x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-      ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-      ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+
+    // // build raw entries
+    // let traitEntries = [
+    //   { text: hairHatTraits[hatFile] || '', color: '#22b573' }, // hat
+    //   { text: torsoTraits[torsoFile] || '', color: '#e91e63' }, // torso
+    //   { text: legsTraits[legsFile] || '', color: '#f4b63d' }, // legs
+    //   { text: shoesTraits[shoesFile] || '', color: '#2a9df4' }  // shoes
+    // ];
+
+    // // hide duplicates but keep first occurrence
+    // traitEntries = dedupeEntries(traitEntries);
+
+    // const centerX = CANVAS_W / 2, centerY = CANVAS_H / 2;
+    // const positions = [
+    //   { x: centerX + 350, y: centerY + 0 }, // hat label pos
+    //   { x: centerX - 400, y: centerY + 250 }, // torso
+    //   { x: centerX - 300, y: centerY + 500 }, // legs
+    //   { x: centerX + 400, y: centerY + 620 }  // shoes
+    // ];
+
+    // ctx.font = 'bold 40px "PP Mori"';
+    // ctx.textBaseline = 'middle';
+    // ctx.textAlign = 'center';
+
+    // function drawRoundRect(x, y, w, h, r) {
+    //   ctx.beginPath();
+    //   ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    //   ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    //   ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    //   ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+    // }
+
+    // traitEntries.forEach((t, i) => {
+    //   if (!t.text) return; // skip blanks (duplicates)
+    //   const pos = positions[i];
+    //   const label = t.text.toUpperCase();
+    //   const m = ctx.measureText(label);
+    //   const pad = 12;
+    //   const boxW = m.width + pad * 6;
+    //   const boxH = 100;
+    //   const radius = boxH / 2;
+    //   const angle = (Math.random() * 16 - 8) * Math.PI / 180;
+    //   ctx.save();
+    //   ctx.translate(pos.x, pos.y);
+    //   ctx.rotate(angle);
+    //   ctx.fillStyle = t.color;
+    //   drawRoundRect(-boxW / 2, -boxH / 2, boxW, boxH, radius);
+    //   ctx.fill();
+    //   ctx.fillStyle = '#fff';
+    //   ctx.fillText(label, 0, 0);
+    //   ctx.restore();
+    // });
+
+    // badge size
+    // order: [hat, torso, legs, shoes]
+    const BADGE_W = 240;
+    const BADGE_H = 240;
+    // set whatever you want per position (deg). example values:
+    const BADGE_ROT = [12, -6, -14, 8];
+
+    function drawBadgeRotated(ctx, img, x, y, w, h, deg) {
+      const rad = deg * Math.PI / 180;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rad);
+      ctx.drawImage(img, -w / 2, -h / 2, w, h);
+      ctx.restore();
     }
-    const traits = [
-      { text: hairHatTraits[hatFile] || '', color: '#22b573' },
-      { text: torsoTraits[torsoFile] || '', color: '#e91e63' },
-      { text: legsTraits[legsFile] || '', color: '#f4b63d' },
-      { text: shoesTraits[shoesFile] || '', color: '#2a9df4' }
+
+    // build entries (same as before)
+    let traitEntries = [
+      { text: hairHatTraits[hatFile] || '', color: '#22b573' }, // hat
+      { text: torsoTraits[torsoFile] || '', color: '#e91e63' }, // torso
+      { text: legsTraits[legsFile] || '', color: '#f4b63d' }, // legs
+      { text: shoesTraits[shoesFile] || '', color: '#2a9df4' }  // shoes
     ];
+
+    // dedupe (keep first)
+    traitEntries = dedupeEntries(traitEntries);
+
+    // same positions as before
     const centerX = CANVAS_W / 2, centerY = CANVAS_H / 2;
     const positions = [
-      { x: centerX + 350, y: centerY + 0 },
-      { x: centerX - 400, y: centerY + 250 },
-      { x: centerX - 300, y: centerY + 500 },
-      { x: centerX + 400, y: centerY + 620 }
+      { x: centerX + 420, y: centerY - 100 }, // right side → +8°
+      { x: centerX - 430, y: centerY + 100 }, // left  side → -8°
+      { x: centerX + 380, y: centerY + 400 }, // left  side → -8°
+      { x: centerX - 380, y: centerY + 570 }  // right side → +8°
     ];
-    ctx.font = 'bold 40px "PP Mori"';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'center';
-    traits.forEach((t, i) => {
-      if (!t.text) return;
-      const pos = positions[i];
-      const label = t.text.toUpperCase();
-      const m = ctx.measureText(label);
-      const pad = 12;
-      const boxW = m.width + pad * 6;
-      const boxH = 100;
-      const radius = boxH / 2;
-      const angle = (Math.random() * 16 - 8) * Math.PI / 180;
-      ctx.save();
-      ctx.translate(pos.x, pos.y);
-      ctx.rotate(angle);
-      ctx.fillStyle = t.color;
-      drawRoundRect(-boxW / 2, -boxH / 2, boxW, boxH, radius);
-      ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.fillText(label, 0, 0);
-      ctx.restore();
+
+    // load badge images
+    const badgePromises = traitEntries.map(t => {
+      if (!t.text) return Promise.resolve(null);
+      const url = badgeUrlFromTrait(t.text);
+      return loadBadgeImage(url);
     });
+    const badgeImgs = await Promise.all(badgePromises);
+
+    badgeImgs.forEach((img, i) => {
+      if (!img) return;
+      const pos = positions[i];
+      const tilt = BADGE_ROT[i] ?? 0; // manual per-slot tilt
+      drawBadgeRotated(ctx, img, pos.x, pos.y, BADGE_W, BADGE_H, tilt);
+    });
+
 
     // 11) return Data URL
     return out.toDataURL('image/png');
@@ -1862,51 +2010,107 @@
       ctx.drawImage(faceCanvas, 0, 0, fcW, fcH, xF, yF, fcW * s, fcH * s);
     }
 
-    // 10) trait labels around avatar
-    const traits = [
-      { text: hairHatTraits[hatFile] || '', color: '#22b573' },
-      { text: torsoTraits[torsoFile] || '', color: '#e91e63' },
-      { text: legsTraits[legsFile] || '', color: '#f4b63d' },
-      { text: shoesTraits[shoesFile] || '', color: '#2a9df4' }
+    // // 10) trait labels around avatar
+    // const traits = [
+    //   { text: hairHatTraits[hatFile] || '', color: '#22b573' },
+    //   { text: torsoTraits[torsoFile] || '', color: '#e91e63' },
+    //   { text: legsTraits[legsFile] || '', color: '#f4b63d' },
+    //   { text: shoesTraits[shoesFile] || '', color: '#2a9df4' }
+    // ];
+    // const centerX = CANVAS_W / 2, centerY = CANVAS_H / 2;
+    // const positions = [
+    //   { x: centerX + 350, y: centerY + 0 },
+    //   { x: centerX - 400, y: centerY + 250 },
+    //   { x: centerX - 300, y: centerY + 500 },
+    //   { x: centerX + 400, y: centerY + 620 }
+    // ];
+    // // helper
+    // function drawRoundRect(x, y, w, h, r) {
+    //   ctx.beginPath();
+    //   ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    //   ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    //   ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    //   ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+    // }
+    // ctx.font = 'bold 40px "PP Mori"'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+    // traits.forEach((t, i) => {
+    //   if (!t.text) return;
+    //   const pos = positions[i];
+    //   const label = t.text.toUpperCase();
+    //   const metrics = ctx.measureText(label);
+    //   const padding = 12;
+    //   const boxW = metrics.width + padding * 6;
+    //   const boxH = 100;
+    //   const radius = boxH / 2;
+    //   // random tilt ±8°
+    //   const deg = Math.random() * 16 - 8;
+    //   const angle = deg * Math.PI / 180;
+    //   ctx.save();
+    //   ctx.translate(pos.x, pos.y);
+    //   ctx.rotate(angle);
+    //   ctx.fillStyle = t.color;
+    //   drawRoundRect(-boxW / 2, -boxH / 2, boxW, boxH, radius);
+    //   ctx.fill();
+    //   ctx.fillStyle = '#fff';
+    //   ctx.fillText(label, 0, 0);
+    //   ctx.restore();
+    // });
+
+    // badge size
+    // order: [hat, torso, legs, shoes]
+    const BADGE_W = 240;
+    const BADGE_H = 240;
+    // set whatever you want per position (deg). example values:
+    const BADGE_ROT = [12, -6, -14, 8];
+
+    function drawBadgeRotated(ctx, img, x, y, w, h, deg) {
+      const rad = deg * Math.PI / 180;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rad);
+      ctx.drawImage(img, -w / 2, -h / 2, w, h);
+      ctx.restore();
+    }
+
+    // build entries (same as before)
+    let traitEntries = [
+      { text: hairHatTraits[hatFile] || '', color: '#22b573' }, // hat
+      { text: torsoTraits[torsoFile] || '', color: '#e91e63' }, // torso
+      { text: legsTraits[legsFile] || '', color: '#f4b63d' }, // legs
+      { text: shoesTraits[shoesFile] || '', color: '#2a9df4' }  // shoes
     ];
+
+    // dedupe (keep first)
+    traitEntries = dedupeEntries(traitEntries);
+
+    // same positions as before
     const centerX = CANVAS_W / 2, centerY = CANVAS_H / 2;
     const positions = [
-      { x: centerX + 350, y: centerY + 0 },
-      { x: centerX - 400, y: centerY + 250 },
-      { x: centerX - 300, y: centerY + 500 },
-      { x: centerX + 400, y: centerY + 620 }
+      { x: centerX + 420, y: centerY - 100 }, // right side → +8°
+      { x: centerX - 430, y: centerY + 100 }, // left  side → -8°
+      { x: centerX + 380, y: centerY + 400 }, // left  side → -8°
+      { x: centerX - 380, y: centerY + 570 }  // right side → +8°
     ];
-    // helper
-    function drawRoundRect(x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-      ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-      ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
-    }
-    ctx.font = 'bold 40px "PP Mori"'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
-    traits.forEach((t, i) => {
-      if (!t.text) return;
-      const pos = positions[i];
-      const label = t.text.toUpperCase();
-      const metrics = ctx.measureText(label);
-      const padding = 12;
-      const boxW = metrics.width + padding * 6;
-      const boxH = 100;
-      const radius = boxH / 2;
-      // random tilt ±8°
-      const deg = Math.random() * 16 - 8;
-      const angle = deg * Math.PI / 180;
-      ctx.save();
-      ctx.translate(pos.x, pos.y);
-      ctx.rotate(angle);
-      ctx.fillStyle = t.color;
-      drawRoundRect(-boxW / 2, -boxH / 2, boxW, boxH, radius);
-      ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.fillText(label, 0, 0);
-      ctx.restore();
+
+    // load badge images
+    const badgePromises = traitEntries.map(t => {
+      if (!t.text) return Promise.resolve(null);
+      const url = badgeUrlFromTrait(t.text);
+      return loadBadgeImage(url);
     });
+    const badgeImgs = await Promise.all(badgePromises);
+
+    badgeImgs.forEach((img, i) => {
+      if (!img) return;
+      const pos = positions[i];
+      const tilt = BADGE_ROT[i] ?? 0; // manual per-slot tilt
+      drawBadgeRotated(ctx, img, pos.x, pos.y, BADGE_W, BADGE_H, tilt);
+    });
+
+
+
+
+
 
     // 11) trigger download
     const link = document.createElement('a');
@@ -1940,11 +2144,13 @@
   const alertMsg = document.getElementById('custom-alert__message');
   const btnGallery = document.getElementById('custom-alert__gallery');
   const btnAnother = document.getElementById('custom-alert__another');
+  const btntoHome = document.getElementById('custom-alert__home');
 
   const btnSave = document.getElementById('custom-alert__save');
   btnSave.addEventListener('click', () => {
     exportAvatarAsPNG();
   });
+
 
   function showAlert(message) {
     alertMsg.textContent = message;
@@ -1960,6 +2166,11 @@
   btnAnother.addEventListener('click', () => {
     alertBox.style.display = 'none';
     window.location.href = './char.html';
+  });
+
+  btntoHome.addEventListener('click', () => {
+    alertBox.style.display = 'none';
+    window.location.href = './index.html';
   });
 
 
@@ -2087,7 +2298,7 @@
 
           console.log('✅ upload + mail enqueue successful');
           loader.style.display = 'none';
-          showAlert('Successfully submitted your avatar!');
+          showAlert('Successfully submitted your avatar! 🎉');
         } catch (err) {
           loader.style.display = 'none';
           console.error('upload or mail enqueue failed', err);
