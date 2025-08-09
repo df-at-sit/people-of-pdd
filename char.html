@@ -237,21 +237,34 @@
   <div id="tc-modal" class="modal-overlay" style="display:none">
     <div class="modal-content">
       <h2>Terms &amp; Conditions</h2>
-      <div class="tc-text" style="max-height:400px; overflow-y:auto; margin-bottom:1em">
+      <div class="tc-text" style="font-size:0.8rem; max-height:300px; overflow-y:auto; margin-bottom:1em">
         <p>By submitting your artwork in connection with the Shaping Hearts Placemaking Series held at the National Day
-          Heartland Celebrations 2025 @ North East on 10 August 2025 … you agree to the following terms:</p>
+          Heartland Celebrations 2025 @ North East on 10 August 2025 organised by People’s Association as represented by
+          the North East Community Development Council, you agree to the following terms:
+           </p>
         <ol>
           <li><strong>Originality and Rights</strong><br />
-            You warrant that: (a) the Artwork is your original creation; (b) submission/use/display won’t infringe any
-            third-party rights.</li>
+            You warrant that: (a) the Artwork is your original creation; (b) The submission, use, and display of the
+            Artwork does not and will not infringe the intellectual property or other rights of any third party.
+             </li>
+          <br>
           <li><strong>Ownership and IP Rights</strong><br />
-            All rights, title &amp; interest in the Artwork vest in PA &amp; SIT upon submission; you waive any moral
-            rights &amp; agree not to assert any claim.</li>
+            You agree that all rights, title, and interest (including all present and future intellectual property
+            rights) in and to the Artwork shall vest in PA and Singapore Institute of Technology upon submission.
+             
+            You irrevocably and unconditionally waive and relinquish any and all rights that you may have in the Artwork
+            (including moral rights), and agree not to assert any claim in connection with the Artwork against PA and/or
+            SIT.</li>
+          <br>
           <li><strong>Use of Artwork</strong><br />
-            PA &amp; SIT may use, reproduce, adapt, distribute, display, publish or communicate the Artwork in any
-            medium for any purpose, without further notice or compensation.</li>
+            PA and SIT shall each have the full and unfettered right to use, reproduce, publish, adapt, modify,
+            distribute, display, and communicate the Artwork in any manner and for any purpose, including marketing,
+            promotional, or archival purposes, in all media and formats, whether now known or hereafter developed,
+            without further notice to or permission from you and without any payment or compensation.</li>
+          <br>
           <li><strong>No Further Claims</strong><br />
-            You release PA, SIT &amp; their representatives from any liability in respect of the Artwork’s use.</li>
+            You agree that you shall not make any claim against PA, SIT and/or their respective representatives in
+            respect of the use of the Artwork, and release them from any liability arising from such use.</li>
         </ol>
       </div>
       <button id="tc-agree" class="red-bg">I AGREE</button>
@@ -378,8 +391,8 @@
 
 
     async function deleteAvatarsCreatedOnAug8() {
-      const start = Timestamp.fromDate(new Date('2025-08-08T00:00:00Z'));
-      const end = Timestamp.fromDate(new Date('2025-08-09T00:00:00Z'));
+      const start = Timestamp.fromDate(new Date('2025-08-09T00:00:00Z'));
+      const end = Timestamp.fromDate(new Date('2025-08-10T00:00:00Z'));
 
       const avatarRef = collection(db, "galleryCharacters");
       const q = query(

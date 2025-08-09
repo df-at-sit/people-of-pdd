@@ -1513,7 +1513,7 @@ small {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 10005;
 }
 
 
@@ -1540,7 +1540,7 @@ small {
 }
 
 .modal-content button:hover {
-  background-color: #22b573;
+  background-color: #fff;
   /* green on hover */
 }
 
