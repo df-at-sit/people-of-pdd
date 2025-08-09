@@ -237,7 +237,7 @@
   <div id="tc-modal" class="modal-overlay" style="display:none">
     <div class="modal-content">
       <button class="tc-close">&times;</button>
-      <h2>Terms &amp; Conditions</h2>
+      <h2>Terms &amp; Conditions.</h2>
       <div class="tc-text" style="font-size:0.8rem; max-height:300px; overflow-y:auto; margin-bottom:1em">
         <p>By submitting your artwork in connection with the Shaping Hearts Placemaking Series held at the National Day
           Heartland Celebrations 2025 @ North East on 10 August 2025 organised by People’s Association as represented by
@@ -283,10 +283,10 @@
     <div class="custom-alert__content">
       <p id="custom-alert__message"></p>
       <div class="custom-alert__buttons">
-        <button id="custom-alert__gallery">VISIT THE GALLERY</button>
-        <button id="custom-alert__another">MAKE ANOTHER AVATAR</button>
-        <button id="custom-alert__save">SAVE AVATAR</button>
-        <button id="custom-alert__home">GO TO HOMEPAGE</button>
+        <button id="custom-alert__gallery">VISIT THE GALLERY <span style="font-size: 2.2rem;">👀</span></button>
+        <button id="custom-alert__another">MAKE ANOTHER AVATAR <span style="font-size: 2.2rem;">🎨</span></button>
+        <button id="custom-alert__save">SAVE AVATAR <span style="font-size: 2.2rem;">💾</span></button>
+        <button id="custom-alert__home">GO TO HOMEPAGE <span style="font-size: 2.2rem;">🏡</span></button>
       </div>
     </div>
   </div>
@@ -1614,6 +1614,24 @@
   }
 
 
+  function makeSafeFilename(str, fallback = 'my-pdd-avatar') {
+    let s = (str || '').trim();
+    if (!s) s = fallback;
+
+    // strip diacritics
+    s = s.normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+
+    // remove illegal filename chars and control chars
+    s = s.replace(/[<>:"/\\|?*\x00-\x1F]/g, '');
+
+    // collapse spaces to dashes, trim dots/dashes at ends
+    s = s.replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^[-.]+|[-.]+$/g, '');
+
+    if (!s) s = fallback;
+    if (s.length > 60) s = s.slice(0, 60); // keep it short
+    return s.toLowerCase();
+  }
+
 
 
   async function getAvatarDataURL() {
@@ -2112,11 +2130,14 @@
 
 
 
+
     // 11) trigger download
     const link = document.createElement('a');
-    link.download = 'my-pdd-avatar.png';
+    const safeBase = makeSafeFilename(charName, 'my-pdd-avatar');
+    link.download = `${safeBase}.png`;
     link.href = out.toDataURL('image/png');
     link.click();
+
   }
 
   const infoToggle = document.getElementById('info-toggle');
@@ -2266,6 +2287,8 @@
             const dataUrl = await getAvatarDataURL();
             const base64 = dataUrl.split(',')[1];
 
+            const safeBase = makeSafeFilename(data.name, 'my-pdd-avatar');
+
             await addDoc(
               collection(db, 'mail'),
               {
@@ -2284,7 +2307,7 @@
 <p>With Love,<br>The People of PDD Team</p>`,
                   attachments: [
                     {
-                      filename: 'your-avatar.png',
+                      filename: `${safeBase}.png`,
                       content: base64,
                       encoding: 'base64',
                       type: 'image/png'
