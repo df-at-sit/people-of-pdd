@@ -420,6 +420,74 @@
 
     window.deleteAvatarsCreatedOnAug8 = deleteAvatarsCreatedOnAug8;
 
+    async function deleteAvatarsWithBlankNames() {
+      const avatarRef = collection(db, "galleryCharacters");
+      const q = query(avatarRef, where("name", "==", ""));
+
+      try {
+        const snapshot = await getDocs(q);
+        console.log(`Found ${snapshot.size} avatars with blank names.`);
+
+        for (const docSnap of snapshot.docs) {
+          await deleteDoc(docSnap.ref);
+          console.log(`🗑️ Deleted: ${docSnap.id}`);
+        }
+      } catch (err) {
+        console.error("❌ Error deleting avatars:", err);
+      }
+    }
+
+    // expose so you can call it from the console
+    window.deleteAvatarsWithBlankNames = deleteAvatarsWithBlankNames;
+
+    async function deleteAvatarsWithNoFavThing() {
+      const avatarRef = collection(db, "galleryCharacters");
+      const q = query(avatarRef, where("favThing", "==", ""));
+
+      try {
+        const snapshot = await getDocs(q);
+        console.log(`Found ${snapshot.size} avatars with no favThing.`);
+
+        for (const docSnap of snapshot.docs) {
+          await deleteDoc(docSnap.ref);
+          console.log(`🗑️ Deleted: ${docSnap.id}`);
+        }
+      } catch (err) {
+        console.error("❌ Error deleting avatars:", err);
+      }
+    }
+
+    // make available in console
+    window.deleteAvatarsWithNoFavThing = deleteAvatarsWithNoFavThing;
+
+    async function deleteAvatarsByName(nameToDelete) {
+      if (!nameToDelete || typeof nameToDelete !== "string") {
+        console.error("❌ Please provide a valid name string");
+        return;
+      }
+
+      const avatarRef = collection(db, "galleryCharacters");
+      const q = query(avatarRef, where("name", "==", nameToDelete));
+
+      try {
+        const snapshot = await getDocs(q);
+        console.log(`Found ${snapshot.size} avatars with name: "${nameToDelete}"`);
+
+        for (const docSnap of snapshot.docs) {
+          await deleteDoc(docSnap.ref);
+          console.log(`🗑️ Deleted: ${docSnap.id}`);
+        }
+      } catch (err) {
+        console.error("❌ Error deleting avatars:", err);
+      }
+    }
+
+    // Expose it globally so you can run from console
+    window.deleteAvatarsByName = deleteAvatarsByName;
+
+
+
+
   </script>
 
 
@@ -2274,6 +2342,7 @@
         loader.style.display = 'flex';
 
         try {
+          exportAvatarAsPNG();
           // gather data
           const data = gatherCharacterData();
           const consent = document.getElementById('emailConsent').checked;
