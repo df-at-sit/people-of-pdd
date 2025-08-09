@@ -233,6 +233,38 @@
 
   </footer>
 
+  <!-- TERMS & CONDITIONS MODAL (hidden by default) -->
+  <div id="tc-modal" class="modal-overlay" style="display:none">
+    <div class="modal-content">
+      <h2>Terms &amp; Conditions</h2>
+      <div class="tc-text" style="max-height:400px; overflow-y:auto; margin-bottom:1em">
+        <p>By submitting your artwork in connection with the Shaping Hearts Placemaking Series held at the National Day
+          Heartland Celebrations 2025 @ North East on 10 August 2025 … you agree to the following terms:</p>
+        <ol>
+          <li><strong>Originality and Rights</strong><br />
+            You warrant that: (a) the Artwork is your original creation; (b) submission/use/display won’t infringe any
+            third-party rights.</li>
+          <li><strong>Ownership and IP Rights</strong><br />
+            All rights, title &amp; interest in the Artwork vest in PA &amp; SIT upon submission; you waive any moral
+            rights &amp; agree not to assert any claim.</li>
+          <li><strong>Use of Artwork</strong><br />
+            PA &amp; SIT may use, reproduce, adapt, distribute, display, publish or communicate the Artwork in any
+            medium for any purpose, without further notice or compensation.</li>
+          <li><strong>No Further Claims</strong><br />
+            You release PA, SIT &amp; their representatives from any liability in respect of the Artwork’s use.</li>
+        </ol>
+      </div>
+      <button id="tc-agree" class="red-bg">I AGREE</button>
+    </div>
+  </div>
+
+
+  <!-- LOADING OVERLAY (hidden by default) -->
+  <div id="loading-overlay" class="modal-overlay" style="display:none">
+    <div class="spinner"></div>
+  </div>
+
+
   <div id="custom-alert" class="custom-alert">
     <div class="custom-alert__content">
       <p id="custom-alert__message"></p>
@@ -243,6 +275,10 @@
       </div>
     </div>
   </div>
+
+
+
+
 
 
   <div class="info-card">
@@ -1980,79 +2016,74 @@
     }
 
     else if (stage === 4) {
-      //exportAvatarAsPNG();
-      // const gallery = JSON.parse(localStorage.getItem('galleryCharacters') || '[]');
-      // // 2. add new entry
-      // gallery.push(gatherCharacterData());
-      // // 3. write back
-      // localStorage.setItem('galleryCharacters', JSON.stringify(gallery));
+      // 1️⃣ show T&C modal
+      const tcModal = document.getElementById('tc-modal');
+      const agreeBtn = document.getElementById('tc-agree');
+      const loader = document.getElementById('loading-overlay');
 
-      const data = gatherCharacterData();
-      const consent = document.getElementById("emailConsent").checked;
-      const email = document.getElementById("emailAddress").value.trim();
-      uploadCharacter(data)
-        .then(async faceUrl => {                  // ← receive the URL here
+      tcModal.style.display = 'flex';
+
+      agreeBtn.onclick = async () => {
+        // hide modal, show loader
+        tcModal.style.display = 'none';
+        loader.style.display = 'flex';
+
+        try {
+          // gather data
+          const data = gatherCharacterData();
+          const consent = document.getElementById('emailConsent').checked;
+          const email = document.getElementById('emailAddress').value.trim();
+
+          // upload character
+          const faceUrl = await uploadCharacter(data);
+
+          // if they opted in, send email
           if (consent && email) {
-            // enqueue the mail for the extension
-            // 1) generate the full-avatar PNG data-url
             const dataUrl = await getAvatarDataURL();
             const base64 = dataUrl.split(',')[1];
 
-            // 2) enqueue mail with attachment
-            await addDoc(collection(db, "mail"), {
-              to: email,
-              message: {
-                subject: "🎉 Your PDD avatar is ready!",
-                html: `<p>Hi there,</p>
-
+            await addDoc(
+              collection(db, 'mail'),
+              {
+                to: email,
+                message: {
+                  subject: '🎉 Your PDD avatar is ready!',
+                  html: `<p>Hi there,</p>
 <p>Your PDD avatar is ready, and it’s attached to this email as an image. We hope you had fun creating it!</p>
-
 <hr>
-
 <h3>🎨 Meet the Artists Behind the Mural</h3>
-<p>
-Your avatar’s outfit, shapes, and patterns are inspired by the beautiful works of <a href="https://shapinghearts.cdc.gov.sg/ezra-chan-yi/" target="_blank">Ezra Chan Yi</a> and <a href="https://shapinghearts.cdc.gov.sg/simeon-tan-rui-en/" target="_blank">Simeon Tan Rui En</a>, two talented artists with disabilities from Shaping Hearts. 
-Their creative contributions are part of a collaborative mural celebrating inclusivity, expression, and the power of community through art.
-</p>
-
+<p>Your avatar’s outfit, shapes, and patterns are inspired by the beautiful works of <a href="https://shapinghearts.cdc.gov.sg/ezra-chan-yi/" target="_blank">Ezra Chan Yi</a> and <a href="https://shapinghearts.cdc.gov.sg/simeon-tan-rui-en/" target="_blank">Simeon Tan Rui En</a>, two talented artists with disabilities from Shaping Hearts. Their creative contributions are part of a collaborative mural celebrating inclusivity, expression, and the power of community through art.</p>
 <hr>
-
 <h3>✨ See Your Avatar Come to Life</h3>
-<p>
-Your character will be featured in an epic <strong>132-metre mural</strong> at the Punggol Digital District Community Promenade, launching on <strong>16 November 2025</strong>. With the help of Augmented Reality (AR), you’ll even be able to see your avatar move and interact right on the mural itself! So make sure to come on down and visit.
-</p>
-
-<p>
-Thank you for being part of this community experience, and we can’t wait for you to see it live!
-</p>
-
-<p>With Love, <br> The People of PDD Team</p>
-`,
-                attachments: [
-                  {
-                    filename: "your-avatar.png",
-                    content: base64,
-                    encoding: "base64",
-                    type: "image/png"
-                  }
-                ]
-              },
-              createdAt: serverTimestamp()
-            });
-
+<p>Your character will be featured in an epic <strong>132-metre mural</strong> at the Punggol Digital District Community Promenade, launching on <strong>16 November 2025</strong>. With the help of Augmented Reality (AR), you’ll even be able to see your avatar move and interact right on the mural itself! So make sure to come on down and visit.</p>
+<p>Thank you for being part of this community experience, and we can’t wait for you to see it live!</p>
+<p>With Love,<br>The People of PDD Team</p>`,
+                  attachments: [
+                    {
+                      filename: 'your-avatar.png',
+                      content: base64,
+                      encoding: 'base64',
+                      type: 'image/png'
+                    }
+                  ]
+                },
+                createdAt: serverTimestamp()
+              }
+            );
           }
-          console.log("✅ upload + mail enqueue successful");
+
+          console.log('✅ upload + mail enqueue successful');
+          loader.style.display = 'none';
           showAlert('Successfully submitted your avatar!');
-        })
-        .catch(err => {
-          console.error("upload or mail enqueue failed", err);
-          alert("upload failed—check console");
-        });
-
-
-      // 4. go to gallery page
-      //window.location.href = './gallery.html';
+        } catch (err) {
+          loader.style.display = 'none';
+          console.error('upload or mail enqueue failed', err);
+          alert('upload failed—check console');
+        }
+      };
     }
+
+
 
   });
 

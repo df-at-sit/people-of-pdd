@@ -87,7 +87,7 @@ body {
   border: none;
   color: white;
   cursor: pointer;
-  background-color: #f7931e;
+  background-color: ;
   transition: background-color 0.3s ease, border 0.3s ease, color 0.3s ease;
 }
 
@@ -1454,7 +1454,7 @@ small {
 
 /* tilt the alert, increase overall font size */
 .custom-alert__content {
-  background: #f7931e;
+  background: #58aaf7;
   color: #fff;
   border-radius: 20px;
   padding: 2rem;
@@ -1500,6 +1500,57 @@ small {
 #custom-alert__another {
   border-color: #9e005d;
   color: #9e005d;
+}
+
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+
+.modal-content {
+  background: #fff;
+  padding: 1.5em;
+  max-width: 600px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h2 {
+  margin-top: 0;
+}
+
+.modal-content button {
+  padding: 0.75em 1.5em;
+  border: none;
+  color: #fff;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.modal-content button:hover {
+  background-color: #22b573;
+  /* green on hover */
+}
+
+#tc-agree {
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+#tc-agree:hover {
+  color: #22b573;
 }
 
 
@@ -2375,6 +2426,30 @@ body.stage-4 .carousel-nav {
 
 
 }
+
+
+/* spinner circle */
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #22b573;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* re-use your modal‐overlay to center it */
+#loading-overlay .spinner {
+  margin: auto;
+}
+
+/* spin keyframes */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 
 /* === 3480 × 2160 Ultra-Wide (16:9 or 16:10) === */
 /* @media screen and (width: 3480px) and (height: 2160px) {
