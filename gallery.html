@@ -588,14 +588,19 @@
         wrapper.appendChild(overlay);
       }
 
+
+      // Tooltip with name and favorite thing
       // Tooltip with name and favorite thing
       const tooltip = document.createElement('div');
       tooltip.classList.add('tooltip');
       tooltip.innerHTML = `
-    <h3>${name.toUpperCase()}</h3>
-    <p>"${favThing}"</p>
-  `;
+  <h3>${(name || '').toUpperCase()}</h3>
+  
+  <p> My favourite thing to do in Punggol: <b style="color: #fff;"> ${favThing ? `${favThing}!` : ''} </b></p>
+`;
       wrapper.appendChild(tooltip);
+
+
 
       container.appendChild(wrapper);
     }

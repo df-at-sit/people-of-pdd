@@ -1931,6 +1931,25 @@ small {
   color: white;
 }
 
+/* under existing .tooltip styles */
+.tooltip .label {
+  display: block;
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: bold;
+  margin: 2px 0 4px;
+  text-transform: none;
+}
+
+/* also show tooltip when the card has .show-tip (for tap/click) */
+.gallery-card.show-tip .tooltip {
+  opacity: 1;
+  transform: translate(-50%, -110%) scale(1);
+  pointer-events: auto;
+}
+
+
+
 .character-svg {
   width: 150px;
   height: auto;
