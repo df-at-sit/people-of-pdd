@@ -1382,7 +1382,6 @@
     const container = document.querySelector('.head .list li.act .svg-container');
     if (!container) return;
 
-    // measure
     const box = container.getBoundingClientRect();
     const newW = box.width, newH = box.height;
     const oldW = canvasEl.width, oldH = canvasEl.height;
@@ -1392,25 +1391,24 @@
       const yScale = newH / oldH;
       const avgScale = (xScale + yScale) / 2;
 
-      strokes.forEach(stroke => {
-        stroke.points.forEach(pt => {
-          pt.x *= xScale;
-          pt.y *= yScale;
+      [strokes, redoStack].forEach(stack => {
+        stack.forEach(stroke => {
+          stroke.points.forEach(pt => {
+            pt.x *= xScale;
+            pt.y *= yScale;
+          });
+          stroke.width *= avgScale;
         });
-        stroke.width *= avgScale;
       });
     }
 
-    // manual vertical tweak (negative = move up, positive = move down)
-    const manualYAdjust = -25;  // ← tweak this value!
-
-    // resize & reposition
+    const manualYAdjust = -25;
     canvasEl.width = newW;
     canvasEl.height = newH;
     Object.assign(canvasEl.style, {
       position: 'fixed',
       left: `${box.left}px`,
-      top: `${box.top + manualYAdjust}px`,  // <-- apply your adjustment here
+      top: `${box.top + manualYAdjust}px`,
       width: `${newW}px`,
       height: `${newH}px`
     });
@@ -1431,6 +1429,7 @@
 
   // 3. strokes data
   const strokes = [];
+  const redoStack = []; // for redo
   let currentStroke = null;
   let brushColor = '#000';
   const brushSize = 10;
@@ -1482,6 +1481,7 @@
 
   // 5. pointer events on canvas
   canvas.addEventListener('pointerdown', e => {
+    redoStack.length = 0;                 // ⟵ clear redo history
     currentStroke = { color: brushColor, width: brushSize, points: [] };
     const x = e.offsetX, y = e.offsetY;
     currentStroke.points.push({ x, y });
@@ -1511,13 +1511,27 @@
 
   // 6. undo & clear
   document.getElementById('undoBtn').onclick = () => {
-    strokes.pop();
-    drawAllStrokes();
+    if (strokes.length) {
+      redoStack.push(strokes.pop());   // move last stroke to redo
+      drawAllStrokes();
+    }
   };
+
+  const redoBtn = document.getElementById('redoBtn');
+  redoBtn.onclick = () => {
+    if (redoStack.length) {
+      strokes.push(redoStack.pop());   // bring it back
+      drawAllStrokes();
+    }
+  };
+
+
   document.getElementById('clearBtn').onclick = () => {
     strokes.length = 0;
+    redoStack.length = 0;
     drawAllStrokes();
   };
+
 
   let lastMidpoint = null;
 
