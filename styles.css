@@ -943,10 +943,10 @@ body.stage-4 .list .act {
   transform: none !important;
 }
 
-body.stage-4 #faceCanvas {
+/* body.stage-4 #faceCanvas {
   display: block !important;
   transform: none !important;
-}
+} */
 
 
 body.stage-3 .carousel-nav,

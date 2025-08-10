@@ -56,7 +56,7 @@
   </header>
 
   <!-- BUILDER: 4/6 -->
-  <main id=" avatarExport" class="builder-section">
+  <main id="avatarExport" class="builder-section">
     <div class="rig-background"></div>
     <svg id="rig" width="800" height="800" viewBox="0 0 800 800"></svg>
 
@@ -1204,7 +1204,7 @@
       subtitle.textContent = "Use the left and right arrows for each section to choose.";
     } else if (stage === 2) {
       h1.textContent = "LET'S ADD SOME FUN PRINTS AND PATTERNS!";
-      subtitle.textContenqt = "Use the left and right arrows for each section to choose.";
+      subtitle.textContent = "Use the left and right arrows for each section to choose.";
     } else if (stage === 3) {
       h1.textContent = "GIVE YOUR CHARACTER A FACE!";
       subtitle.textContent = "Click and drag over the face. You can add eyes, a nose, a mouth or whatever else you please.";
@@ -1616,10 +1616,14 @@
     });
 
     // overlay face strokes on the head
+    const old = svg.querySelector('#face-overlay');
+    if (old) old.remove();
+
     const faceCanvas = document.getElementById('faceCanvas');
     if (faceCanvas.width && faceCanvas.height) {
       const faceImg = document.createElementNS(svgNS, 'image');
-      faceImg.classList.add('final-img', 'face-overlay');
+      faceImg.id = 'face-overlay';              // <-- stable id
+      faceImg.classList.add('final-img');
       faceImg.setAttributeNS('http://www.w3.org/1999/xlink', 'href', faceCanvas.toDataURL('image/png'));
       faceImg.setAttribute('width', sizes[3]);
       faceImg.setAttribute('height', sizes[3]);
@@ -1628,6 +1632,7 @@
       svg.appendChild(faceImg);
     }
 
+    faceCanvas.style.display = "none";
 
   }
 
@@ -2307,7 +2312,7 @@
 
       // hide the palette but keep the canvas visible
       toolbarEl.style.display = 'none';
-
+      canvasEl.style.display = 'none';
       // 1) resize & scale the face canvas to the head SVG
       resizeCanvasToFace();
       // 2) redraw strokes so they're scaled correctly
@@ -2315,7 +2320,8 @@
 
       // 3) now draw just the four printed svgs on the rig
       drawFinalRig();
-      canvasEl.style.display = 'none';
+      const faceCanvas = document.getElementById('faceCanvas');
+      faceCanvas.style.display = 'none';
 
       console.log("DATA", gatherCharacterData());
       // 4) update UI
