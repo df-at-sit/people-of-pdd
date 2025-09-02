@@ -269,6 +269,32 @@
       pointer-events: auto;
     }
 
+    .back-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      color: #2a9df4;
+      background-color: #fff;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 7000;
+      transition: opacity 0.3s ease;
+      opacity: 0;
+      /* start hidden */
+      pointer-events: none;
+      /* ignore clicks when hidden */
+    }
+
+    .back-to-top:hover {
+      background: #1e7fd1;
+    }
+
+
     /* tighten mobile header, remove rotation, reduce big subtitle */
     @media (max-width: 600px) {
       .header {
@@ -291,7 +317,9 @@
         background: #f4b63d;
         border-radius: 16px;
         padding: 12px 16px;
-        transform: none !important;
+
+        transform-origin: center center;
+        transform: rotate(-3deg) !important;
         /* remove jaunty tilt on mobile */
       }
 
@@ -303,6 +331,17 @@
         font-size: 1rem;
         margin: 4px 0 0;
       }
+
+      .header-right.search-container {
+        justify-content: center;
+        width: 70%;
+        /* or any percentage of its parent */
+        max-width: 280px;
+        /* optional cap */
+        margin: 0 auto;
+        /* centers in the header */
+      }
+
 
       .search-container {
         width: 100%;
@@ -321,6 +360,33 @@
         height: 44px;
         font-size: 1.1rem;
       }
+
+
+      .back-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: none;
+        background: #2a9df4;
+        color: #fff;
+        font-size: 1.4rem;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 7000;
+        transition: opacity 0.3s ease;
+        opacity: 0;
+        /* start hidden */
+        pointer-events: none;
+        /* ignore clicks when hidden */
+      }
+
+      .back-to-top:hover {
+        background: #1e7fd1;
+      }
+
 
     }
 
@@ -407,6 +473,28 @@
     <!-- <button id="shuffle-btn" class="text-back next-btn">SHUFFLE</button> -->
   </footer>
 
+  <!-- put this just before </body> -->
+  <button id="backToTop" class="back-to-top">↑</button>
+
+  <script>
+    const backToTop = document.getElementById('backToTop');
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // optional: only show after scrolling a bit
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 200) {
+        backToTop.style.opacity = '1';
+        backToTop.style.pointerEvents = 'auto';
+      } else {
+        backToTop.style.opacity = '0';
+        backToTop.style.pointerEvents = 'none';
+      }
+    });
+  </script>
+
+
 
 
   <script>
@@ -462,16 +550,10 @@
       let i = 0;
       snap.forEach(doc => {
         const d = doc.data();
-        // note: faceUrl → faceData, selections, name, favThing
         renderAvatar(
-          {
-            selections: d.selections,
-            faceData: d.faceUrl,
-            name: d.name,
-            favThing: d.favThing
-          },
+          { selections: d.selections, faceData: d.faceUrl, name: d.name, favThing: d.favThing },
           i++,
-          1
+          SCALE                   // <— pass scale here
         );
       });
 
@@ -479,9 +561,13 @@
       brickLayout();
 
 
-      // re‑layout on window resize
       window.addEventListener('resize', () => {
-        resizeContainer();
+        resizeContainer();         // updates SCALE
+        // update transform on all cards when breakpoint changes
+        document.querySelectorAll('.gallery-card').forEach(card => {
+          card.dataset.scale = SCALE;
+          card.style.transform = `scale(${SCALE})`;
+        });
         brickLayout();
       });
 
@@ -532,10 +618,11 @@
     function renderAvatar({ selections, faceData, name, favThing }, index, scale = 1) {
       const wrapper = document.createElement('div');
       wrapper.classList.add('gallery-card');
-      wrapper.dataset.name = name.trim().toLowerCase();
+      wrapper.dataset.name = (name || '').trim().toLowerCase();
+      wrapper.dataset.scale = scale;                // <— keep the scale with the card
       wrapper.style.width = CARD_W + 'px';
       wrapper.style.height = CARD_H + 'px';
-      wrapper.style.transform = `scale(${scale})`;
+      wrapper.style.transform = `scale(${scale})`;  // <— apply scale visually
 
       const svgNS = 'http://www.w3.org/2000/svg';
       const svg = document.createElementNS(svgNS, 'svg');
@@ -701,49 +788,56 @@
     }
 
     function brickLayout() {
-
-
       const cards = Array.from(document.querySelectorAll('.gallery-card'));
       if (cards.length === 0) return;
 
-      const cardW = cards[0].offsetWidth;
-      const cardH = cards[0].offsetHeight;
+      // base (unscaled) dimensions
+      const baseW = CARD_W;
+      const baseH = CARD_H;
+
       const containerWidth = container.clientWidth;
+      const mobile = isMobileView();
+      const margin = mobile ? 30 : 100;
+      const scale = currentScale();
 
-      const isMobile = window.matchMedia('(max-width: 600px)').matches;
-      const margin = isMobile ? 20 : 100;           // less side‑margin on phones
-      const gapX = isMobile ? 10 : container.clientWidth / 9;
-      const gapY = isMobile ? 10 : 60;
+      // spacing tuned per platform
+      const gapX = mobile ? 100 : Math.max(24, container.clientWidth / 9);
+      const gapY = mobile ? 8 : 60;
 
-      // Calculate how many cards can fit in the widest row
       const usableWidth = containerWidth - 2 * margin;
-      const maxCardsPerRow = Math.floor((usableWidth + gapX) / (cardW + gapX));
 
-      let x = 0;
-      let y = 0;
-      let row = 0;
-      let col = 0;
+      // compute effective scaled card size for layout math
+      const effW = baseW * scale;
+      const effH = baseH * scale;
 
-      cards.forEach((card, i) => {
-        // For odd rows, apply half offset
-        const offsetX = (row % 2 === 0) ? 0 : (cardW / 2 + gapX / 2);
+      // how many cards fit per row
+      const maxCardsPerRow = Math.max(1, Math.floor((usableWidth + gapX) / (effW + gapX)));
 
-        // Compute position
+      let x = 0, y = 0, row = 0, col = 0;
+
+      cards.forEach((card) => {
+        // ensure the DOM scale matches (e.g., if you resized from desktop → mobile)
+        if (parseFloat(card.dataset.scale || '1') !== scale) {
+          card.dataset.scale = scale;
+          card.style.transform = `scale(${scale})`;
+        }
+
+        const offsetX = (row % 2 === 0) ? 0 : (effW / 2 + gapX / 2);
         card.style.left = `${margin + x + offsetX}px`;
         card.style.top = `${margin + y}px`;
 
-        // Advance column
         col++;
-        x += cardW + gapX;
+        x += effW + gapX;
 
-        // If next card exceeds usable width, break to next row
-        if (col >= maxCardsPerRow || (margin + x + cardW + offsetX > containerWidth - margin)) {
-          row++;
-          col = 0;
-          x = 0;
-          y += cardH + gapY;
+        const nextWouldOverflow = (margin + x + effW + offsetX > containerWidth - margin);
+        if (col >= maxCardsPerRow || nextWouldOverflow) {
+          row++; col = 0; x = 0; y += effH + gapY;
         }
       });
+
+      // allow container to scroll if content extends below
+      const totalHeight = margin + y + effH + gapY + 8;
+      container.style.minHeight = `${Math.max(totalHeight, container.style.height)}px`;
     }
 
 
@@ -829,6 +923,19 @@
     if ('ontouchstart' in window) {
       document.addEventListener('DOMContentLoaded', enableTapZoom);
     }
+
+    // smoothen transforms a bit
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.gallery-card').forEach(c => {
+        c.style.willChange = 'transform, left, top';
+      });
+    });
+
+    // reduce motion for users who asked
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.querySelectorAll('.gallery-card').forEach(c => c.style.transition = 'none');
+    }
+
 
   </script>
 </body>
