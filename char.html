@@ -486,6 +486,22 @@
     window.deleteAvatarsByName = deleteAvatarsByName;
 
 
+    async function countAllAvatars() {
+      const avatarRef = collection(db, "galleryCharacters");
+
+      try {
+        const snapshot = await getDocs(avatarRef);
+        console.log(`📊 Total avatars: ${snapshot.size}`);
+        return snapshot.size;
+      } catch (err) {
+        console.error("❌ Error counting avatars:", err);
+        return 0;
+      }
+    }
+
+    // expose globally so you can call from console
+    window.countAllAvatars = countAllAvatars;
+
 
 
   </script>
@@ -1653,6 +1669,8 @@
 
 
   function gatherCharacterData() {
+
+
     const selections = carousels.map(c => c.images[c.currentIndex]);
     const name = document.getElementById('charName').value;
     const favThing = document.getElementById('favThing').value;

@@ -189,6 +189,7 @@
       margin-top: 50px;
     }
 
+
     .gallery-card {
       position: absolute;
       transform-origin: center center;
@@ -268,71 +269,77 @@
       pointer-events: auto;
     }
 
+    /* tighten mobile header, remove rotation, reduce big subtitle */
     @media (max-width: 600px) {
-
-      /* stack header into 4 centred rows with more vertical spacing */
-      .header-top {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 24px 16px;
-        gap: 100px;
-        /* increased vertical gap */
+      .header {
+        padding-top: env(safe-area-inset-top, 20px);
       }
 
-      /* 1) back-buttons row */
+      .header-top {
+        flex-direction: column;
+        align-items: center;
+        padding: 16px;
+        gap: 16px;
+        /* was 100px */
+      }
+
       .header-left {
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        margin-bottom: 8px;
+        margin-bottom: 0;
       }
 
       .header-center {
-        padding: 60px 0 0px 0;
+        background: #f4b63d;
+        border-radius: 16px;
+        padding: 12px 16px;
+        transform: none !important;
+        /* remove jaunty tilt on mobile */
       }
 
-      /* 2) title row */
       .header-center h1 {
-        font-size: 2.2rem;
-        /* margin: 0 0 4px 0; */
+        font-size: 1.6rem;
       }
 
-      /* 3) subtitle row */
       .header-center p.subtitle {
-        font-size: 3rem;
-        margin: 0 0 10px 0;
+        font-size: 1rem;
+        margin: 4px 0 0;
       }
 
-      /* 4) search row: pill input + circle icon */
       .search-container {
-        display: flex;
-        align-items: center;
-        width: 80%;
-        max-width: 360px;
-        gap: 10px;
-        margin-bottom: 12px;
-        /* extra space below search */
+        width: 100%;
+        max-width: 420px;
+        gap: 8px;
       }
 
       .search-container input {
         flex: 1;
-        padding: 12px 16px;
+        padding: 12px 14px;
+        width: auto;
       }
 
       .search-btn {
-        flex-shrink: 0;
         width: 44px;
         height: 44px;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
       }
 
-      /* make all cards (and their svg + face overlays) 70% of their normal size */
-      .gallery-card {
-        transform: scale(0.7) !important;
-        transform-origin: center top !important;
+    }
+
+    /* only desktop/laptop should magnify on hover */
+    @media (hover: hover) and (pointer: fine) {
+      .gallery-card:hover {
+        transform: scale(1.5) !important;
+      }
+    }
+
+    /* touch devices: no hover zoom; tooltips off (tap to zoom handled in JS) */
+    @media (hover: none) and (pointer: coarse) {
+      .gallery-card:hover {
+        transform: none !important;
       }
 
+      .tooltip {
+        display: none;
+      }
     }
   </style>
 
@@ -412,9 +419,25 @@
     const headerEl = document.querySelector('header');
     const footerEl = document.querySelector('footer');
 
+    // const CARD_W = 200 / 1.5;
+    // const CARD_H = 360 / 1.5;
+
+    let SCALE = 1;  // updated on load + resize, used by render + layout
+
+    function isMobileView() {
+      return window.matchMedia('(max-width: 600px)').matches;
+    }
+    function currentScale() {
+      // tweak as you like; a hair larger on bigger phones
+      return isMobileView() ? 0.72 : 1;
+    }
+
+
     function resizeContainer() {
       container.style.height = (window.innerHeight - headerEl.offsetHeight - footerEl.offsetHeight) + 'px';
+      SCALE = currentScale();
     }
+
 
 
     window.addEventListener('resize', resizeContainer);
@@ -573,7 +596,8 @@
       wrapper.appendChild(svg);
 
       // Overlay face strokes
-      if (faceData) {
+      // Overlay face strokes (only if it's actually an image, not text)
+      if (isRenderableImage(faceData)) {
         const headCfg = centers[3];
         const overlay = document.createElement('img');
         overlay.src = faceData;
@@ -587,6 +611,7 @@
         overlay.style.zIndex = '2';
         wrapper.appendChild(overlay);
       }
+
 
 
       // Tooltip with name and favorite thing
@@ -604,6 +629,40 @@
 
       container.appendChild(wrapper);
     }
+
+    function ensureFaceCanvasReady() {
+      const c = document.getElementById('faceCanvas');
+      if (!c.width || !c.height) {
+        resizeCanvasToFace();   // you already have this
+        drawAllStrokes();       // re-render after resize
+      }
+      return c;
+    }
+
+    function isRenderableImage(src) {
+      if (!src || typeof src !== 'string') return false;
+      const s = src.trim();
+
+      // explicitly reject text-y data URIs
+      if (s.startsWith('data:text/')) return false;
+
+      // valid inline/blob images
+      if (s.startsWith('data:image/')) return true;
+      if (s.startsWith('blob:')) return true;
+
+      // http(s) images with common extensions
+      try {
+        const u = new URL(s, location.href);
+        const p = u.pathname.toLowerCase();
+        const okProto = u.protocol === 'http:' || u.protocol === 'https:';
+        const okExt = p.endsWith('.png') || p.endsWith('.jpg') || p.endsWith('.jpeg') || p.endsWith('.webp');
+        return okProto && okExt;
+      } catch {
+        return false;
+      }
+    }
+
+
 
     function filterGallery() {
       const term = document.getElementById('search-input')
