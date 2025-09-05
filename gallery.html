@@ -397,14 +397,26 @@
       }
     }
 
-    /* touch devices: no hover zoom; tooltips off (tap to zoom handled in JS) */
+    /* touch devices: no hover zoom; show tooltip on tap via .show-tip */
     @media (hover: none) and (pointer: coarse) {
       .gallery-card:hover {
         transform: none !important;
       }
 
+      /* keep tooltips renderable but hidden by default */
       .tooltip {
-        display: none;
+        display: block;
+        /* was none */
+        opacity: 0;
+        transform: translate(-50%, -110%) scale(0.9);
+        pointer-events: none;
+      }
+
+      /* when the card has .show-tip, reveal it */
+      .gallery-card.show-tip .tooltip {
+        opacity: 1;
+        transform: translate(-50%, -110%) scale(1);
+        pointer-events: auto;
       }
     }
   </style>
@@ -686,18 +698,26 @@
       // Overlay face strokes (only if it's actually an image, not text)
       if (isRenderableImage(faceData)) {
         const headCfg = centers[3];
-        const overlay = document.createElement('img');
-        overlay.src = faceData;
-        overlay.width = headCfg.size;
-        overlay.height = headCfg.size;
-        overlay.style.position = 'absolute';
         const offsetX = CARD_W / 2 + headCfg.ctr.x - headCfg.size / 2;
         const offsetY = 5 + headCfg.ctr.y - headCfg.size / 2;
-        overlay.style.left = `${offsetX}px`;
-        overlay.style.top = `${offsetY}px`;
-        overlay.style.zIndex = '2';
-        wrapper.appendChild(overlay);
+
+        loadImageSafe(faceData).then((img) => {
+          if (!img) return; // bail if unreadable
+
+          img.width = headCfg.size;
+          img.height = headCfg.size;
+          img.style.position = 'absolute';
+          img.style.left = `${offsetX}px`;
+          img.style.top = `${offsetY}px`;
+          img.style.zIndex = '2';
+
+          // optional: lift this card above neighbors while face is shown
+          wrapper.style.zIndex = '3';
+
+          wrapper.appendChild(img);
+        });
       }
+
 
 
 
@@ -716,6 +736,19 @@
 
       container.appendChild(wrapper);
     }
+
+    function loadImageSafe(src, timeout = 4000) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        let finished = false;
+        const done = (ok) => { if (!finished) { finished = true; resolve(ok ? img : null); } };
+        const t = setTimeout(() => done(false), timeout);
+        img.onload = () => { clearTimeout(t); done(true); };
+        img.onerror = () => { clearTimeout(t); done(false); };
+        img.src = src;
+      });
+    }
+
 
     function ensureFaceCanvasReady() {
       const c = document.getElementById('faceCanvas');
@@ -938,6 +971,48 @@
 
 
   </script>
+
+  <script>
+    // enable tap-to-toggle tooltip on mobile only
+    function enableMobileTooltips() {
+      const cards = document.querySelectorAll('.gallery-card');
+
+      cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+          e.stopPropagation();
+
+          // close others
+          document.querySelectorAll('.gallery-card.show-tip').forEach(c => {
+            if (c !== card) {
+              c.classList.remove('show-tip');
+              c.style.zIndex = '';
+            }
+          });
+
+          // toggle this one
+          if (card.classList.toggle('show-tip')) {
+            card.style.zIndex = '9999';   // lift above neighbors
+          } else {
+            card.style.zIndex = '';
+          }
+        }, { passive: true });
+      });
+
+      // tap outside to close
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.gallery-card.show-tip').forEach(c => {
+          c.classList.remove('show-tip');
+          c.style.zIndex = '';
+        });
+      });
+    }
+
+    // run only on touch/mobile
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+      document.addEventListener('DOMContentLoaded', enableMobileTooltips);
+    }
+  </script>
+
 </body>
 
 </html>

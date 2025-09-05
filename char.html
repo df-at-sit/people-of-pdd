@@ -39,7 +39,7 @@
     </div>
 
 
-    </div>
+
 
     <div class="title-section">
       <div class="steps">
@@ -298,7 +298,7 @@
 
 
   <div class="info-card">
-    <button id="info-close" class="circle-button small yellow-bg" aria-label="close info">←</button>
+    <button id="info-close" class="circle-button small yellow-bg" aria-label="close info">x</button>
     <h2>FEATURING ARTWORKS BY SHAPING HEARTS ARTISTS!</h2>
     <p>Each clothing and print is built from artwork created by Shaping Hearts Artists Simeon and Ezra. Learn more
       about
@@ -512,6 +512,10 @@
 </body>
 
 <script>
+
+
+
+
   // start empty; we'll fill these from CSV
   let hairHatTraits = {};
   let torsoTraits = {};
@@ -1387,36 +1391,32 @@
     tb.style.left = `${Math.round(left)}px`;
   }
 
-
   function placeUndoNearSwatches() {
     // only in stage-3 on mobile
-    if (window.innerWidth < 768 || !document.body.classList.contains('stage-3')) return;
+    if (window.innerWidth <= 768 && document.body.classList.contains('stage-3')) {
+      const undo = document.getElementById('undoBtn');
+      const lastSwatch = document.querySelector('.color-picker .color-swatch:last-child');
+      if (!undo || !lastSwatch) return;
 
-    const undo = document.getElementById('undoBtn');
-    const lastSwatch = document.querySelector('.color-picker .color-swatch:last-child');
-    if (!undo || !lastSwatch) return;
+      undo.style.left = '0px';
+      undo.style.top = '0px';
 
-    // ensure undo has a real size before positioning
-    undo.style.left = '0px';
-    undo.style.top = '0px';
+      const sw = lastSwatch.getBoundingClientRect();
+      const undoW = undo.offsetWidth;
+      const undoH = undo.offsetHeight;
 
-    // measure the last swatch and sit Undo just to its right, vertically centered
-    const sw = lastSwatch.getBoundingClientRect();
-    const undoW = undo.offsetWidth;
-    const undoH = undo.offsetHeight;
+      const gap = 12;
+      let left = sw.right + gap;
+      let top = sw.top + (sw.height - undoH) / 2;
 
-    const gap = 12; // space between swatch ring and undo
-    let left = sw.right + gap;
-    let top = sw.top + (sw.height - undoH) / 2;
+      const maxLeft = window.innerWidth - undoW - 8;
+      const maxTop = window.innerHeight - undoH - 8;
+      left = Math.max(8, Math.min(left, maxLeft));
+      top = Math.max(8, Math.min(top, maxTop));
 
-    // clamp to viewport so it never goes off-screen
-    const maxLeft = window.innerWidth - undoW - 8;
-    const maxTop = window.innerHeight - undoH - 8;
-    left = Math.max(8, Math.min(left, maxLeft));
-    top = Math.max(8, Math.min(top, maxTop));
-
-    undo.style.left = `${Math.round(left)}px`;
-    undo.style.top = `${Math.round(top)}px`;
+      undo.style.left = `${Math.round(left)}px`;
+      undo.style.top = `${Math.round(top)}px`;
+    }
   }
 
   function placeToolbarNearHeadAndLayout() {
@@ -1473,6 +1473,41 @@
         listEl.classList.remove('is-animating');
       });
     }, 300);  // matches your 0.3s CSS fade-out
+  }
+
+
+  let _stage4ScrollHandler = null;
+
+  function enableSubmitOnlyAtBottom() {
+    if (window.innerWidth > 768) return; // mobile only
+
+    const scroller = document.querySelector('.builder-section');
+    if (!scroller) return;
+
+    // Hide footer until bottom
+    document.body.classList.remove('show-submit');
+
+    const onScroll = () => {
+      const atBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 10;
+      document.body.classList.toggle('show-submit', atBottom);
+    };
+
+    // Save so we can remove later
+    _stage4ScrollHandler = onScroll;
+
+    // Bind + run once
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    // In case it already fits on screen (short content)
+    requestAnimationFrame(onScroll);
+  }
+
+  function disableSubmitOnlyAtBottom() {
+    const scroller = document.querySelector('.builder-section');
+    if (scroller && _stage4ScrollHandler) {
+      scroller.removeEventListener('scroll', _stage4ScrollHandler);
+    }
+    _stage4ScrollHandler = null;
+    document.body.classList.remove('show-submit');
   }
 
 
@@ -1720,8 +1755,22 @@
       y: (nodes.footL.y + nodes.footR.y) / 2 - 30
     };
 
+
     const centers = [shoesCtr, legsCtr, torsoCtr, headCtr];
+    console.log(centers)
+
+    // if (isMobile) {
+    //   torsoCtr.y *= 0.8;
+    //   legsCtr.y *= 0.7;
+    // }
     const sizes = [180, 250, 240, 130];
+
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      for (let i = 0; i < sizes.length; i++) {
+        sizes[i] *= 1.4;
+      }
+    }
 
     // append outfit layers: shoes → legs → torso → head
     centers.forEach((ctr, i) => {
@@ -2460,6 +2509,7 @@
       nextBtn.textContent = 'SUBMIT';
       nextBtn.classList.replace('blue-bg', 'red-bg');
       nextBtn.type = 'submit';
+      enableSubmitOnlyAtBottom();
 
     }
 
@@ -2577,6 +2627,8 @@
       // → stage-4 → stage-3
       // 1) swap CSS
       root.classList.replace('stage-4', 'stage-3');
+      // Leaving stage-4: unbind bottom-reveal behavior
+      disableSubmitOnlyAtBottom();
 
       // 2) bring back the draw tools
       toolbarEl.style.display = 'flex';

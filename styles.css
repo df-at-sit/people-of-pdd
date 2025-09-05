@@ -2272,23 +2272,18 @@ body.stage-4 .carousel-nav {
     position: fixed;
     top: 0;
     right: 0;
-    width: 80vw;
-    height: 80vh;
+    width: 100vw;
+    height: 100vh;
     transform: translateX(100%);
     transition: transform 0.3s ease-in-out;
     z-index: 2000;
+    padding-top: 70px;
   }
 
   body.info-open .info-card {
     transform: translateX(0);
   }
 
-  .info-card {
-    position: fixed;
-    top: 0;
-    right: 0;
-    /* your existing width/height/transform rules */
-  }
 
   .info-card #info-close {
     display: block;
@@ -2795,4 +2790,139 @@ body.stage-4 .carousel-nav {
     align-items: center;
     justify-content: center;
   }
+}
+
+/* === Stage-4 MOBILE layout overrides === */
+@media (max-width: 768px) {
+
+  /* Make the content scrollable in stage-4 only */
+  body.stage-4 .builder-section {
+    display: block !important;
+    height: 100svh;
+    /* use the visible viewport */
+    overflow-y: auto !important;
+    /* allow scrolling */
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 16px 120px;
+    /* bottom pad so last input isn’t hidden */
+  }
+
+  /* Hide the footer (submit area) by default in stage-4 mobile */
+  body.stage-4 .footer-section {
+    display: none !important;
+    transition: opacity .35s ease, transform .35s ease;
+  }
+
+  /* Reveal footer only when JS says we’re at the bottom */
+  body.stage-4.show-submit .footer-section {
+    display: flex !important;
+    transition: opacity .35s ease, transform .35s ease;
+  }
+
+  /* Avatar (final SVG) should be centered and responsive */
+  body.stage-4 #rig {
+    display: block !important;
+    width: 100% !important;
+    max-width: 520px;
+    /* tweak as you like */
+    height: auto !important;
+    margin: 10px auto 16px auto !important;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  /* Ensure any positional hacks from earlier stages don’t interfere */
+  body.stage-4 .head,
+  body.stage-4 .torso {
+    position: static !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    z-index: auto !important;
+  }
+
+  /* Traits row: become a normal block under the avatar */
+  body.stage-4 .card-input.traits-card {
+    position: static !important;
+    display: flex !important;
+    transform: none !important;
+    margin: 8px auto 16px auto !important;
+    max-width: 90vw !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.stage-4 .traits-card h3 {
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  body.stage-4 .traits-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  /* Form cards: stack in flow, full width */
+  body.stage-4 .card-input {
+    position: static !important;
+    transform: none !important;
+    display: block !important;
+    max-width: 70vw !important;
+    width: 100% !important;
+    margin: 12px auto !important;
+  }
+
+  body.stage-4 .name-card {
+    background: #f7931e !important;
+    transform: rotate(-5deg) !important;
+  }
+
+  body.stage-4 .fav-card {
+    background: #9e005d !important;
+    transform: rotate(3deg) !important;
+  }
+
+  body.stage-4 .email-card {
+    background: #22b573 !important;
+  }
+
+  /* Keep carousel/nav clutter hidden in stage-4 */
+  body.stage-4 .carousel-nav,
+  body.stage-4 .list li:not(.act),
+  body.stage-4 .rig-background {
+    display: none !important;
+  }
+
+  /* MOBILE + DESKTOP: hide scooter button entirely */
+  body.stage-4 .icon {
+    display: none !important;
+  }
+
+  /* make rig parts bigger without changing their anchors */
+  body.stage-4 .head li svg,
+  body.stage-4 .torso li svg,
+  body.stage-4 .legs li svg,
+  body.stage-4 .shoes li svg {
+    transform: scale(1.2);
+    /* 1.2 = 20% larger, tweak to taste */
+    transform-origin: center center;
+  }
+
+  body.stage-4 .final-img {
+    transform: scale(1.2);
+    transform-origin: center center;
+  }
+
+  .head li img,
+  .torso li img,
+  .legs li img,
+  .shoes li img {
+    transform: scale(1.2);
+    transform-origin: center center;
+  }
+
+
+
 }
