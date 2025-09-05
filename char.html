@@ -712,6 +712,14 @@
   let scale;
   let yspacing = 70;
   window.addEventListener('resize', setScaleForViewport);
+  window.addEventListener('resize', () => {
+    if (document.body.classList.contains('stage-3')) {
+      resizeCanvasToFace();
+      layoutSwatchesInArc();
+      placeUndoNearSwatches(); // <— add
+    }
+  });
+
 
 
   function svgPointToClient(x, y) {
@@ -1281,6 +1289,8 @@
 
   }
 
+
+
   // Arc layout for color swatches
   function layoutSwatchesInArc() {
     const swatches = document.querySelectorAll('.color-picker .color-swatch');
@@ -1337,6 +1347,86 @@
       btn.style.top = `${y}px`;
     });
   }
+
+  function placeToolbarNearHead() {
+    const tb = document.querySelector('.draw-toolbar');
+    if (!tb) return;
+
+    // only do special placement on mobile (<=768px)
+    const isMobile = window.innerWidth <= 768;
+    if (!isMobile || !document.body.classList.contains('stage-3')) {
+      return;
+    }
+
+    // anchor to the active head SVG box
+    const headBox = document.querySelector('.head .list li.act .svg-container');
+    if (!headBox) return;
+
+    const rect = headBox.getBoundingClientRect();
+    // ensure toolbar has its natural size before measuring
+    tb.style.position = 'fixed';
+    tb.style.transform = 'none';
+    tb.style.left = '0px';
+    tb.style.top = '0px';
+
+    // measure after it's fixed so offsetWidth/Height are correct
+    const pad = 12;
+    const vw = window.innerWidth;
+    const tbW = tb.offsetWidth;
+    const tbH = tb.offsetHeight;
+
+    // try to place ABOVE the head; if not enough room, place BELOW
+    let top = rect.top - tbH - pad;
+    if (top < pad) top = Math.min(window.innerHeight - tbH - pad, rect.bottom + pad);
+
+    // center horizontally over the head, clamped to screen
+    let left = rect.left + rect.width / 2 - tbW / 2;
+    left = Math.max(pad, Math.min(left, vw - tbW - pad));
+
+    tb.style.top = `${Math.round(top)}px`;
+    tb.style.left = `${Math.round(left)}px`;
+  }
+
+
+  function placeUndoNearSwatches() {
+    // only in stage-3 on mobile
+    if (window.innerWidth < 768 || !document.body.classList.contains('stage-3')) return;
+
+    const undo = document.getElementById('undoBtn');
+    const lastSwatch = document.querySelector('.color-picker .color-swatch:last-child');
+    if (!undo || !lastSwatch) return;
+
+    // ensure undo has a real size before positioning
+    undo.style.left = '0px';
+    undo.style.top = '0px';
+
+    // measure the last swatch and sit Undo just to its right, vertically centered
+    const sw = lastSwatch.getBoundingClientRect();
+    const undoW = undo.offsetWidth;
+    const undoH = undo.offsetHeight;
+
+    const gap = 12; // space between swatch ring and undo
+    let left = sw.right + gap;
+    let top = sw.top + (sw.height - undoH) / 2;
+
+    // clamp to viewport so it never goes off-screen
+    const maxLeft = window.innerWidth - undoW - 8;
+    const maxTop = window.innerHeight - undoH - 8;
+    left = Math.max(8, Math.min(left, maxLeft));
+    top = Math.max(8, Math.min(top, maxTop));
+
+    undo.style.left = `${Math.round(left)}px`;
+    undo.style.top = `${Math.round(top)}px`;
+  }
+
+  function placeToolbarNearHeadAndLayout() {
+    placeToolbarNearHead();
+    layoutSwatchesInArc();
+
+    layoutButtonsInArc();
+    placeUndoNearSwatches();  // <— add this
+  }
+
 
   // rerun on resize to keep things in sync
   window.addEventListener('resize', layoutButtonsInArc);
@@ -2333,7 +2423,14 @@
       toolbarEl.style.display = 'flex';
       canvasEl.style.display = 'block';
       // size overlay AFTER zoom CSS finishes
-      setTimeout(resizeCanvasToFace, 300);
+      // setTimeout(resizeCanvasToFace, 300);
+      setTimeout(() => {
+        resizeCanvasToFace();
+        layoutSwatchesInArc();
+        placeUndoNearSwatches(); // <— add
+      }, 300);
+
+
       stage = 3;
       updateTitleSection(stage);
 
@@ -2454,6 +2551,9 @@
       canvasEl.style.display = 'none';
       stage = 2;
       updateTitleSection(stage);
+      requestAnimationFrame(() => {
+        carousels.forEach(c => c.positionNavButtons());
+      });
 
       // footer is already in stage-2, backBtn stays visible
     }
@@ -2468,6 +2568,9 @@
       footer.classList.replace('stage-2', 'stage-1');
       stage = 1;
       updateTitleSection(stage);
+      requestAnimationFrame(() => {
+        carousels.forEach(c => c.positionNavButtons());
+      });
     }
 
     else if (stage === 4) {
@@ -2496,7 +2599,11 @@
       setTimeout(() => {
         resizeCanvasToFace();
         drawAllStrokes();
+        layoutSwatchesInArc();
+        placeUndoNearSwatches(); // <— add
       }, 0);
+
+
 
       // 7) reset UI state
       stage = 3;

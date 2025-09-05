@@ -2615,3 +2615,184 @@ body.stage-4 .carousel-nav {
     width: 1920px;
   }
 } */
+
+@media (max-width: 768px) {
+
+  /* root viewport sizing */
+  :root {
+    --header-h: 0px;
+    --footer-h: 0px;
+  }
+
+  /* make the whole app fit the *visible* viewport height */
+  html,
+  body,
+  .char-page {
+    height: 100svh;
+    /* <— instead of 100vh */
+    overflow: hidden;
+    /* no page scroll between stages */
+  }
+
+  /* keep NEXT/BACK always on screen */
+  .footer-section {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* give it breathing room on iOS home indicator */
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    background-size: 100% auto;
+    background-position: center 110%;
+    z-index: 2000;
+  }
+
+
+  /* fills exactly the space between header and fixed footer */
+  .builder-section {
+    height: calc(100svh - var(--header-h) - var(--footer-h));
+    overflow: hidden;
+  }
+
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 16px 16px;
+    /* a bit tighter to avoid pushing content */
+  }
+
+  /* the big head/torso zoom can push below the footer; keep inside builder */
+  body.stage-3 .head,
+  body.stage-3 .torso {
+    will-change: transform;
+    max-width: 100%;
+  }
+}
+
+/* --- index.html mobile fixes --- */
+@media (max-width: 768px) {
+
+  /* allow vertical scroll and keep extra space for the footer art */
+  .homepage {
+    min-height: 100svh;
+    /* visible viewport height */
+    overflow-y: auto;
+    /* enable scrolling */
+    overflow-x: hidden;
+    padding-bottom: 220px;
+    /* make room for .wavy-footer (>= its height) */
+  }
+
+  /* the wave is just decoration: don't block clicks, keep it behind content */
+  .wavy-footer {
+    pointer-events: none;
+    /* taps go through */
+    z-index: 0;
+  }
+
+  /* ensure cards sit above the wave */
+  .container,
+  .cards,
+  .card-wrapper {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+
+@media (max-width: 768px) {
+
+  /* stage-3: toolbar is placed by JS relative to the head */
+  body.stage-3 .draw-toolbar {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+    background: transparent;
+    z-index: 1002;
+    pointer-events: auto;
+  }
+
+  /* optional: keep a tight natural width so centering looks right */
+  body.stage-3 .draw-toolbar .color-picker,
+  body.stage-3 .draw-toolbar .button-row {
+    display: inline-block;
+  }
+
+}
+
+
+/* FINAL authority: mobile stage-3 toolbar placement is controlled by JS */
+@media (max-width: 768px) {
+  body.stage-3 .draw-toolbar {
+    position: fixed !important;
+    left: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: translateX(-100%) !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 8px 12px !important;
+    background: transparent !important;
+    z-index: 1002 !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* MOBILE: show only UNDO; hide CLEAR & REDO; stop arc/transform fights */
+@media (max-width: 768px) {
+
+  /* hide these entirely on mobile */
+  #clearBtn,
+  #redoBtn {
+    display: none !important;
+  }
+
+  /* keep Undo visible and let JS place it precisely */
+  #undoBtn {
+    display: inline-flex !important;
+    position: fixed !important;
+    /* we’ll set left/top via JS */
+    transform: translateX(0%) !important;
+    z-index: 1003;
+    /* above the canvas */
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+
+  /* don’t let the old arc layout yank buttons around on mobile */
+  .button-row {
+    width: auto !important;
+    height: auto !important;
+    transform: none !important;
+  }
+}
+
+/* MOBILE: Only Undo visible, force it on top & visible */
+@media (max-width: 768px) {
+
+  #clearBtn,
+  #redoBtn {
+    display: none !important;
+  }
+
+
+  #undoBtn {
+    display: inline-flex !important;
+    position: fixed !important;
+    /* absolute to the viewport */
+    inset: auto auto auto auto !important;
+    transform: translateX(150%) translateY(-50%) !important;
+
+    z-index: 10050 !important;
+    /* above canvas & toolbars */
+    width: 52px;
+    height: 52px;
+    font-size: 1.2rem;
+    align-items: center;
+    justify-content: center;
+  }
+}
