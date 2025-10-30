@@ -1,0 +1,25 @@
+[
+    {
+        "origin": [
+            "http://127.0.0.1:5501",
+            "http://localhost:5501",
+            "http://192.168.4.23:5501",
+            "https://people-of-pdd.web.app",
+            "https://people-of-pdd.firebaseapp.com",
+            "https://ourpunggolstory.sg",
+            "https://www.ourpunggolstory.sg",
+            "http://10.130.8.129:5501",
+            "http://172.20.10.10:5501/ar.html"
+        ],
+        "method": [
+            "GET",
+            "HEAD",
+            "OPTIONS"
+        ],
+        "responseHeader": [
+            "Content-Type",
+            "Access-Control-Allow-Origin"
+        ],
+        "maxAgeSeconds": 3600
+    }
+]

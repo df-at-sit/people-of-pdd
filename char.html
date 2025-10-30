@@ -2670,4 +2670,132 @@
 
 </script>
 
+<script>
+  // --- Transparent export (R key) ---
+  async function exportAvatarTransparentPNG() {
+    // canvas size (same aspect you already use)
+    const CANVAS_W = 1200, CANVAS_H = 1800;
+
+    // current selections
+    const selections = carousels.map(c => c.images[c.currentIndex]);
+    // viewBox + rig math (mirrors your exportAvatarAsPNG)
+    const vbW = svg.viewBox.baseVal.width;   // 800
+    const vbH = svg.viewBox.baseVal.height;  // 800
+
+    const baseScale = CANVAS_W / vbW;
+    const fillMultiplier = 2;                // same overall zoom
+    const s = baseScale * fillMultiplier;
+    const xOff = (CANVAS_W - vbW * s) / 2;
+    const baseYOff = (CANVAS_H - vbH * s) / 2;
+    const manualYOffset = 500;
+    const yOff = baseYOff + manualYOffset;
+
+    // compute VB-space centers (same as your other exporter)
+    const originVB = { x: vbW / 2, y: 100 };
+    const headVB = { x: originVB.x, y: originVB.y };
+    const torsoVB = {
+      x: originVB.x + (baseRig.shoulderL.x + baseRig.shoulderR.x + baseRig.hipL.x + baseRig.hipR.x) / 4,
+      y: originVB.y + (baseRig.shoulderL.y + baseRig.shoulderR.y + baseRig.hipL.y + baseRig.hipR.y) / 4 + 10
+    };
+    const legsVB = {
+      x: originVB.x + (baseRig.kneeL.x + baseRig.kneeR.x) / 2,
+      y: originVB.y + (baseRig.kneeL.y + baseRig.kneeR.y) / 2 + 20
+    };
+    const shoesVB = {
+      x: originVB.x + (baseRig.footL.x + baseRig.footR.x) / 2,
+      y: originVB.y + (baseRig.footL.y + baseRig.footR.y) / 2 + 40
+    };
+    const centersVB = [shoesVB, legsVB, torsoVB, headVB];
+
+    // max VB dimensions per part (matches your export)
+    const liSizesVB = [180, 200, 200, 130];
+
+    // load the 4 part images
+    const imgs = await Promise.all(
+      selections.map(u => new Promise(res => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => res(img);
+        img.src = u;
+      }))
+    );
+
+    // prepare transparent canvas
+    const out = document.createElement('canvas');
+    out.width = CANVAS_W;
+    out.height = CANVAS_H;
+    const ctx = out.getContext('2d');
+
+    // draw body parts only (no bg, no header, no text, no badges)
+    for (let i = 0; i < 4; i++) {
+      const img = imgs[3 - i];
+      const maxVB = liSizesVB[i];
+      const aspect = img.naturalWidth / img.naturalHeight;
+
+      // scale to fit maxVB while preserving aspect
+      let partVBW, partVBH;
+      if (aspect >= 1) {
+        partVBW = maxVB;
+        partVBH = maxVB / aspect;
+      } else {
+        partVBH = maxVB;
+        partVBW = maxVB * aspect;
+      }
+
+      // per-part extra scale (same tweaks you used)
+      let extraScale = 1;
+      if (i === 0) extraScale = 0.95; // shoes/hat slot in your stacking
+      if (i === 1) extraScale = 1.08; // legs/torso slot
+      if (i === 3) extraScale = 0.90; // head slot
+
+      const pxW = partVBW * s * extraScale;
+      const pxH = partVBH * s * extraScale;
+
+      const ctrVB = centersVB[i];
+      const baseX = ctrVB.x * s - pxW / 2 + xOff;
+      let baseY = ctrVB.y * s - pxH / 2 + yOff;
+
+      // your small offsets
+      if (i === 2) baseY += 10;  // legs down a bit
+      if (i === 1) baseY -= 40;  // torso up
+      if (i === 0) baseY -= 20;  // shoes/hat up
+
+      ctx.drawImage(img, baseX, baseY, pxW, pxH);
+    }
+
+    // add face strokes if present
+    const faceCanvas = document.getElementById('faceCanvas');
+    const manualYAdjust = -25;  // same stroke nudge
+    if (!faceCanvas.width || !faceCanvas.height) {
+      // ensure canvas is sized + strokes drawn if stage changed
+      resizeCanvasToFace();
+      drawAllStrokes();
+    }
+    const fcW = faceCanvas.width, fcH = faceCanvas.height;
+    if (fcW && fcH) {
+      const headCtr = centersVB[3];
+      const xF = headCtr.x * s - (fcW * s) / 2 + xOff;
+      const yF = headCtr.y * s - (fcH * s) / 2 + yOff + manualYAdjust;
+      ctx.drawImage(faceCanvas, 0, 0, fcW, fcH, xF, yF, fcW * s, fcH * s);
+    }
+
+    // download
+    const charName = document.getElementById('charName').value.trim();
+    const safeBase = makeSafeFilename(charName, 'my-pdd-avatar');
+    const a = document.createElement('a');
+    a.download = `${safeBase}.png`;
+    a.href = out.toDataURL('image/png'); // keeps alpha
+    a.click();
+  }
+
+  // hotkey: press "R" to export transparent avatar
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'r' || e.key === 'R') {
+      e.preventDefault();
+      exportAvatarTransparentPNG();
+    }
+  });
+</script>
+
+
 </html>

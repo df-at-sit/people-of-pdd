@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>Character Gallery</title>
+
+    <style>
+        /* Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'PP Mori', sans-serif;
+            background: white;
+            color: #2a9df4;
+        }
+
+        /* HEADER */
+        .header {
+            width: 100%;
+            padding-top: 30px;
+            position: sticky;
+            top: 0;
+            z-index: 6000;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 40px;
+            position: relative;
+        }
+
+        .header-center {
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            background: #f4b63d;
+            border-radius: 20px;
+            padding: 20px 30px;
+            transform-origin: center center;
+            transform: rotate(-2deg) !important;
+        }
+
+        .header-left,
+        .header-right {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            padding: 15px 20px;
+            background-color: #58aaf7;
+            border-radius: 20px;
+        }
+
+        .circle-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: #2a9df4;
+            background-color: #fff;
+            font-size: 1.2rem;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .text-back {
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: #2a9df4;
+            background-color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .header-center h1 {
+            color: #c13a00;
+            text-transform: uppercase;
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .subtitle {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 5px 0 0;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-container input {
+            padding: 8px 14px;
+            border: 2px solid #2a9df4;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-family: 'PP Mori', sans-serif;
+            text-transform: uppercase;
+            color: #2a9df4;
+            outline: none;
+            width: 200px;
+        }
+
+        .search-container input::placeholder {
+            color: #2a9df4;
+            opacity: 0.8;
+        }
+
+        .search-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #2a9df4;
+            background-color: #2a9df4;
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .search-btn:hover {
+            background-color: #1e7fd1;
+        }
+
+        /* FOOTER */
+        .footer-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 50px;
+            text-align: center;
+            background: url("./assets/wave-gallery.svg") no-repeat bottom center;
+            background-position: center calc(100% + 40px);
+            background-size: 100% auto;
+            z-index: 20;
+        }
+
+        /* GALLERY */
+        #gallery-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 140px);
+            overflow: visible;
+            z-index: 2;
+            margin-bottom: 500px;
+            margin-top: 50px;
+        }
+
+        .gallery-card {
+            position: absolute;
+            transform-origin: center center;
+            transition: left 0.4s ease, top 0.4s ease, opacity 0.3s ease, transform 0.3s ease;
+            opacity: 1;
+            transform: scale(1);
+            cursor: pointer;
+        }
+
+        .gallery-card:hover {
+            transform: scale(1.5) !important;
+        }
+
+        .gallery-card.zoomed {
+            transform: scale(1.5) !important;
+            z-index: 9999;
+        }
+
+        /* TOOLTIP */
+        .tooltip {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -110%) scale(0.1);
+            padding: 10px 10px;
+            background-color: #2a9df4;
+            border-radius: 10px;
+            border: 2px solid #fff;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+            min-width: 160px;
+            max-width: 200px;
+            text-align: center;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 7px 7px 0 7px;
+            border-style: solid;
+            border-color: #2a9df4 transparent transparent transparent;
+        }
+
+        .tooltip h3 {
+            margin: 0 0 6px;
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .tooltip p {
+            margin: 0 0 10px;
+            color: #ffe699;
+            font-size: 0.65rem;
+            text-align: center;
+        }
+
+        .tooltip .ar-btn {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 16px;
+            border: 2px solid #fff;
+            color: #2a9df4;
+            background: #fff;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .gallery-card.show-tip .tooltip {
+            opacity: 1;
+            transform: translate(-50%, -110%) scale(1);
+            pointer-events: auto;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            color: #2a9df4;
+            background-color: #fff;
+            font-size: 1.4rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 7000;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .back-to-top:hover {
+            background: #1e7fd1;
+        }
+
+        /* tighten mobile header, remove rotation, reduce big subtitle */
+        @media (max-width: 600px) {
+            .header {
+                padding-top: env(safe-area-inset-top, 20px);
+            }
+
+            .header-top {
+                flex-direction: column;
+                align-items: center;
+                padding: 16px;
+                gap: 16px;
+            }
+
+            .header-left {
+                margin-bottom: 0;
+            }
+
+            .header-center {
+                background: #f4b63d;
+                border-radius: 16px;
+                padding: 12px 16px;
+                transform: rotate(-3deg) !important;
+            }
+
+            .header-center h1 {
+                font-size: 1.6rem;
+            }
+
+            .header-center p.subtitle {
+                font-size: 1rem;
+                margin: 4px 0 0;
+            }
+
+            .header-right.search-container {
+                justify-content: center;
+                width: 70%;
+                max-width: 280px;
+                margin: 0 auto;
+            }
+
+            .search-container {
+                width: 100%;
+                max-width: 420px;
+                gap: 8px;
+            }
+
+            .search-container input {
+                flex: 1;
+                padding: 12px 14px;
+                width: auto;
+            }
+
+            .search-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 1.1rem;
+            }
+
+            .back-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                border: none;
+                background: #2a9df4;
+                color: #fff;
+                font-size: 1.4rem;
+                cursor: pointer;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                z-index: 7000;
+                transition: opacity 0.3s ease;
+                opacity: 0;
+                pointer-events: none;
+            }
+
+            .back-to-top:hover {
+                background: #1e7fd1;
+            }
+        }
+
+        /* desktop hover */
+        @media (hover: hover) and (pointer: fine) {
+            .gallery-card:hover {
+                transform: scale(1.5) !important;
+            }
+        }
+    </style>
+
+    <!-- model-viewer (v3+) -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+    <!-- firebase init -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, getDocs }
+            from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDwpNjnDFAA_5P64zMOt-GTSOdETx2xKJQ",
+            authDomain: "people-of-pdd-website.firebaseapp.com",
+            projectId: "people-of-pdd-website",
+            storageBucket: "people-of-pdd-website.firebasestorage.app",
+            messagingSenderId: "685048567158",
+            appId: "1:685048567158:web:abc51754b5b785219c1657",
+            measurementId: "G-1VRMYRMXKN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // expose to non-module scripts
+        window.db = db;
+        window.collection = collection;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.getDocs = getDocs;
+    </script>
+
+    <!-- AR modal styles (additions) -->
+    <style>
+        .ar-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+        }
+
+        .ar-modal.open {
+            display: flex;
+        }
+
+        .ar-wrap {
+            position: relative;
+            width: min(100vw, 100vh);
+            height: min(100vw, 100vh);
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .ar-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 2;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #fff;
+            color: #2a9df4;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .4);
+        }
+
+        model-viewer#arMV {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        /* Modal container */
+        .ar-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+        }
+
+        .ar-modal.open {
+            display: flex;
+        }
+
+        /* Wrapper keeps a nice square and rounds corners */
+        .ar-wrap {
+            position: relative;
+            width: min(94vw, 94vh);
+            height: min(94vw, 94vh);
+            background: #000;
+            /* keep dark behind the model */
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .35);
+        }
+
+        /* Top bar */
+        .ar-topbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, .75), rgba(0, 0, 0, 0));
+            z-index: 3;
+            pointer-events: none;
+            /* allow model-viewer controls through */
+        }
+
+        .ar-topbar h3 {
+            margin: 0;
+            color: #fff;
+            letter-spacing: .5px;
+            font-size: 16px;
+            text-transform: uppercase;
+            font-weight: 800;
+            pointer-events: none;
+        }
+
+        .ar-close {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            z-index: 4;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #fff;
+            color: #2a9df4;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+            pointer-events: auto;
+            /* clickable */
+        }
+
+        /* Model-viewer fills the box */
+        model-viewer#arMV {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        /* Bottom help bar */
+        .ar-help {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, .65);
+            color: #fff;
+            z-index: 3;
+            padding: 10px 12px;
+            font: 13px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .ar-help b {
+            color: #ffe699;
+            font-weight: 800;
+        }
+
+        .cube-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            background: #fff;
+            box-shadow: inset 0 0 0 2px #2a9df4;
+            transform: rotate(15deg);
+            margin: 0 4px -1px 4px;
+        }
+
+        /* Pulsing pointer that sits above the cube button */
+        .ar-pointer {
+            position: absolute;
+            right: 20px;
+            bottom: 70px;
+            /* sits just above <model-viewer>'s cube */
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, .8);
+            animation: pulse 1.6s ease-out infinite;
+            z-index: 3;
+            opacity: .9;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, .7);
+                transform: scale(1);
+            }
+
+            70% {
+                box-shadow: 0 0 0 18px rgba(255, 255, 255, 0);
+                transform: scale(1.1);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+                transform: scale(1);
+            }
+        }
+
+        /* tighten on very small phones */
+        @media (max-width: 280px) {
+            .ar-help {
+                font-size: 12px;
+            }
+
+            .ar-pointer {
+                right: 16px;
+                bottom: 64px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-top">
+            <!-- Left Column -->
+            <div class="header-left">
+                <button id="goBackMain" class="circle-button" onclick="goBack()">←</button>
+                <button class="text-back" onclick="goBack()">BACK TO MAIN PAGE</button>
+            </div>
+
+            <!-- Center Column -->
+            <div class="header-center">
+                <h1>GALLERY</h1>
+                <p class="subtitle">Step into the characters of the PDD Community!</p>
+            </div>
+
+            <!-- Right Column -->
+            <div class="header-right search-container">
+                <input type="text" id="search-input" placeholder="SEARCH NAME" autocomplete="off" />
+                <button id="search-btn" class="search-btn">&#128269;</button>
+            </div>
+        </div>
+    </header>
+
+    <main id="gallery-container"></main>
+    <footer class="footer-section"></footer>
+
+    <!-- back to top -->
+    <button id="backToTop" class="back-to-top">↑</button>
+
+    <!-- AR Modal -->
+    <!-- AR Modal (enhanced UI) -->
+    <div id="arModal" class="ar-modal" aria-hidden="true">
+        <div class="ar-wrap">
+            <!-- Top bar -->
+            <div class="ar-topbar">
+                <h3 id="arTitle">Character</h3>
+                <button class="ar-close" id="arClose" aria-label="Close">✕</button>
+            </div>
+
+            <!-- 3D viewer -->
+            <model-viewer id="arMV" src="./assets/ar/avatar-billboard.glb" ios-src="./assets/ar/avatar-billboard.usdz"
+                ar ar-modes="webxr scene-viewer quick-look" placement="floor" camera-controls shadow-intensity="0.25"
+                exposure="1" tone-mapping="aces" environment-image="neutral" interaction-prompt="none">
+            </model-viewer>
+
+            <!-- Bottom instruction bar -->
+            <!-- <div class="ar-help">
+                <p><b>Tip:</b> Tap the <span class="cube-dot" aria-hidden="true"></span> cube in the bottom-right to
+                    enter AR.
+                    Then move your phone to find the floor and tap to place.</p>
+            </div> -->
+
+            <!-- little pulsing pointer near the cube -->
+            <div class="ar-pointer" aria-hidden="true"></div>
+        </div>
+    </div>
+
+    <!-- 1) Firebase init -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, getDocs }
+            from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDwpNjnDFAA_5P64zMOt-GTSOdETx2xKJQ",
+            authDomain: "people-of-pdd-website.firebaseapp.com",
+            projectId: "people-of-pdd-website",
+            storageBucket: "people-of-pdd-website.firebasestorage.app",
+            messagingSenderId: "685048567158",
+            appId: "1:685048567158:web:abc51754b5b785219c1657",
+            measurementId: "G-1VRMYRMXKN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // expose for non-module scripts
+        window.db = db;
+        window.collection = collection;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.getDocs = getDocs;
+    </script>
+
+    <!-- 2) Back-to-top + tiny helpers -->
+    <script>
+        const backToTop = document.getElementById('backToTop');
+        backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        window.addEventListener('scroll', () => {
+            const on = window.scrollY > 200;
+            backToTop.style.opacity = on ? '1' : '0';
+            backToTop.style.pointerEvents = on ? 'auto' : 'none';
+        });
+
+        function goBack() { window.location.href = 'index.html'; }
+    </script>
+
+    <!-- 3) Gallery rendering + tooltip + "view in ar" + PNG compositor -->
+    <script>
+        // layout constants
+        const CARD_W = 200 / 1.5;
+        const CARD_H = 360 / 1.5;
+        const container = document.getElementById('gallery-container');
+        const headerEl = document.querySelector('header');
+        const footerEl = document.querySelector('footer');
+        let SCALE = 1;
+
+        // responsive scale
+        const isMobileView = () => window.matchMedia('(max-width: 600px)').matches;
+        const currentScale = () => isMobileView() ? 0.72 : 1;
+        function resizeContainer() {
+            container.style.height = (window.innerHeight - headerEl.offsetHeight - footerEl.offsetHeight) + 'px';
+            SCALE = currentScale();
+        }
+        window.addEventListener('resize', resizeContainer);
+
+        // init — fetch from Firestore and render
+        document.addEventListener('DOMContentLoaded', async () => {
+            resizeContainer();
+
+            const q = window.query(window.collection(window.db, "galleryCharacters"), window.orderBy("createdAt", "desc"));
+            const snap = await window.getDocs(q);
+
+            let i = 0;
+            snap.forEach(doc => {
+                const d = doc.data();
+                renderAvatar(
+                    { selections: d.selections, faceData: d.faceUrl, name: d.name, favThing: d.favThing },
+                    i++,
+                    SCALE
+                );
+            });
+
+            brickLayout();
+
+            // reflow on resize
+            window.addEventListener('resize', () => {
+                resizeContainer();
+                document.querySelectorAll('.gallery-card').forEach(card => {
+                    card.dataset.scale = SCALE;
+                    card.style.transform = `scale(${SCALE})`;
+                });
+                brickLayout();
+            });
+
+            // live search
+            document.getElementById('search-input')?.addEventListener('input', filterGallery);
+            document.getElementById('search-btn')?.addEventListener('click', filterGallery);
+        });
+
+        // ---- render each avatar card ----
+        function renderAvatar({ selections = [], faceData, name, favThing }, index, scale = 1) {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('gallery-card');
+            wrapper.dataset.name = (name || '').trim().toLowerCase();
+            wrapper.dataset.scale = scale;
+            wrapper.dataset.selections = JSON.stringify(selections || []);
+            wrapper.dataset.face = faceData || '';
+
+            wrapper.style.width = CARD_W + 'px';
+            wrapper.style.height = CARD_H + 'px';
+            wrapper.style.transform = `scale(${scale})`;
+
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const svg = document.createElementNS(svgNS, 'svg');
+            svg.setAttribute('viewBox', `0 0 ${CARD_W} ${CARD_H}`);
+            svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+            svg.setAttribute('width', CARD_W);
+            svg.setAttribute('height', CARD_H);
+            svg.style.position = 'absolute';
+            svg.style.left = '0';
+            svg.style.top = '0';
+            svg.style.zIndex = '1';
+
+            const group = document.createElementNS(svgNS, 'g');
+            group.setAttribute('transform', `translate(${CARD_W / 2}, 10)`);
+
+            // colorful base shape
+            const baseShape = createBaseShape(svgNS, CARD_W);
+            baseShape.setAttribute('transform', (baseShape.getAttribute('transform') || '') + ' translate(0, 20)');
+            group.appendChild(baseShape);
+
+            // simple rig
+            const baseRig = {
+                head: { x: 0, y: 20 },
+                shoulderL: { x: -40, y: 20 }, shoulderR: { x: 40, y: 20 },
+                hipL: { x: 0, y: 75 }, hipR: { x: 0, y: 75 },
+                kneeL: { x: 0, y: 140 }, kneeR: { x: 0, y: 140 },
+                footL: { x: 0, y: 180 }, footR: { x: 0, y: 180 }
+            };
+            const centers = [
+                { ctr: baseRig.footL, size: 80 },   // shoes
+                { ctr: baseRig.kneeL, size: 100 },  // legs
+                { ctr: baseRig.hipL, size: 90 },   // torso
+                { ctr: baseRig.head, size: 60 }    // head
+            ];
+
+            // draw 4 parts (reverse-index like your original)
+            centers.forEach((cfg, i) => {
+                const img = document.createElementNS(svgNS, 'image');
+                img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', selections[3 - i]);
+                img.setAttribute('width', cfg.size);
+                img.setAttribute('height', cfg.size);
+                img.setAttribute('x', cfg.ctr.x - cfg.size / 2);
+                img.setAttribute('y', cfg.ctr.y - cfg.size / 2);
+                group.appendChild(img);
+            });
+
+            svg.appendChild(group);
+            wrapper.appendChild(svg);
+
+            // face overlay if present
+            if (isRenderableImage(faceData)) {
+                const headCfg = centers[3];
+                const offsetX = CARD_W / 2 + headCfg.ctr.x - headCfg.size / 2;
+                const offsetY = 5 + headCfg.ctr.y - headCfg.size / 2;
+
+                loadImageSafe(faceData).then((img) => {
+                    if (!img) return;
+                    img.width = headCfg.size; img.height = headCfg.size;
+                    img.style.position = 'absolute';
+                    img.style.left = `${offsetX}px`;
+                    img.style.top = `${offsetY}px`;
+                    img.style.zIndex = '2';
+                    wrapper.style.zIndex = '3';
+                    wrapper.appendChild(img);
+                });
+            }
+
+            // tooltip (with AR button)
+            const tooltip = document.createElement('div');
+            tooltip.classList.add('tooltip');
+            tooltip.innerHTML = `
+      <h3>${(name || '').toUpperCase()}</h3>
+      <p>My favourite thing to do in Punggol:
+        <b style="color:#fff;">${favThing ? `${favThing}!` : ''}</b>
+      </p>
+      <button class="ar-btn" type="button">view in ar</button>
+    `;
+            wrapper.appendChild(tooltip);
+
+            // toggle tooltip on card click
+            wrapper.addEventListener('click', (e) => {
+                if (e.target.closest('.ar-btn')) return; // AR handled below
+                e.stopPropagation();
+                document.querySelectorAll('.gallery-card.show-tip').forEach(c => {
+                    if (c !== wrapper) { c.classList.remove('show-tip'); c.style.zIndex = ''; }
+                });
+                const open = wrapper.classList.toggle('show-tip');
+                wrapper.style.zIndex = open ? '9999' : '';
+            });
+            // close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.gallery-card')) {
+                    document.querySelectorAll('.gallery-card.show-tip').forEach(c => { c.classList.remove('show-tip'); c.style.zIndex = ''; });
+                }
+            });
+
+            // “view in AR” → compose PNG → open modal
+            tooltip.querySelector('.ar-btn').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const sels = JSON.parse(wrapper.dataset.selections || '[]');
+                const face = wrapper.dataset.face || '';
+                //const pngDataURL = await composeAvatarPNG(sels, face);
+                const displayName = (name || '').trim() || 'Your Character';
+
+                const pngDataURL = await composeAvatarPNG(sels, face, displayName);
+                if (!pngDataURL) {
+                    alert('Could not compose AR texture (CORS). Try reloading after enabling Storage CORS.');
+                    return;
+                }
+                window.openARWithTexture(pngDataURL, displayName);
+            });
+
+            container.appendChild(wrapper);
+        }
+
+        // ---- helpers & layout ----
+        function loadImageSafe(src, timeout = 6000) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                let doneOnce = false;
+                const done = ok => { if (!doneOnce) { doneOnce = true; resolve(ok ? img : null); } };
+                const t = setTimeout(() => done(false), timeout);
+                img.onload = () => { clearTimeout(t); done(true); };
+                img.onerror = () => { clearTimeout(t); done(false); };
+                img.crossOrigin = 'anonymous'; // requires CORS on your bucket
+                img.src = src;
+            });
+        }
+
+        function isRenderableImage(src) {
+            if (!src || typeof src !== 'string') return false;
+            const s = src.trim();
+            if (s.startsWith('data:text/')) return false;
+            if (s.startsWith('data:image/')) return true;
+            if (s.startsWith('blob:')) return true;
+            try {
+                const u = new URL(s, location.href);
+                const okProto = u.protocol === 'http:' || u.protocol === 'https:';
+                const p = u.pathname.toLowerCase();
+                const okExt = p.endsWith('.png') || p.endsWith('.jpg') || p.endsWith('.jpeg') || p.endsWith('.webp');
+                return okProto && okExt;
+            } catch { return false; }
+        }
+
+        function filterGallery() {
+            const term = document.getElementById('search-input').value.trim().toLowerCase();
+            const cards = Array.from(document.querySelectorAll('.gallery-card'));
+            if (!term) { cards.forEach(c => c.style.display = ''); brickLayout(); return; }
+            const matching = [], nonMatching = [];
+            cards.forEach(card => {
+                if (card.dataset.name.includes(term)) { matching.push(card); card.style.display = ''; }
+                else { nonMatching.push(card); card.style.display = 'none'; }
+            });
+            container.innerHTML = '';
+            [...matching, ...nonMatching].forEach(card => container.appendChild(card));
+            brickLayout();
+        }
+
+        function brickLayout() {
+            const cards = Array.from(document.querySelectorAll('.gallery-card'));
+            if (!cards.length) return;
+
+            const baseW = CARD_W, baseH = CARD_H;
+            const containerWidth = container.clientWidth;
+            const mobile = isMobileView();
+            const margin = mobile ? 30 : 100;
+            const scale = currentScale();
+            const gapX = mobile ? 100 : Math.max(24, container.clientWidth / 9);
+            const gapY = mobile ? 8 : 60;
+
+            const usableWidth = containerWidth - 2 * margin;
+            const effW = baseW * scale, effH = baseH * scale;
+            const maxCardsPerRow = Math.max(1, Math.floor((usableWidth + gapX) / (effW + gapX)));
+
+            let x = 0, y = 0, row = 0, col = 0;
+
+            cards.forEach((card) => {
+                if (parseFloat(card.dataset.scale || '1') !== scale) {
+                    card.dataset.scale = scale;
+                    card.style.transform = `scale(${scale})`;
+                }
+                const offsetX = (row % 2 === 0) ? 0 : (effW / 2 + gapX / 2);
+                card.style.left = `${margin + x + offsetX}px`;
+                card.style.top = `${margin + y}px`;
+
+                col++; x += effW + gapX;
+
+                const nextWouldOverflow = (margin + x + effW + offsetX > containerWidth - margin);
+                if (col >= maxCardsPerRow || nextWouldOverflow) {
+                    row++; col = 0; x = 0; y += effH + gapY;
+                }
+            });
+
+            const totalHeight = margin + y + effH + gapY + 8;
+            container.style.minHeight = `${Math.max(totalHeight, parseFloat(container.style.height) || 0)}px`;
+        }
+
+        function createBaseShape(svgNS) {
+            const shapes = [
+                { type: 'ellipse', cx: 68.41, cy: 28.33, rx: 53.5, ry: 16.59 },
+                { type: 'path', d: 'M101.97,31.92l-35.5,17.77c-5.41,2.71-11.77,2.77-17.24.17L11.98,32.14c-3.41-1.62-3.41-6.48,0-8.1L48.4,6.69c5.31-2.53,11.47-2.55,16.79-.05l36.67,17.2c3.39,1.59,3.46,6.4.1,8.08Z' },
+                { type: 'path', d: 'M94.9,36l4.47,8.76c2.07,4.04-8.4,7.25-17.15,5.25l-18.94-4.34c-1.52-.35-3.38-.34-4.9.03l-18.85,4.55c-8.7,2.11-19.24-1-17.26-5.1l4.28-8.86c.34-.71-.24-1.44-1.53-1.93l-16.12-6.02c-7.44-2.79-3.49-7.93,6.48-8.43l21.59-1.07c1.73-.09,3.24-.54,3.95-1.2l8.88-8.23c4.1-3.79,17.08-3.82,21.27-.04l9.06,8.16c.73.66,2.24,1.1,3.97,1.18l21.61.93c9.98.43,14.04,5.5,6.66,8.32l-15.99,6.1c-1.29.49-1.85,1.22-1.49,1.93Z' }
+            ];
+            const colors = ['#9e005d', '#3fa9f5', '#22b573', '#e85e24', '#f7931e'];
+            const s = shapes[Math.floor(Math.random() * shapes.length)];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const el = document.createElementNS(svgNS, s.type);
+            el.setAttribute('fill', color);
+            if (s.type === 'ellipse') { el.setAttribute('cx', 0); el.setAttribute('cy', 180); el.setAttribute('rx', s.rx); el.setAttribute('ry', s.ry); }
+            else { el.setAttribute('d', s.d); el.setAttribute('transform', 'translate(-60, 150)'); }
+            return el;
+        }
+
+        function drawNameBanner(ctx, text, canvasW, opts = {}) {
+            const {
+                topY = 90,
+                maxWidthPct = 0.84,     // banner won’t exceed this % of canvas width
+                minWidth = 420,         // nice min pill width
+                padX = 64,
+                padY = 28,
+                cornerR = 32,
+                bg = '#2a9df4',
+                stroke = '#ffffff',
+                textColor = '#ffffff',
+                startFont = 120,
+                minFont = 40
+            } = opts;
+
+            const rr = (x, y, w, h, r) => {
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                ctx.lineTo(x + w, y + h - r);
+                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                ctx.lineTo(x + r, y + h);
+                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
+            };
+
+            const pickFont = (sz) => `${sz}px "PP Mori", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
+
+            const maxBannerW = canvasW * maxWidthPct;
+            let fontSize = startFont;
+            const t = String(text).toUpperCase();
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = textColor;
+            ctx.font = pickFont(fontSize);
+
+            // shrink font until text fits inside maxBannerW (with padding)
+            while (ctx.measureText(t).width + padX * 2 > maxBannerW && fontSize > minFont) {
+                fontSize -= 4;
+                ctx.font = pickFont(fontSize);
+            }
+
+            const textW = ctx.measureText(t).width;
+            const bannerW = Math.max(minWidth, Math.min(maxBannerW, textW + padX * 2));
+            const bannerH = fontSize + padY * 2;
+            const x = (canvasW - bannerW) / 2;
+            const y = topY;
+
+            // bg + subtle stroke
+            rr(x, y, bannerW, bannerH, cornerR);
+            ctx.fillStyle = bg;
+            ctx.fill();
+
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = stroke;
+            ctx.globalAlpha = 0.85;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+
+            // text shadow for legibility
+            ctx.shadowColor = 'rgba(0,0,0,0.35)';
+            ctx.shadowBlur = 12;
+            ctx.shadowOffsetY = 2;
+
+            ctx.fillStyle = textColor;
+            ctx.fillText(t, x + bannerW / 2, y + bannerH / 2);
+
+            // reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+        }
+
+
+
+
+        // ---- PNG compositor (exact placement + NAME BANNER) ----
+        async function composeAvatarPNG(selections, faceData, displayName = '') {
+            // canvas & VB from your original exporter
+            const CANVAS_W = 1200, CANVAS_H = 1800;
+            const vbW = 800, vbH = 800;
+
+            const baseScale = CANVAS_W / vbW;
+            const fillMultiplier = 2;
+            const s = baseScale * fillMultiplier;
+            const xOff = (CANVAS_W - vbW * s) / 2;
+            const baseYOff = (CANVAS_H - vbH * s) / 2;
+            const manualYOffset = 500;
+            const yOff = baseYOff + manualYOffset;
+
+            const originVB = { x: vbW / 2, y: 100 };
+            const baseRig = {
+                shoulderL: { x: -40, y: 20 }, shoulderR: { x: 40, y: 20 },
+                hipL: { x: 0, y: 75 }, hipR: { x: 0, y: 75 },
+                kneeL: { x: 0, y: 140 }, kneeR: { x: 0, y: 140 },
+                footL: { x: 0, y: 180 }, footR: { x: 0, y: 180 }
+            };
+            const headVB = { x: originVB.x, y: originVB.y };
+            const torsoVB = {
+                x: originVB.x + (baseRig.shoulderL.x + baseRig.shoulderR.x + baseRig.hipL.x + baseRig.hipR.x) / 4,
+                y: originVB.y + (baseRig.shoulderL.y + baseRig.shoulderR.y + baseRig.hipL.y + baseRig.hipR.y) / 4 + 10
+            };
+            const legsVB = {
+                x: originVB.x + (baseRig.kneeL.x + baseRig.kneeR.x) / 2,
+                y: originVB.y + (baseRig.kneeL.y + baseRig.kneeR.y) / 2 + 20
+            };
+            const shoesVB = {
+                x: originVB.x + (baseRig.footL.x + baseRig.footR.x) / 2,
+                y: originVB.y + (baseRig.footL.y + baseRig.footR.y) / 2 + 40
+            };
+
+            // render order and max sizes — identical to your PNG exporter
+            const centersVB = [shoesVB, legsVB, torsoVB, headVB];
+            const liSizesVB = [180, 200, 200, 130];
+
+            const imgs = await Promise.all(
+                (selections || []).map(u => new Promise(res => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = () => res(img);
+                    img.onerror = () => res(null);
+                    img.src = u;
+                }))
+            );
+
+            const out = document.createElement('canvas');
+            out.width = CANVAS_W; out.height = CANVAS_H;
+            const ctx = out.getContext('2d');
+
+            // 0) NAME BANNER (draw first so avatar sits "under" it if overlapping)
+            // tweak these to taste
+            const BANNER_H = 220;                 // banner height
+            const BANNER_Y = 90;                  // distance from very top
+            const BANNER_RX = 32;                 // corner radius
+            const BANNER_PAD_X = 64;              // horizontal padding for text
+            const BANNER_BG = '#2a9df4';          // PDD blue
+            const BANNER_STROKE = '#ffffff';
+            const TEXT_COLOR = '#ffffff';
+            if (displayName) {
+                drawNameBanner(ctx, displayName, CANVAS_W, {
+                    topY: 90,           // move down/up if you like
+                    maxWidthPct: 0.86,  // clamp to ~86% of canvas width
+                    minWidth: 420,      // min pill width
+                    padX: 64,
+                    padY: 28,
+                    cornerR: 32
+                });
+            }
+            // 1) avatar parts (unchanged logic, small comments)
+            for (let i = 0; i < 4; i++) {
+                const img = imgs[3 - i]; if (!img) continue;
+
+                const maxVB = liSizesVB[i];
+                const aspect = img.naturalWidth / img.naturalHeight;
+
+                let partVBW, partVBH;
+                if (aspect >= 1) { partVBW = maxVB; partVBH = maxVB / aspect; }
+                else { partVBH = maxVB; partVBW = maxVB * aspect; }
+
+                let extraScale = 1;
+                if (i === 0) extraScale = 0.95;  // shoes
+                if (i === 1) extraScale = 1.08;  // legs
+                if (i === 3) extraScale = 0.90;  // head
+
+                const pxW = partVBW * s * extraScale;
+                const pxH = partVBH * s * extraScale;
+
+                const ctrVB = [shoesVB, legsVB, torsoVB, headVB][i];
+                const baseX = ctrVB.x * s - pxW / 2 + xOff;
+                let baseY = ctrVB.y * s - pxH / 2 + yOff;
+
+                // tiny per-slot offsets — as in your exporter
+                if (i === 3) baseY -= 120;  // head up a bit
+                if (i === 2) baseY += 50;   // legs down a bit
+                if (i === 1) baseY += 200;  // torso up
+                if (i === 0) baseY += 300;  // shoes up
+
+                ctx.drawImage(img, baseX, baseY, pxW, pxH);
+            }
+
+            // 2) face overlay (unchanged)
+            if (faceData && (faceData.startsWith('data:') || faceData.startsWith('http') || faceData.startsWith('blob:'))) {
+                const face = await new Promise(res => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = () => res(img);
+                    img.onerror = () => res(null);
+                    img.src = faceData;
+                });
+                if (face) {
+                    const manualYAdjust = -25 - 120;
+                    const fcW = face.naturalWidth, fcH = face.naturalHeight;
+                    const headCtr = headVB;
+                    const xF = headCtr.x * s - (fcW * s) / 2 + xOff;
+                    const yF = headCtr.y * s - (fcH * s) / 2 + yOff + manualYAdjust;
+                    ctx.drawImage(face, 0, 0, fcW, fcH, xF, yF, fcW * s, fcH * s);
+                }
+            }
+
+            try {
+                return out.toDataURL('image/png'); // transparent PNG with banner
+            } catch (e) {
+                console.error('toDataURL failed (likely CORS/tainted canvas):', e);
+                return null;
+            }
+        }
+
+    </script>
+
+    <!-- 4) AR modal controller (uses #arMV already in your HTML) -->
+    <script type="module">
+        const modal = document.getElementById('arModal');
+        const mv = document.getElementById('arMV');  // src set in HTML (e.g., "./assets/ar/avatar-billboard.glb")
+        const closeBtn = document.getElementById('arClose');
+        const arTitle = document.getElementById('arTitle');
+
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+        });
+
+        // pngDataURL: transparent PNG, displayName: shown in modal header
+        async function openARWithTexture(pngDataURL, displayName = 'Character') {
+            if (arTitle) arTitle.textContent = (displayName || 'Character').toUpperCase();
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+
+            // wait for GLB to load once
+            if (!mv.model) {
+                await new Promise(res => mv.addEventListener('load', res, { once: true }));
+            }
+
+            const mat = mv.model?.materials?.find(m => m.name === 'AvatarMat');
+            if (!mat) { console.warn('AvatarMat not found in GLB'); return; }
+
+            const tex = await mv.createTexture(pngDataURL); // keeps alpha
+            const pbr = mat.pbrMetallicRoughness;
+
+            if (pbr?.baseColorTexture?.setTexture) {
+                pbr.baseColorTexture.setTexture(tex);   // model-viewer v3+
+            } else if (pbr?.setBaseColorTexture) {
+                pbr.setBaseColorTexture(tex);           // fallback
+            }
+
+            // non-metallic, matte poster look
+            pbr?.setMetallicFactor?.(0.0);
+            pbr?.setRoughnessFactor?.(1.0);
+            mat?.setAlphaMode?.('BLEND');
+        }
+
+        // expose globally for the gallery script
+        window.openARWithTexture = openARWithTexture;
+    </script>
+
+
+</body>
+
+</html>
