@@ -1,7 +1,6 @@
+// functions/index.js
 /* eslint-disable */
-"use strict";
-
-const functions = require("firebase-functions");
+const functions = require("firebase-functions/v1"); // ← v1 compat fixes "region is not a function"
 const admin = require("firebase-admin");
 const express = require("express");
 const cors = require("cors");
@@ -13,14 +12,23 @@ const os = require("os");
 const yauzl = require("yauzl");
 const yazl = require("yazl");
 
+// ---- init ----
 admin.initializeApp();
-const bucket = admin.storage().bucket(); // default Firebase bucket
+const bucket = admin.storage().bucket();
 
-// ---------- helpers ----------
+const app = express();
+app.use(cors({ origin: true }));
+app.use(express.json({ limit: "20mb" }));
+
+// if your template contains "0/poster.png", keep this.
+// if you re-exported your template as "textures/poster.png", change accordingly.
+const TEX_PATH_IN_USDZ = path.join("0", "poster.png");
+
+// helper: write PNG (from dataURL or https URL) to a temp file
 async function writePngTemp(dataOrUrl) {
     const out = path.join(os.tmpdir(), `avatar-${Date.now()}.png`);
     if (typeof dataOrUrl === "string" && dataOrUrl.startsWith("data:image/")) {
-        const b64 = dataOrUrl.split(",")[1];
+        const b64 = dataOrUrl.split(",")[1] || "";
         await fsp.writeFile(out, Buffer.from(b64, "base64"));
         return out;
     }
@@ -31,6 +39,7 @@ async function writePngTemp(dataOrUrl) {
     return out;
 }
 
+// unzip USDZ into a temp dir
 async function unzipUsdZ(usdzPath, outDir) {
     await fsp.mkdir(outDir, { recursive: true });
     await new Promise((resolve, reject) => {
@@ -58,9 +67,11 @@ async function unzipUsdZ(usdzPath, outDir) {
     });
 }
 
+// re-pack (STORE / no compression) into USDZ
 async function zipUsdZFromDir(srcDir, outUsdz) {
     await fsp.mkdir(path.dirname(outUsdz), { recursive: true });
     const zipfile = new yazl.ZipFile();
+
     function addDir(rel) {
         const abs = path.join(srcDir, rel);
         const stats = fs.statSync(abs);
@@ -72,7 +83,9 @@ async function zipUsdZFromDir(srcDir, outUsdz) {
             zipfile.addFile(abs, rel.replace(/\\/g, "/"), { compress: false }); // STORE
         }
     }
-    addDir("");
+
+    addDir(""); // add everything
+
     await new Promise((resolve, reject) => {
         zipfile.outputStream
             .pipe(fs.createWriteStream(outUsdz))
@@ -81,11 +94,6 @@ async function zipUsdZFromDir(srcDir, outUsdz) {
         zipfile.end();
     });
 }
-
-// ---------- app ----------
-const app = express();
-app.use(cors({ origin: true }));
-app.use(express.json({ limit: "20mb" }));
 
 // POST /make-usdz  { pngDataUrl?: string, pngUrl?: string, displayName?: string }
 app.post("/make-usdz", async (req, res) => {
@@ -96,31 +104,32 @@ app.post("/make-usdz", async (req, res) => {
             return res.status(400).json({ ok: false, error: "pngDataUrl or pngUrl required" });
         }
 
-        // 1) template on disk (checked into repo at functions/template/template.usdz)
+        // use local, checked-in template copy
         const templatePath = path.join(__dirname, "template", "template.usdz");
         if (!fs.existsSync(templatePath)) {
             return res.status(500).json({ ok: false, error: "template.usdz missing on server" });
         }
 
-        // 2) workspace
+        // workspace
         const work = path.join(os.tmpdir(), `usdz-${Date.now()}`);
         const unpackDir = path.join(work, "unpacked");
         const outUsdz = path.join(work, "out.usdz");
         await unzipUsdZ(templatePath, unpackDir);
 
-        // 3) drop in the incoming PNG to textures/poster.png
+        // overwrite the texture file inside the package
         const incomingPng = await writePngTemp(src);
-        const texDest = path.join(unpackDir, "textures", "poster.png"); // must match inside template
+        const texDest = path.join(unpackDir, TEX_PATH_IN_USDZ);
+        await fsp.mkdir(path.dirname(texDest), { recursive: true });
         await fsp.copyFile(incomingPng, texDest);
 
-        // minor cache marker
+        // tiny cache-buster file (optional)
         await fsp.writeFile(path.join(unpackDir, "version.txt"), String(Date.now()));
 
-        // 4) re-pack as USDZ (STORE)
+        // re-pack
         await zipUsdZFromDir(unpackDir, outUsdz);
 
-        // 5) upload to Storage and make it PUBLIC
-        const safeName = (displayName || "character").replace(/[^\w-]+/g, "_");
+        // upload to Firebase Storage (public)
+        const safeName = (displayName || "character").replace(/[^\w\-]+/g, "_");
         const destPath = `usdz/${safeName}-${Date.now()}.usdz`;
         await bucket.upload(outUsdz, {
             destination: destPath,
@@ -129,8 +138,9 @@ app.post("/make-usdz", async (req, res) => {
                 cacheControl: "public,max-age=60",
             },
         });
-        const file = bucket.file(destPath);
-        await file.makePublic();
+
+        // build a **public** URL (no signed URLs; works great for Quick Look)
+        // NOTE: your bucket is: people-of-pdd-website.firebasestorage.app (per your config)
         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${destPath}`;
 
         return res.json({ ok: true, usdzUrl: publicUrl });
@@ -140,5 +150,5 @@ app.post("/make-usdz", async (req, res) => {
     }
 });
 
-// 1st-gen HTTPS function (adjust region if you prefer)
+// export 1st-gen HTTPS function in asia-southeast1
 exports.api = functions.region("asia-southeast1").https.onRequest(app);
