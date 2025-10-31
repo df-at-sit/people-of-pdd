@@ -1,0 +1,186 @@
+.
+├── Archive
+│   ├── char.html.bak
+│   ├── char2.html
+│   ├── char3.html
+│   ├── chara.html.bak
+│   ├── chartest.html
+│   ├── gallery.html.bak
+│   ├── styles.css.bak
+│   ├── styles2.css
+│   └── styles2.css.bak
+├── Asset 1.svg
+├── CNAME
+├── README.md
+├── ar.html
+├── areffect
+│   ├── aditi.png
+│   ├── avatar-billboard.glb
+│   └── index.html
+├── assets
+│   ├── ar
+│   ├── char
+│   ├── char-mockup.png
+│   ├── char-pattern
+│   ├── fonts
+│   ├── gallery
+│   ├── header-avatarexport.svg
+│   ├── home
+│   ├── home copy
+│   ├── patterned
+│   ├── svgshapes
+│   ├── traits
+│   ├── wave-gallery.svg
+│   ├── wave-home-1.png
+│   ├── wave-home.svg
+│   └── wave.svg
+├── backupfirestore.js
+├── char.html
+├── char.html.bak
+├── cors.json
+├── firebase.json
+├── firestore-backup.json
+├── functions
+│   ├── index.js
+│   ├── node_modules
+│   ├── package-lock.json
+│   └── package.json
+├── gallery.html
+├── index.html
+├── node_modules
+│   ├── @fastify
+│   ├── @firebase
+│   ├── @google-cloud
+│   ├── @grpc
+│   ├── @js-sdsl
+│   ├── @opentelemetry
+│   ├── @protobufjs
+│   ├── @tootallnate
+│   ├── @types
+│   ├── abort-controller
+│   ├── agent-base
+│   ├── ansi-regex
+│   ├── ansi-styles
+│   ├── arrify
+│   ├── async-retry
+│   ├── asynckit
+│   ├── base64-js
+│   ├── bignumber.js
+│   ├── buffer-equal-constant-time
+│   ├── call-bind-apply-helpers
+│   ├── cliui
+│   ├── color-convert
+│   ├── color-name
+│   ├── combined-stream
+│   ├── debug
+│   ├── delayed-stream
+│   ├── dunder-proto
+│   ├── duplexify
+│   ├── ecdsa-sig-formatter
+│   ├── emoji-regex
+│   ├── end-of-stream
+│   ├── es-define-property
+│   ├── es-errors
+│   ├── es-object-atoms
+│   ├── es-set-tostringtag
+│   ├── escalade
+│   ├── event-target-shim
+│   ├── extend
+│   ├── farmhash-modern
+│   ├── fast-deep-equal
+│   ├── fast-xml-parser
+│   ├── faye-websocket
+│   ├── firebase-admin
+│   ├── form-data
+│   ├── function-bind
+│   ├── functional-red-black-tree
+│   ├── gaxios
+│   ├── gcp-metadata
+│   ├── get-caller-file
+│   ├── get-intrinsic
+│   ├── get-proto
+│   ├── google-auth-library
+│   ├── google-gax
+│   ├── google-logging-utils
+│   ├── gopd
+│   ├── gtoken
+│   ├── has-symbols
+│   ├── has-tostringtag
+│   ├── hasown
+│   ├── html-entities
+│   ├── http-parser-js
+│   ├── http-proxy-agent
+│   ├── https-proxy-agent
+│   ├── inherits
+│   ├── is-fullwidth-code-point
+│   ├── is-stream
+│   ├── jose
+│   ├── json-bigint
+│   ├── jsonwebtoken
+│   ├── jwa
+│   ├── jwks-rsa
+│   ├── jws
+│   ├── limiter
+│   ├── lodash.camelcase
+│   ├── lodash.clonedeep
+│   ├── lodash.includes
+│   ├── lodash.isboolean
+│   ├── lodash.isinteger
+│   ├── lodash.isnumber
+│   ├── lodash.isplainobject
+│   ├── lodash.isstring
+│   ├── lodash.once
+│   ├── long
+│   ├── lru-cache
+│   ├── lru-memoizer
+│   ├── math-intrinsics
+│   ├── mime
+│   ├── mime-db
+│   ├── mime-types
+│   ├── ms
+│   ├── node-fetch
+│   ├── node-forge
+│   ├── object-hash
+│   ├── once
+│   ├── p-limit
+│   ├── proto3-json-serializer
+│   ├── protobufjs
+│   ├── readable-stream
+│   ├── require-directory
+│   ├── retry
+│   ├── retry-request
+│   ├── safe-buffer
+│   ├── semver
+│   ├── stream-events
+│   ├── stream-shift
+│   ├── string-width
+│   ├── string_decoder
+│   ├── strip-ansi
+│   ├── strnum
+│   ├── stubs
+│   ├── teeny-request
+│   ├── tr46
+│   ├── tslib
+│   ├── undici-types
+│   ├── util-deprecate
+│   ├── uuid
+│   ├── webidl-conversions
+│   ├── websocket-driver
+│   ├── websocket-extensions
+│   ├── whatwg-url
+│   ├── wrap-ansi
+│   ├── wrappy
+│   ├── y18n
+│   ├── yallist
+│   ├── yargs
+│   ├── yargs-parser
+│   └── yocto-queue
+├── package-lock.json
+├── package.json
+├── serviceAccountKey.json
+├── structure.txt
+├── styles.css
+├── styles.css.bak
+└── styles2.css.bak
+
+144 directories, 40 files

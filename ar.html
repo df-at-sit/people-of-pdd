@@ -677,6 +677,23 @@
         window.getDocs = getDocs;
     </script>
 
+    <script>
+        const API_BASE =
+            "https://asia-southeast1-people-of-pdd-website.cloudfunctions.net/api";
+
+        async function makeUsdzFromPng({ pngDataUrl, pngUrl, displayName }) {
+            const resp = await fetch(`${API_BASE}/make-usdz`, {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ pngDataUrl, pngUrl, displayName }),
+            });
+            const j = await resp.json();
+            if (!resp.ok || !j.ok) throw new Error(j.error || "usdz build failed");
+            return j.usdzUrl; // signed url valid ~15min
+        }
+    </script>
+
+
     <!-- 2) Back-to-top + tiny helpers -->
     <script>
         const backToTop = document.getElementById('backToTop');
@@ -854,17 +871,45 @@
             // “view in AR” → compose PNG → open modal
             tooltip.querySelector('.ar-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
+
                 const sels = JSON.parse(wrapper.dataset.selections || '[]');
                 const face = wrapper.dataset.face || '';
-                //const pngDataURL = await composeAvatarPNG(sels, face);
                 const displayName = (name || '').trim() || 'Your Character';
 
                 const pngDataURL = await composeAvatarPNG(sels, face, displayName);
                 if (!pngDataURL) {
-                    alert('Could not compose AR texture (CORS). Try reloading after enabling Storage CORS.');
+                    alert('Could not compose AR texture (CORS).');
                     return;
                 }
-                window.openARWithTexture(pngDataURL, displayName);
+
+                // SAFER: btn may be null if handler bound oddly or DOM moved
+                const btn = (e.currentTarget && e.currentTarget.nodeType === 1)
+                    ? e.currentTarget
+                    : e.target.closest('.ar-btn');
+
+                const prevLabel = btn ? btn.textContent : null;
+                if (btn) { btn.textContent = 'preparing…'; btn.disabled = true; }
+
+                try {
+                    const usdzUrl = await makeUsdzFromPng({ pngDataUrl: pngDataURL, displayName });
+
+                    const mv = document.getElementById('arMV');
+                    if (!mv) throw new Error('#arMV not found');
+                    mv.setAttribute('ios-src', usdzUrl + '&v=' + Date.now());
+
+                    // open modal + set runtime texture (Android/WebXR path)
+                    window.openARWithTexture?.(pngDataURL, displayName);
+
+                    // iOS quick look (ignore errors if not supported)
+                    if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+                        try { await mv.activateAR(); } catch { }
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('AR package error: ' + err.message);
+                } finally {
+                    if (btn) { btn.textContent = prevLabel; btn.disabled = false; }
+                }
             });
 
             container.appendChild(wrapper);
@@ -1195,11 +1240,15 @@
 
         // pngDataURL: transparent PNG, displayName: shown in modal header
         async function openARWithTexture(pngDataURL, displayName = 'Character') {
-            if (arTitle) arTitle.textContent = (displayName || 'Character').toUpperCase();
-            modal.classList.add('open');
-            modal.setAttribute('aria-hidden', 'false');
+            const modal = document.getElementById('arModal');
+            const mv = document.getElementById('arMV');
+            const arTitle = document.getElementById('arTitle');
 
-            // wait for GLB to load once
+            if (arTitle) arTitle.textContent = (displayName || 'Character').toUpperCase();
+            if (modal) { modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); }
+
+            if (!mv) { console.warn('#arMV missing'); return; }
+
             if (!mv.model) {
                 await new Promise(res => mv.addEventListener('load', res, { once: true }));
             }
@@ -1207,20 +1256,17 @@
             const mat = mv.model?.materials?.find(m => m.name === 'AvatarMat');
             if (!mat) { console.warn('AvatarMat not found in GLB'); return; }
 
-            const tex = await mv.createTexture(pngDataURL); // keeps alpha
+            const tex = await mv.createTexture(pngDataURL);
             const pbr = mat.pbrMetallicRoughness;
 
-            if (pbr?.baseColorTexture?.setTexture) {
-                pbr.baseColorTexture.setTexture(tex);   // model-viewer v3+
-            } else if (pbr?.setBaseColorTexture) {
-                pbr.setBaseColorTexture(tex);           // fallback
-            }
+            if (pbr?.baseColorTexture?.setTexture) pbr.baseColorTexture.setTexture(tex);
+            else if (pbr?.setBaseColorTexture) pbr.setBaseColorTexture(tex);
 
-            // non-metallic, matte poster look
             pbr?.setMetallicFactor?.(0.0);
             pbr?.setRoughnessFactor?.(1.0);
             mat?.setAlphaMode?.('BLEND');
         }
+
 
         // expose globally for the gallery script
         window.openARWithTexture = openARWithTexture;
