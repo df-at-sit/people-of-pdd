@@ -689,8 +689,12 @@
             });
             const j = await resp.json();
             if (!resp.ok || !j.ok) throw new Error(j.error || "usdz build failed");
-            return j.usdzUrl; // signed url valid ~15min
+
+            console.log("USDZ URL (from makeUsdzFromPng):", j.usdzUrl); // << add this
+            window.lastUsdz = j.usdzUrl; // handy to grab in console later
+            return j.usdzUrl;
         }
+
     </script>
 
 
@@ -892,6 +896,9 @@
 
                 try {
                     const usdzUrl = await makeUsdzFromPng({ pngDataUrl: pngDataURL, displayName });
+                    console.log("USDZ URL (from click):", usdzUrl);
+                    window.lastUsdz = usdzUrl; // optional
+
 
                     const mv = document.getElementById('arMV');
                     if (!mv) throw new Error('#arMV not found');

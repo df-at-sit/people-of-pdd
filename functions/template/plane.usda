@@ -1,0 +1,43 @@
+#usda 1.0
+(
+    defaultPrim = "Plane"
+)
+
+def Xform "Plane" {
+    def Mesh "mesh" {
+        uniform bool doubleSided = true
+        int[] faceVertexCounts = [4]
+        int[] faceVertexIndices = [0, 1, 2, 3]
+        point3f[] points = [
+            (-0.5, 0, -0.5),
+            ( 0.5, 0, -0.5),
+            ( 0.5, 0,  0.5),
+            (-0.5, 0,  0.5)
+        ]
+        texCoord2f[] primvars:st = [
+            (0, 0),
+            (1, 0),
+            (1, 1),
+            (0, 1)
+        ]
+        uniform token subdivisionScheme = "none"
+        rel material:binding = </Material>
+    }
+}
+
+def Material "Material" {
+    token outputs:surface.connect = </Material/PreviewSurface.outputs:surface>
+    def Shader "PreviewSurface" {
+        uniform token info:id = "UsdPreviewSurface"
+        color3f inputs:diffuseColor.connect = </Material/Tex.outputs:rgb>
+        float inputs:roughness = 1
+        token outputs:surface
+    }
+    def Shader "Tex" {
+        uniform token info:id = "UsdUVTexture"
+        asset inputs:file = @0/poster.png@
+        token inputs:wrapS = "repeat"
+        token inputs:wrapT = "repeat"
+        float3 outputs:rgb
+    }
+}
