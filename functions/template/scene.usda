@@ -1,0 +1,80 @@
+#usda 1.0
+(
+    defaultPrim = "Plane",
+    upAxis = "Y",
+    metersPerUnit = 1
+)
+
+def Xform "Plane"
+{
+    def Mesh "mesh"
+    {
+        uniform bool doubleSided = true
+
+        # 1 quad
+        int[] faceVertexCounts = [4]
+        int[] faceVertexIndices = [0, 1, 2, 3]
+
+        # 1x1 plane in XZ, centered, Y-up
+        point3f[] points = [
+            (-0.5, 0, -0.5),
+            ( 0.5, 0, -0.5),
+            ( 0.5, 0,  0.5),
+            (-0.5, 0,  0.5)
+        ]
+
+        # bounds (some viewers require this)
+        float3[] extent = [(-0.5, 0, -0.5), (0.5, 0, 0.5)]
+
+        # basic normals up
+        normal3f[] normals = [
+            (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0)
+        ]
+        uniform token normals:interpolation = "vertex"
+
+        # UVs + explicit interpolation (works better on Quick Look)
+        texCoord2f[] primvars:st = [
+            (0, 0), (1, 0), (1, 1), (0, 1)
+        ]
+        uniform token primvars:st:interpolation = "vertex"
+
+        uniform token subdivisionScheme = "none"
+
+        # bind material
+        rel material:binding = </Material>
+    }
+}
+
+def Material "Material"
+{
+    token outputs:surface.connect = </Material/PreviewSurface.outputs:surface>
+
+    def Shader "PreviewSurface"
+    {
+        uniform token info:id = "UsdPreviewSurface"
+        color3f inputs:diffuseColor.connect = </Material/Tex.outputs:rgb>
+        float inputs:metallic = 0
+        float inputs:roughness = 1
+        float inputs:opacity = 1
+        token outputs:surface
+    }
+
+    # explicit UV reader
+    def Shader "ST"
+    {
+        uniform token info:id = "UsdPrimvarReader_float2"
+        token inputs:varname = "st"
+        float2 outputs:result
+    }
+
+    def Shader "Tex"
+    {
+        uniform token info:id = "UsdUVTexture"
+        asset inputs:file = @0/poster.png@
+        float2 inputs:st.connect = </Material/ST.outputs:result>
+        token inputs:wrapS = "clamp"
+        token inputs:wrapT = "clamp"
+        token inputs:sourceColorSpace = "sRGB"
+        float3 outputs:rgb
+    }
+}
