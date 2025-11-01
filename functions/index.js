@@ -12,6 +12,9 @@ const os = require("os");
 const yauzl = require("yauzl");
 const yazl = require("yazl");
 const { randomUUID } = require("crypto");
+// const { promisify } = require("util");
+// const { execFile } = require("child_process");
+// const execFileAsync = promisify(execFile);
 
 // Favour the native fetch in Node 18+; lazily fall back to node-fetch for older runtimes.
 const fetchFn = globalThis.fetch
@@ -76,54 +79,65 @@ async function unzipUsdZ(usdzPath, outDir) {
     });
 }
 
+
 async function zipUsdZFromDir(srcDir, outUsdz) {
     await fsp.mkdir(path.dirname(outUsdz), { recursive: true });
     const zipfile = new yazl.ZipFile();
 
-    function priorityForRootEntry(entry) {
-        if (entry.name === STAGE_BASENAME) return -20; // ensure stage first
-        if (entry.stats.isDirectory()) return 0;
-        if (entry.name === "version.txt") return 20; // push cache buster to the end
-        return 10; // other loose files after directories
-    }
+    const normalize = (p) => p.replace(/\\/g, "/");
 
-    function addDir(rel) {
+    async function addDir(rel) {
         const abs = path.join(srcDir, rel);
-        const stats = fs.statSync(abs);
+        const stats = await fsp.stat(abs);
+
         if (!stats.isDirectory()) {
-            // USDZ requires STORE (no compression)
-            zipfile.addFile(abs, rel.replace(/\\/g, "/"), { compress: false });
+            const data = await fsp.readFile(abs); // CRC + size now known
+            zipfile.addBuffer(data, normalize(rel), {
+                compress: false,
+                mtime: stats.mtime,
+                mode: stats.mode,
+            });
             return;
         }
 
-        let entries = fs.readdirSync(abs).map((name) => ({
-            name,
-            stats: fs.statSync(path.join(abs, name)),
-        }));
-
-        if (!rel) {
-            entries.sort((a, b) => {
-                const pa = priorityForRootEntry(a);
-                const pb = priorityForRootEntry(b);
-                if (pa !== pb) return pa - pb;
-                return a.name.localeCompare(b.name);
-            });
-        } else {
-            entries.sort((a, b) => a.name.localeCompare(b.name));
-        }
-
         if (rel) {
-            const dirName = rel.replace(/\\/g, "/");
-            const needsSlash = dirName.endsWith("/") ? dirName : `${dirName}/`;
-            zipfile.addEmptyDirectory(needsSlash);
+            const dirName = normalize(rel);
+            const nameWithSlash = dirName.endsWith("/") ? dirName : `${dirName}/`;
+            zipfile.addEmptyDirectory(nameWithSlash, {
+                mtime: stats.mtime,
+                mode: stats.mode,
+            });
         }
 
-        for (const entry of entries) {
-            addDir(path.join(rel, entry.name));
+        let entries = await fsp.readdir(abs);
+        const enriched = await Promise.all(
+            entries.map(async (name) => {
+                const childAbs = path.join(abs, name);
+                const childStats = await fsp.stat(childAbs);
+                return { name, stats: childStats };
+            })
+        );
+
+        enriched.sort((a, b) => {
+            if (!rel) {
+                const priority = (entry) => {
+                    if (entry.name === STAGE_BASENAME) return -20;
+                    if (entry.stats.isDirectory()) return 0;
+                    return 10;
+                };
+                const pa = priority(a);
+                const pb = priority(b);
+                if (pa !== pb) return pa - pb;
+            }
+            return a.name.localeCompare(b.name);
+        });
+
+        for (const entry of enriched) {
+            await addDir(path.join(rel, entry.name));
         }
     }
 
-    addDir("");
+    await addDir("");
 
     await new Promise((resolve, reject) => {
         zipfile.outputStream
@@ -162,7 +176,7 @@ app.post("/make-usdz", async (req, res) => {
         await fsp.copyFile(incomingPng, texDest);
 
         // optional cache buster
-        await fsp.writeFile(path.join(unpackDir, "version.txt"), String(Date.now()));
+        // await fsp.writeFile(path.join(unpackDir, "version.txt"), String(Date.now()));
 
         // repack
         await zipUsdZFromDir(unpackDir, outUsdz);
