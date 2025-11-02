@@ -633,7 +633,8 @@
             </div>
 
             <!-- 3D viewer -->
-            <model-viewer id="arMV" src="./assets/ar/avatar-billboard.glb" ios-src="./assets/ar/avatar-billboard.usdz"
+            <model-viewer id="arMV" src="./assets/ar/animationtemplate.glb"
+                ios-src="./functions/template/animationtemplate.usdz"
                 ar ar-modes="webxr scene-viewer quick-look" placement="floor" camera-controls shadow-intensity="0.25"
                 exposure="1" tone-mapping="aces" environment-image="neutral" interaction-prompt="none">
             </model-viewer>
@@ -681,11 +682,16 @@
         const API_BASE =
             "https://asia-southeast1-people-of-pdd-website.cloudfunctions.net/api";
 
-        async function makeUsdzFromPng({ pngDataUrl, pngUrl, displayName }) {
+        async function makeUsdzFromPng({ posterDataUrl, traitDataUrls = [], nameDataUrl, pngDataUrl, pngUrl, displayName }) {
+            const payload = { displayName };
+            if (posterDataUrl || pngDataUrl) payload.posterDataUrl = posterDataUrl || pngDataUrl;
+            if (pngUrl) payload.pngUrl = pngUrl;
+            if (Array.isArray(traitDataUrls) && traitDataUrls.length) payload.traitDataUrls = traitDataUrls;
+            if (nameDataUrl) payload.nameDataUrl = nameDataUrl;
             const resp = await fetch(`${API_BASE}/make-usdz`, {
                 method: "POST",
                 headers: { "content-type": "application/json" },
-                body: JSON.stringify({ pngDataUrl, pngUrl, displayName }),
+                body: JSON.stringify(payload),
             });
             const j = await resp.json();
             if (!resp.ok || !j.ok) throw new Error(j.error || "usdz build failed");
@@ -820,6 +826,95 @@
                 img.onerror = () => resolve(null);
                 img.src = url;
             });
+        }
+
+        const TRAIT_TEXTURE_SIZE = 1024;
+        const NAME_TEXTURE_W = 1010;
+        const NAME_TEXTURE_H = 256;
+
+        function buildTraitTexture(entry, badgeImg) {
+            const label = (entry?.text || '').trim();
+            const hasContent = badgeImg || label;
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = TRAIT_TEXTURE_SIZE;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, TRAIT_TEXTURE_SIZE, TRAIT_TEXTURE_SIZE);
+
+            if (!hasContent) {
+                return canvas.toDataURL('image/png');
+            }
+
+            const fg = (entry?.color || '#2a9df4').trim() || '#2a9df4';
+
+            ctx.fillStyle = fg;
+            ctx.globalAlpha = 0.2;
+            ctx.fillRect(0, 0, TRAIT_TEXTURE_SIZE, TRAIT_TEXTURE_SIZE);
+            ctx.globalAlpha = 1;
+
+            ctx.beginPath();
+            ctx.fillStyle = fg;
+            ctx.globalAlpha = 0.65;
+            ctx.arc(TRAIT_TEXTURE_SIZE / 2, TRAIT_TEXTURE_SIZE / 2, TRAIT_TEXTURE_SIZE * 0.42, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            if (badgeImg) {
+                const maxDim = TRAIT_TEXTURE_SIZE * 0.62;
+                const aspect = badgeImg.naturalWidth / (badgeImg.naturalHeight || 1);
+                let drawW = maxDim;
+                let drawH = maxDim;
+                if (aspect >= 1) {
+                    drawH = maxDim / aspect;
+                } else {
+                    drawW = maxDim * aspect;
+                }
+                const dx = (TRAIT_TEXTURE_SIZE - drawW) / 2;
+                const dy = (TRAIT_TEXTURE_SIZE - drawH) / 2;
+                ctx.drawImage(badgeImg, dx, dy, drawW, drawH);
+            } else if (label) {
+                let fontSize = 128;
+                const maxWidth = TRAIT_TEXTURE_SIZE * 0.68;
+                const maxLines = 3;
+                const upper = label.toUpperCase();
+                let lines = [];
+
+                const measureLines = () => {
+                    const words = upper.split(/\s+/);
+                    const tmp = [];
+                    let current = '';
+                    for (const word of words) {
+                        const candidate = current ? `${current} ${word}` : word;
+                        if (!current || ctx.measureText(candidate).width <= maxWidth) {
+                            current = candidate;
+                        } else {
+                            tmp.push(current);
+                            current = word;
+                        }
+                    }
+                    if (current) tmp.push(current);
+                    return tmp;
+                };
+
+                while (fontSize >= 40) {
+                    ctx.font = `800 ${fontSize}px 'PP Mori', 'Helvetica Neue', Arial, sans-serif`;
+                    lines = measureLines();
+                    const fitsWidth = lines.every(line => ctx.measureText(line).width <= maxWidth);
+                    if (lines.length <= maxLines && fitsWidth) break;
+                    fontSize -= 6;
+                }
+                if (!lines.length) lines = [upper];
+
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const lineHeight = fontSize * 1.1;
+                const startY = TRAIT_TEXTURE_SIZE / 2 - ((lines.length - 1) * lineHeight) / 2;
+                lines.forEach((line, i) => {
+                    ctx.fillText(line, TRAIT_TEXTURE_SIZE / 2, startY + i * lineHeight);
+                });
+            }
+
+            return canvas.toDataURL('image/png');
         }
 
         // responsive scale
@@ -974,7 +1069,7 @@
                 }
             });
 
-            // “view in AR” → compose PNG → open modal
+            // “view in AR” → compose textures → open modal
             tooltip.querySelector('.ar-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
 
@@ -982,11 +1077,12 @@
                 const face = wrapper.dataset.face || '';
                 const displayName = (name || '').trim() || 'Your Character';
 
-                const pngDataURL = await composeAvatarPNG(sels, face, displayName);
-                if (!pngDataURL) {
-                    alert('Could not compose AR texture (CORS).');
+                const textures = await composeAvatarPNG(sels, face, displayName);
+                if (!textures || !textures.posterDataUrl) {
+                    alert('Could not compose AR textures (CORS).');
                     return;
                 }
+                window.lastArTextures = textures;
 
                 // SAFER: btn may be null if handler bound oddly or DOM moved
                 const btn = (e.currentTarget && e.currentTarget.nodeType === 1)
@@ -997,7 +1093,12 @@
                 if (btn) { btn.textContent = 'preparing…'; btn.disabled = true; }
 
                 try {
-                    const usdzUrl = await makeUsdzFromPng({ pngDataUrl: pngDataURL, displayName });
+                    const usdzUrl = await makeUsdzFromPng({
+                        posterDataUrl: textures.posterDataUrl,
+                        traitDataUrls: textures.traitDataUrls,
+                        nameDataUrl: textures.nameDataUrl,
+                        displayName
+                    });
                     console.log("USDZ URL (from click):", usdzUrl);
                     window.lastUsdz = usdzUrl; // optional
 
@@ -1007,7 +1108,7 @@
                     mv.setAttribute('ios-src', usdzUrl + '&v=' + Date.now());
 
                     // open modal + set runtime texture (Android/WebXR path)
-                    window.openARWithTexture?.(pngDataURL, displayName);
+                    window.openARWithTexture?.(textures, displayName);
 
                     // iOS quick look (ignore errors if not supported)
                     if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
@@ -1256,25 +1357,6 @@
             out.width = CANVAS_W; out.height = CANVAS_H;
             const ctx = out.getContext('2d');
 
-            // 0) NAME BANNER (draw first so avatar sits "under" it if overlapping)
-            // tweak these to taste
-            const BANNER_H = 220;                 // banner height
-            const BANNER_Y = 90;                  // distance from very top
-            const BANNER_RX = 32;                 // corner radius
-            const BANNER_PAD_X = 64;              // horizontal padding for text
-            const BANNER_BG = '#2a9df4';          // PDD blue
-            const BANNER_STROKE = '#ffffff';
-            const TEXT_COLOR = '#ffffff';
-            if (displayName) {
-                drawNameBanner(ctx, displayName, CANVAS_W, {
-                    topY: 90,           // move down/up if you like
-                    maxWidthPct: 0.86,  // clamp to ~86% of canvas width
-                    minWidth: 420,      // min pill width
-                    padX: 64,
-                    padY: 28,
-                    cornerR: 32
-                });
-            }
             // 1) avatar parts (unchanged logic, small comments)
             for (let i = 0; i < 4; i++) {
                 const img = imgs[3 - i]; if (!img) continue;
@@ -1330,8 +1412,14 @@
             const getFileName = (idx) => {
                 const src = typeof parts[idx] === 'string' ? parts[idx] : '';
                 if (!src) return '';
-                const bits = src.split('/');
-                return bits[bits.length - 1] || '';
+                const segment = (src.split('/').pop() || '');
+                const clean = segment.split('?')[0].split('#')[0];
+                let decoded = clean;
+                try {
+                    decoded = decodeURIComponent(clean);
+                } catch { /* ignore */ }
+                const finalSeg = decoded.includes('/') ? decoded.split('/').pop() : decoded;
+                return (finalSeg || '').trim();
             };
 
             const hatFile = getFileName(0);
@@ -1339,51 +1427,53 @@
             const legsFile = getFileName(2);
             const shoesFile = getFileName(3);
 
-            const BADGE_W = 240;
-            const BADGE_H = 240;
-            const BADGE_ROT = [12, -6, -14, 8];
-
-            const centerX = CANVAS_W / 2;
-            const centerY = CANVAS_H / 2;
-            const badgePositions = [
-                { x: centerX + 420, y: centerY - 100 },
-                { x: centerX - 430, y: centerY + 100 },
-                { x: centerX + 380, y: centerY + 400 },
-                { x: centerX - 380, y: centerY + 570 }
-            ];
-
-            let traitEntries = [
+            const traitEntries = [
                 { text: hairHatTraits[hatFile] || '', color: '#22b573' },
                 { text: torsoTraits[torsoFile] || '', color: '#e91e63' },
                 { text: legsTraits[legsFile] || '', color: '#f4b63d' },
                 { text: shoesTraits[shoesFile] || '', color: '#2a9df4' }
             ];
 
-            traitEntries = dedupeEntries(traitEntries);
-
             const badgeImgs = await Promise.all(traitEntries.map(entry => {
-                if (!entry.text) return Promise.resolve(null);
-                const badgeUrl = badgeUrlFromTrait(entry.text);
-                return loadBadgeImage(badgeUrl);
+                const badgeUrl = entry.text ? badgeUrlFromTrait(entry.text) : null;
+                return badgeUrl ? loadBadgeImage(badgeUrl) : Promise.resolve(null);
             }));
 
-            badgeImgs.forEach((img, idx) => {
-                if (!img) return;
-                const pos = badgePositions[idx];
-                const tilt = BADGE_ROT[idx] ?? 0;
-                ctx.save();
-                ctx.translate(pos.x, pos.y);
-                ctx.rotate((tilt * Math.PI) / 180);
-                ctx.drawImage(img, -BADGE_W / 2, -BADGE_H / 2, BADGE_W, BADGE_H);
-                ctx.restore();
-            });
+            const traitDataUrls = traitEntries.map((entry, idx) => buildTraitTexture(entry, badgeImgs[idx]));
 
+            let posterDataUrl = null;
             try {
-                return out.toDataURL('image/png'); // transparent PNG with banner
+                posterDataUrl = out.toDataURL('image/png'); // transparent PNG for avatar plane
             } catch (e) {
                 console.error('toDataURL failed (likely CORS/tainted canvas):', e);
                 return null;
             }
+
+            let nameDataUrl = null;
+            try {
+                const nameCanvas = document.createElement('canvas');
+                nameCanvas.width = NAME_TEXTURE_W;
+                nameCanvas.height = NAME_TEXTURE_H;
+                const nameCtx = nameCanvas.getContext('2d');
+                nameCtx.clearRect(0, 0, NAME_TEXTURE_W, NAME_TEXTURE_H);
+                if (displayName) {
+                    const bannerHeight = 170;
+                    const topY = Math.max(24, (NAME_TEXTURE_H - bannerHeight) / 2);
+                    drawNameBanner(nameCtx, displayName, NAME_TEXTURE_W, {
+                        topY,
+                        maxWidthPct: 0.92,
+                        minWidth: Math.min(820, NAME_TEXTURE_W * 0.88),
+                        padX: 64,
+                        padY: 34,
+                        cornerR: 56
+                    });
+                }
+                nameDataUrl = nameCanvas.toDataURL('image/png');
+            } catch (err) {
+                console.error('failed to compose name texture', err);
+            }
+
+            return { posterDataUrl, traitDataUrls, nameDataUrl };
         }
 
     </script>
@@ -1400,8 +1490,8 @@
             modal.setAttribute('aria-hidden', 'true');
         });
 
-        // pngDataURL: transparent PNG, displayName: shown in modal header
-        async function openARWithTexture(pngDataURL, displayName = 'Character') {
+        // textureBundle: { posterDataUrl, nameDataUrl, traitDataUrls[] }, displayName: shown in modal header
+        async function openARWithTexture(textureBundle, displayName = 'Character') {
             const modal = document.getElementById('arModal');
             const mv = document.getElementById('arMV');
             const arTitle = document.getElementById('arTitle');
@@ -1415,18 +1505,54 @@
                 await new Promise(res => mv.addEventListener('load', res, { once: true }));
             }
 
-            const mat = mv.model?.materials?.find(m => m.name === 'AvatarMat');
-            if (!mat) { console.warn('AvatarMat not found in GLB'); return; }
+            const bundle = typeof textureBundle === 'string'
+                ? { posterDataUrl: textureBundle, traitDataUrls: [] }
+                : (textureBundle || {});
+            const posterDataUrl = bundle.posterDataUrl || bundle.poster || bundle.pngDataUrl || null;
+            const traitDataUrls = Array.isArray(bundle.traitDataUrls)
+                ? bundle.traitDataUrls
+                : Array.isArray(bundle.traits) ? bundle.traits : [];
+            const nameDataUrl = bundle.nameDataUrl || bundle.name || null;
 
-            const tex = await mv.createTexture(pngDataURL);
-            const pbr = mat.pbrMetallicRoughness;
+            const materials = mv.model?.materials || [];
+            const posterMat = materials.find(m => m.name === 'PosterMaterial') || materials.find(m => m.name === 'AvatarMat');
+            if (!posterMat) { console.warn('PosterMaterial not found in GLB'); return; }
 
-            if (pbr?.baseColorTexture?.setTexture) pbr.baseColorTexture.setTexture(tex);
-            else if (pbr?.setBaseColorTexture) pbr.setBaseColorTexture(tex);
+            if (posterDataUrl) {
+                const tex = await mv.createTexture(posterDataUrl);
+                const pbr = posterMat.pbrMetallicRoughness;
+                if (pbr?.baseColorTexture?.setTexture) pbr.baseColorTexture.setTexture(tex);
+                else if (pbr?.setBaseColorTexture) pbr.setBaseColorTexture(tex);
+                pbr?.setMetallicFactor?.(0.0);
+                pbr?.setRoughnessFactor?.(1.0);
+                posterMat?.setAlphaMode?.('BLEND');
+            }
 
-            pbr?.setMetallicFactor?.(0.0);
-            pbr?.setRoughnessFactor?.(1.0);
-            mat?.setAlphaMode?.('BLEND');
+            const nameMat = materials.find(m => m.name === 'name');
+            if (nameMat && nameDataUrl) {
+                const nameTex = await mv.createTexture(nameDataUrl);
+                const namePbr = nameMat.pbrMetallicRoughness;
+                if (namePbr?.baseColorTexture?.setTexture) namePbr.baseColorTexture.setTexture(nameTex);
+                else if (namePbr?.setBaseColorTexture) namePbr.setBaseColorTexture(nameTex);
+                namePbr?.setMetallicFactor?.(0.0);
+                namePbr?.setRoughnessFactor?.(1.0);
+                nameMat?.setAlphaMode?.('BLEND');
+            }
+
+            const traitNames = ['trait1', 'trait2', 'trait3', 'trait4'];
+            await Promise.all(traitNames.map(async (traitName, idx) => {
+                const mat = materials.find(m => m.name === traitName);
+                if (!mat) return;
+                const dataUrl = traitDataUrls[idx];
+                if (!dataUrl) return;
+                const tex = await mv.createTexture(dataUrl);
+                const pbr = mat.pbrMetallicRoughness;
+                if (pbr?.baseColorTexture?.setTexture) pbr.baseColorTexture.setTexture(tex);
+                else if (pbr?.setBaseColorTexture) pbr.setBaseColorTexture(tex);
+                pbr?.setMetallicFactor?.(0.0);
+                pbr?.setRoughnessFactor?.(1.0);
+                mat?.setAlphaMode?.('BLEND');
+            }));
         }
 
 

@@ -23,8 +23,16 @@ const fetchFn = globalThis.fetch
 
 // ---- config ----
 // change if your template places the texture elsewhere (e.g. "textures/poster.png")
-const TEX_PATH_IN_USDZ = path.join("textures", "poster.png");
-const STAGE_BASENAME = "template.usdc";
+const TEX_PATHS = {
+    poster: path.join("textures", "poster.png"),
+    name: path.join("textures", "name.png"),
+    trait1: path.join("textures", "trait1.png"),
+    trait2: path.join("textures", "trait2.png"),
+    trait3: path.join("textures", "trait3.png"),
+    trait4: path.join("textures", "trait4.png"),
+};
+const TRAIT_KEYS = ["trait1", "trait2", "trait3", "trait4"];
+const STAGE_BASENAME = "animationtemplate.usdc";
 
 // ---- init ----
 admin.initializeApp();
@@ -149,18 +157,21 @@ async function zipUsdZFromDir(srcDir, outUsdz) {
 }
 
 // --- main endpoint ---
-// body: { pngDataUrl?: string, pngUrl?: string, displayName?: string }
+// body: { posterDataUrl?: string, pngDataUrl?: string, pngUrl?: string, traitDataUrls?: string[], nameDataUrl?: string, displayName?: string }
 app.options("/make-usdz", (_, res) => res.sendStatus(204)); // CORS preflight
 app.post("/make-usdz", async (req, res) => {
     try {
-        const { pngDataUrl, pngUrl, displayName } = req.body || {};
-        const src = pngDataUrl || pngUrl;
-        if (!src) return res.status(400).json({ ok: false, error: "pngDataUrl or pngUrl required" });
+        const { posterDataUrl, pngDataUrl, pngUrl, traitDataUrls, nameDataUrl, displayName } = req.body || {};
+        const posterSrc = posterDataUrl || pngDataUrl || pngUrl;
+        if (!posterSrc) {
+            return res.status(400).json({ ok: false, error: "posterDataUrl or pngDataUrl required" });
+        }
+        const traitSrcs = Array.isArray(traitDataUrls) ? traitDataUrls : [];
 
         // local, checked-in template
-        const templatePath = path.join(__dirname, "template", "template.usdz");
+        const templatePath = path.join(__dirname, "template", "animationtemplate.usdz");
         if (!fs.existsSync(templatePath)) {
-            return res.status(500).json({ ok: false, error: "template.usdz missing on server" });
+            return res.status(500).json({ ok: false, error: "animationtemplate.usdz missing on server" });
         }
 
         // workspace
@@ -169,11 +180,19 @@ app.post("/make-usdz", async (req, res) => {
         const outUsdz = path.join(work, "out.usdz");
         await unzipUsdZ(templatePath, unpackDir);
 
-        // overwrite texture in the package
-        const incomingPng = await writePngTemp(src);
-        const texDest = path.join(unpackDir, TEX_PATH_IN_USDZ);
-        await fsp.mkdir(path.dirname(texDest), { recursive: true });
-        await fsp.copyFile(incomingPng, texDest);
+        async function replaceTexture(relPath, source) {
+            if (!source) return;
+            const tmp = await writePngTemp(source);
+            const dest = path.join(unpackDir, relPath);
+            await fsp.mkdir(path.dirname(dest), { recursive: true });
+            await fsp.copyFile(tmp, dest);
+        }
+
+        await replaceTexture(TEX_PATHS.poster, posterSrc);
+        await replaceTexture(TEX_PATHS.name, nameDataUrl);
+        await Promise.all(
+            TRAIT_KEYS.map((key, idx) => replaceTexture(TEX_PATHS[key], traitSrcs[idx]))
+        );
 
         // optional cache buster
         // await fsp.writeFile(path.join(unpackDir, "version.txt"), String(Date.now()));
