@@ -721,6 +721,107 @@
         const footerEl = document.querySelector('footer');
         let SCALE = 1;
 
+        let hairHatTraits = {};
+        let torsoTraits = {};
+        let legsTraits = {};
+        let shoesTraits = {};
+        let keywordIndexMap = {};
+        const badgeCache = new Map();
+        let traitInitPromise = null;
+
+        function csvToMap(text) {
+            const lines = text.trim().split(/\r?\n/);
+            const header = lines.shift().split(',');
+            const fi = header.findIndex(h => /filename/i.test(h));
+            const ti = header.findIndex(h => /trait/i.test(h));
+            const map = {};
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                const cols = line.split(',');
+                const file = cols[fi]?.trim();
+                const trait = cols[ti]?.trim();
+                if (file && trait) map[file] = trait;
+            }
+            return map;
+        }
+
+        function csvToKeywordIndex(text) {
+            const lines = text.trim().split(/\r?\n/);
+            const header = lines.shift().split(',');
+            const ki = header.findIndex(h => /keyword/i.test(h));
+            const ii = header.findIndex(h => /(image\s*number|number|index)/i.test(h));
+            const map = {};
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                const cols = line.split(',');
+                const kw = (cols[ki] || '').trim().toLowerCase();
+                const num = parseInt((cols[ii] || '').trim(), 10);
+                if (kw && Number.isFinite(num)) map[kw] = num;
+            }
+            return map;
+        }
+
+        async function ensureTraitsReady() {
+            if (!traitInitPromise) {
+                traitInitPromise = (async () => {
+                    const [
+                        hairCSV,
+                        torsoCSV,
+                        legsCSV,
+                        shoesCSV,
+                        keywordCSV
+                    ] = await Promise.all([
+                        fetch('./assets/traits/hair-hat.csv').then(r => r.text()),
+                        fetch('./assets/traits/torso.csv').then(r => r.text()),
+                        fetch('./assets/traits/legs.csv').then(r => r.text()),
+                        fetch('./assets/traits/shoes.csv').then(r => r.text()),
+                        fetch('./assets/traits/pdd_keywords.csv').then(r => r.text())
+                    ]);
+                    hairHatTraits = csvToMap(hairCSV);
+                    torsoTraits = csvToMap(torsoCSV);
+                    legsTraits = csvToMap(legsCSV);
+                    shoesTraits = csvToMap(shoesCSV);
+                    keywordIndexMap = csvToKeywordIndex(keywordCSV);
+                })().catch(err => {
+                    traitInitPromise = null;
+                    console.error('failed to load trait data', err);
+                    throw err;
+                });
+            }
+            return traitInitPromise;
+        }
+
+        function dedupeEntries(entries) {
+            const seen = new Set();
+            return entries.map(entry => {
+                const value = (entry.text || '').trim();
+                if (!value || seen.has(value)) return { ...entry, text: '' };
+                seen.add(value);
+                return entry;
+            });
+        }
+
+        function badgeUrlFromTrait(trait) {
+            const idx = keywordIndexMap[(trait || '').trim().toLowerCase()];
+            if (!idx) return null;
+            return `./assets/traits/badges/${idx}.svg`;
+        }
+
+        function loadBadgeImage(url) {
+            if (!url) return Promise.resolve(null);
+            if (badgeCache.has(url)) return Promise.resolve(badgeCache.get(url));
+            return new Promise(resolve => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    badgeCache.set(url, img);
+                    resolve(img);
+                };
+                img.onerror = () => resolve(null);
+                img.src = url;
+            });
+        }
+
         // responsive scale
         const isMobileView = () => window.matchMedia('(max-width: 600px)').matches;
         const currentScale = () => isMobileView() ? 0.72 : 1;
@@ -733,6 +834,7 @@
         // init — fetch from Firestore and render
         document.addEventListener('DOMContentLoaded', async () => {
             resizeContainer();
+            await ensureTraitsReady();
 
             const q = window.query(window.collection(window.db, "galleryCharacters"), window.orderBy("createdAt", "desc"));
             const snap = await window.getDocs(q);
@@ -1102,6 +1204,7 @@
 
         // ---- PNG compositor (exact placement + NAME BANNER) ----
         async function composeAvatarPNG(selections, faceData, displayName = '') {
+            await ensureTraitsReady();
             // canvas & VB from your original exporter
             const CANVAS_W = 1200, CANVAS_H = 1800;
             const vbW = 800, vbH = 800;
@@ -1222,6 +1325,58 @@
                     ctx.drawImage(face, 0, 0, fcW, fcH, xF, yF, fcW * s, fcH * s);
                 }
             }
+
+            const parts = Array.isArray(selections) ? selections : [];
+            const getFileName = (idx) => {
+                const src = typeof parts[idx] === 'string' ? parts[idx] : '';
+                if (!src) return '';
+                const bits = src.split('/');
+                return bits[bits.length - 1] || '';
+            };
+
+            const hatFile = getFileName(0);
+            const torsoFile = getFileName(1);
+            const legsFile = getFileName(2);
+            const shoesFile = getFileName(3);
+
+            const BADGE_W = 240;
+            const BADGE_H = 240;
+            const BADGE_ROT = [12, -6, -14, 8];
+
+            const centerX = CANVAS_W / 2;
+            const centerY = CANVAS_H / 2;
+            const badgePositions = [
+                { x: centerX + 420, y: centerY - 100 },
+                { x: centerX - 430, y: centerY + 100 },
+                { x: centerX + 380, y: centerY + 400 },
+                { x: centerX - 380, y: centerY + 570 }
+            ];
+
+            let traitEntries = [
+                { text: hairHatTraits[hatFile] || '', color: '#22b573' },
+                { text: torsoTraits[torsoFile] || '', color: '#e91e63' },
+                { text: legsTraits[legsFile] || '', color: '#f4b63d' },
+                { text: shoesTraits[shoesFile] || '', color: '#2a9df4' }
+            ];
+
+            traitEntries = dedupeEntries(traitEntries);
+
+            const badgeImgs = await Promise.all(traitEntries.map(entry => {
+                if (!entry.text) return Promise.resolve(null);
+                const badgeUrl = badgeUrlFromTrait(entry.text);
+                return loadBadgeImage(badgeUrl);
+            }));
+
+            badgeImgs.forEach((img, idx) => {
+                if (!img) return;
+                const pos = badgePositions[idx];
+                const tilt = BADGE_ROT[idx] ?? 0;
+                ctx.save();
+                ctx.translate(pos.x, pos.y);
+                ctx.rotate((tilt * Math.PI) / 180);
+                ctx.drawImage(img, -BADGE_W / 2, -BADGE_H / 2, BADGE_W, BADGE_H);
+                ctx.restore();
+            });
 
             try {
                 return out.toDataURL('image/png'); // transparent PNG with banner

@@ -23,7 +23,7 @@ const fetchFn = globalThis.fetch
 
 // ---- config ----
 // change if your template places the texture elsewhere (e.g. "textures/poster.png")
-const TEX_PATH_IN_USDZ = path.join("0", "poster.png");
+const TEX_PATH_IN_USDZ = path.join("textures", "poster.png");
 const STAGE_BASENAME = "template.usdc";
 
 // ---- init ----
