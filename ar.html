@@ -634,9 +634,9 @@
 
             <!-- 3D viewer -->
             <model-viewer id="arMV" src="./assets/ar/animationtemplate.glb"
-                ios-src="./functions/template/animationtemplate.usdz"
-                ar ar-modes="webxr scene-viewer quick-look" placement="floor" camera-controls shadow-intensity="0.25"
-                exposure="1" tone-mapping="aces" environment-image="neutral" interaction-prompt="none">
+                ios-src="./functions/template/animationtemplate.usdz" ar ar-modes="webxr scene-viewer quick-look"
+                placement="floor" camera-controls shadow-intensity="0.25" exposure="1" tone-mapping="aces"
+                environment-image="neutral" interaction-prompt="none">
             </model-viewer>
 
             <!-- Bottom instruction bar -->
@@ -828,6 +828,28 @@
             });
         }
 
+        const ensureSemiBoldFont = (() => {
+            let promise = null;
+            return () => {
+                if (promise) return promise;
+                if (!('fonts' in document) || !window.FontFace) {
+                    return Promise.resolve(null);
+                }
+                const face = new FontFace('PP Mori SemiBold', 'url("./assets/fonts/PPMori-SemiBold.otf")');
+                promise = face.load()
+                    .then(loaded => {
+                        document.fonts.add(loaded);
+                        return loaded;
+                    })
+                    .catch(err => {
+                        console.warn('Failed to load PP Mori SemiBold font', err);
+                        promise = null;
+                        return null;
+                    });
+                return promise;
+            };
+        })();
+
         const TRAIT_TEXTURE_SIZE = 1024;
         const NAME_TEXTURE_W = 1010;
         const NAME_TEXTURE_H = 256;
@@ -845,18 +867,6 @@
             }
 
             const fg = (entry?.color || '#2a9df4').trim() || '#2a9df4';
-
-            ctx.fillStyle = fg;
-            ctx.globalAlpha = 0.2;
-            ctx.fillRect(0, 0, TRAIT_TEXTURE_SIZE, TRAIT_TEXTURE_SIZE);
-            ctx.globalAlpha = 1;
-
-            ctx.beginPath();
-            ctx.fillStyle = fg;
-            ctx.globalAlpha = 0.65;
-            ctx.arc(TRAIT_TEXTURE_SIZE / 2, TRAIT_TEXTURE_SIZE / 2, TRAIT_TEXTURE_SIZE * 0.42, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1;
 
             if (badgeImg) {
                 const maxDim = TRAIT_TEXTURE_SIZE * 0.62;
@@ -904,14 +914,21 @@
                 }
                 if (!lines.length) lines = [upper];
 
-                ctx.fillStyle = '#ffffff';
+                ctx.fillStyle = fg;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.45)';
+                ctx.shadowBlur = 18;
+                ctx.shadowOffsetY = 6;
                 const lineHeight = fontSize * 1.1;
                 const startY = TRAIT_TEXTURE_SIZE / 2 - ((lines.length - 1) * lineHeight) / 2;
                 lines.forEach((line, i) => {
-                    ctx.fillText(line, TRAIT_TEXTURE_SIZE / 2, startY + i * lineHeight);
+                    const y = startY + i * lineHeight;
+                    ctx.fillText(line, TRAIT_TEXTURE_SIZE / 2, y);
                 });
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetY = 0;
             }
 
             return canvas.toDataURL('image/png');
@@ -1223,83 +1240,6 @@
             return el;
         }
 
-        function drawNameBanner(ctx, text, canvasW, opts = {}) {
-            const {
-                topY = 90,
-                maxWidthPct = 0.84,     // banner won’t exceed this % of canvas width
-                minWidth = 420,         // nice min pill width
-                padX = 64,
-                padY = 28,
-                cornerR = 32,
-                bg = '#2a9df4',
-                stroke = '#ffffff',
-                textColor = '#ffffff',
-                startFont = 120,
-                minFont = 40
-            } = opts;
-
-            const rr = (x, y, w, h, r) => {
-                ctx.beginPath();
-                ctx.moveTo(x + r, y);
-                ctx.lineTo(x + w - r, y);
-                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-                ctx.lineTo(x + w, y + h - r);
-                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-                ctx.lineTo(x + r, y + h);
-                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-                ctx.lineTo(x, y + r);
-                ctx.quadraticCurveTo(x, y, x + r, y);
-                ctx.closePath();
-            };
-
-            const pickFont = (sz) => `${sz}px "PP Mori", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
-
-            const maxBannerW = canvasW * maxWidthPct;
-            let fontSize = startFont;
-            const t = String(text).toUpperCase();
-
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = textColor;
-            ctx.font = pickFont(fontSize);
-
-            // shrink font until text fits inside maxBannerW (with padding)
-            while (ctx.measureText(t).width + padX * 2 > maxBannerW && fontSize > minFont) {
-                fontSize -= 4;
-                ctx.font = pickFont(fontSize);
-            }
-
-            const textW = ctx.measureText(t).width;
-            const bannerW = Math.max(minWidth, Math.min(maxBannerW, textW + padX * 2));
-            const bannerH = fontSize + padY * 2;
-            const x = (canvasW - bannerW) / 2;
-            const y = topY;
-
-            // bg + subtle stroke
-            rr(x, y, bannerW, bannerH, cornerR);
-            ctx.fillStyle = bg;
-            ctx.fill();
-
-            ctx.lineWidth = 6;
-            ctx.strokeStyle = stroke;
-            ctx.globalAlpha = 0.85;
-            ctx.stroke();
-            ctx.globalAlpha = 1;
-
-            // text shadow for legibility
-            ctx.shadowColor = 'rgba(0,0,0,0.35)';
-            ctx.shadowBlur = 12;
-            ctx.shadowOffsetY = 2;
-
-            ctx.fillStyle = textColor;
-            ctx.fillText(t, x + bannerW / 2, y + bannerH / 2);
-
-            // reset shadow
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetY = 0;
-        }
-
 
 
 
@@ -1311,11 +1251,11 @@
             const vbW = 800, vbH = 800;
 
             const baseScale = CANVAS_W / vbW;
-            const fillMultiplier = 2;
+            const fillMultiplier = 2.35;
             const s = baseScale * fillMultiplier;
             const xOff = (CANVAS_W - vbW * s) / 2;
             const baseYOff = (CANVAS_H - vbH * s) / 2;
-            const manualYOffset = 500;
+            const manualYOffset = 720;
             const yOff = baseYOff + manualYOffset;
 
             const originVB = { x: vbW / 2, y: 100 };
@@ -1457,16 +1397,82 @@
                 const nameCtx = nameCanvas.getContext('2d');
                 nameCtx.clearRect(0, 0, NAME_TEXTURE_W, NAME_TEXTURE_H);
                 if (displayName) {
-                    const bannerHeight = 170;
-                    const topY = Math.max(24, (NAME_TEXTURE_H - bannerHeight) / 2);
-                    drawNameBanner(nameCtx, displayName, NAME_TEXTURE_W, {
-                        topY,
-                        maxWidthPct: 0.92,
-                        minWidth: Math.min(820, NAME_TEXTURE_W * 0.88),
-                        padX: 64,
-                        padY: 34,
-                        cornerR: 56
-                    });
+                    const text = String(displayName).trim();
+                    if (text) {
+                        await ensureSemiBoldFont();
+                        const upper = text.toUpperCase();
+                        const maxWidth = NAME_TEXTURE_W * 0.82;
+                        const maxLines = 2;
+                        let fontSize = 88;
+                        let lines = [];
+                        const measureLines = () => {
+                            const words = upper.split(/\s+/);
+                            const tmp = [];
+                            let current = '';
+                            for (const word of words) {
+                                const candidate = current ? `${current} ${word}` : word;
+                                if (!current || nameCtx.measureText(candidate).width <= maxWidth) {
+                                    current = candidate;
+                                } else {
+                                    tmp.push(current);
+                                    current = word;
+                                }
+                            }
+                            if (current) tmp.push(current);
+                            return tmp;
+                        };
+
+                        while (fontSize >= 56) {
+                            nameCtx.font = `800 ${fontSize}px 'PP Mori SemiBold', 'PP Mori', 'Helvetica Neue', Arial, sans-serif`;
+                            lines = measureLines();
+                            const fitsWidth = lines.every(line => nameCtx.measureText(line).width <= maxWidth);
+                            if (lines.length <= maxLines && fitsWidth) break;
+                            fontSize -= 6;
+                        }
+                        if (!lines.length) lines = [upper];
+
+                        nameCtx.textAlign = 'center';
+                        nameCtx.textBaseline = 'middle';
+                        nameCtx.font = `800 ${fontSize}px 'PP Mori SemiBold', 'PP Mori', 'Helvetica Neue', Arial, sans-serif`;
+
+                        const lineHeight = fontSize * 1.05;
+                        const maxLineWidth = lines.reduce((m, line) => Math.max(m, nameCtx.measureText(line).width), 0);
+                        const padX = Math.max(NAME_TEXTURE_W * 0.12, 54);
+                        const padY = Math.max(NAME_TEXTURE_H * 0.14, 40);
+                        const totalTextHeight = lines.length * lineHeight;
+                        const rectWidth = Math.min(NAME_TEXTURE_W - 40, maxLineWidth + padX * 2);
+                        const rectHeight = Math.min(NAME_TEXTURE_H - 40, totalTextHeight + padY * 2);
+                        const rectX = (NAME_TEXTURE_W - rectWidth) / 2;
+                        const rectY = (NAME_TEXTURE_H - rectHeight) / 2;
+                        const cornerR = Math.min(96, rectHeight / 1.6);
+
+                        const drawRoundedRect = (ctx, x, y, w, h, r) => {
+                            ctx.beginPath();
+                            ctx.moveTo(x + r, y);
+                            ctx.lineTo(x + w - r, y);
+                            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                            ctx.lineTo(x + w, y + h - r);
+                            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                            ctx.lineTo(x + r, y + h);
+                            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                            ctx.lineTo(x, y + r);
+                            ctx.quadraticCurveTo(x, y, x + r, y);
+                            ctx.closePath();
+                        };
+
+                        drawRoundedRect(nameCtx, rectX, rectY, rectWidth, rectHeight, cornerR);
+                        nameCtx.fillStyle = '#2a9df4';
+                        nameCtx.globalAlpha = 0.92;
+                        nameCtx.fill();
+                        nameCtx.globalAlpha = 1;
+
+                        const startY = NAME_TEXTURE_H / 2 - ((lines.length - 1) * lineHeight) / 2;
+                        nameCtx.fillStyle = '#ffffff';
+                        lines.forEach((line, idx) => {
+                            const y = startY + idx * lineHeight;
+                            nameCtx.fillText(line, NAME_TEXTURE_W / 2, y);
+                        });
+                    }
                 }
                 nameDataUrl = nameCanvas.toDataURL('image/png');
             } catch (err) {
