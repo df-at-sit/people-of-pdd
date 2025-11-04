@@ -47,7 +47,7 @@ app.get("/healthz", (_, res) => res.json({ ok: true }));
 
 // --- helpers ---
 async function writePngTemp(dataOrUrl) {
-    const out = path.join(os.tmpdir(), `avatar-${Date.now()}.png`);
+    const out = path.join(os.tmpdir(), `avatar-${Date.now()}-${randomUUID()}.png`);
     if (typeof dataOrUrl === "string" && dataOrUrl.startsWith("data:image/")) {
         const b64 = dataOrUrl.split(",")[1] || "";
         await fsp.writeFile(out, Buffer.from(b64, "base64"));
