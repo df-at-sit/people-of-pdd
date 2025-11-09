@@ -199,7 +199,9 @@ body {
 
     .title-section {
       margin-top: 5px;
-      background-color: #f4b63d;
+      /* background-color: #f4b63d; */
+      background: linear-gradient(135deg, #ffd147, #f4b63d);
+
       border-radius: 20px;
 
       padding: 5px 20px 15px 20px;
@@ -2449,7 +2451,8 @@ body.stage-4 .carousel-nav {
 
   .char-page .title-section {
     margin-top: 5px;
-    background-color: #f7931e;
+    /* background-color: #f7931e; */
+    background: linear-gradient(135deg, #ffd147, #f4b63d);
     border-radius: 20px;
     padding: 5px 10px 15px 10px;
     transform: rotate(3deg) !important;
