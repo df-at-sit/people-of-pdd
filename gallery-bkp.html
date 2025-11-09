@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+  <title>Character Gallery</title>
+  <!-- <link rel="stylesheet" href="styles.css" /> -->
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'PP Mori', sans-serif;
+      background: white;
+      color: #2a9df4;
+    }
+
+    /* HEADER */
+    .header {
+      width: 100%;
+      padding-top: 30px;
+      position: sticky;
+      top: 0;
+      z-index: 6000;
+      /* background: white; */
+      /* border: 4px solid rgba(0, 0, 0, 0.1); */
+      /* ensures it's not transparent */
+    }
+
+
+
+    .header-top {
+      display: flex;
+      /* background-color: #ffe699; */
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+
+      /* no horizontal padding */
+      /* width: 100%; */
+      position: relative;
+    }
+
+
+    /* Center section is absolutely centered, unaffected by side widths */
+    .header-center {
+      /* position: absolute; */
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      background: #f4b63d;
+
+      border-radius: 20px;
+      padding: 20px 30px;
+      transform-origin: center center;
+      transform: rotate(-2deg) !important;
+    }
+
+    /* Left and right columns */
+    .header-left,
+    .header-right {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      /* prevent shrinking */
+    }
+
+    .header-left {
+      /* background-color: #2a9df4; */
+      padding: 15px 20px 15px 20px;
+      background-color: #58aaf7;
+      border-radius: 20px;
+    }
+
+    /* BUTTONS */
+    .circle-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      color: #2a9df4;
+      background-color: #fff;
+      font-size: 1.2rem;
+      border: none;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    .text-back {
+      padding: 10px 20px;
+      border-radius: 20px;
+      color: #2a9df4;
+      background-color: white;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* TITLE */
+    .header-center h1 {
+      color: #c13a00;
+      text-transform: uppercase;
+      font-size: 2rem;
+      /* letter-spacing: 2px; */
+      margin: 0;
+    }
+
+    .subtitle {
+      color: #fff;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin: 5px 0 0;
+    }
+
+    /* SEARCH */
+    .search-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-container input {
+      padding: 8px 14px;
+      border: 2px solid #2a9df4;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-family: 'PP Mori', sans-serif;
+      text-transform: uppercase;
+      color: #2a9df4;
+      outline: none;
+      width: 200px;
+    }
+
+    .search-container input::placeholder {
+      color: #2a9df4;
+      opacity: 0.8;
+    }
+
+    .search-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #2a9df4;
+      background-color: #2a9df4;
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+
+    .search-btn:hover {
+      background-color: #1e7fd1;
+    }
+
+    /* FOOTER */
+    .footer-section {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 50px;
+      text-align: center;
+      background: url("./assets/wave-gallery.svg") no-repeat bottom center;
+      background-position: center calc(100% + 40px);
+      background-size: 100% auto;
+      z-index: 20;
+      /* keeps it on top of other elements */
+    }
+
+    /* GALLERY */
+    #gallery-container {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 140px);
+      overflow: visible;
+      z-index: 2;
+      /* padding-bottom: 300px; */
+      margin-bottom: 500px;
+      margin-top: 50px;
+    }
+
+
+    .gallery-card {
+      position: absolute;
+      transform-origin: center center;
+      transition:
+        left 0.4s ease,
+        top 0.4s ease,
+        opacity 0.3s ease,
+        transform 0.3s ease;
+      /* start with full opacity */
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .gallery-card:hover {
+      transform: scale(1.5) !important;
+    }
+
+    .gallery-card.zoomed {
+      transform: scale(1.5) !important;
+      z-index: 9999;
+    }
+
+    /* TOOLTIP */
+    .tooltip {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -110%) scale(0.1);
+      padding: 6px 6px;
+      /* less padding → shorter height */
+      background-color: #2a9df4;
+      border-radius: 8px;
+      /* slightly smaller corner radius */
+      border: 2px solid #fff;
+      /* white border */
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+      min-width: 100px;
+      /* wider base width */
+      max-width: 140px;
+      /* optional: cap width */
+      text-align: center;
+      /* ensure centered text */
+    }
+
+    .tooltip::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 7px 7px 0 7px;
+      border-style: solid;
+      border-color: #2a9df4 transparent transparent transparent;
+    }
+
+    .tooltip h3 {
+      margin: 0 0 4px;
+      color: #fff;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    .tooltip p {
+      margin: 0;
+      color: #ffe699;
+      font-size: 0.5rem;
+      text-align: center;
+    }
+
+    .gallery-card:hover .tooltip {
+      opacity: 1;
+      transform: translate(-50%, -110%) scale(1);
+      pointer-events: auto;
+    }
+
+    .back-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      color: #2a9df4;
+      background-color: #fff;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 7000;
+      transition: opacity 0.3s ease;
+      opacity: 0;
+      /* start hidden */
+      pointer-events: none;
+      /* ignore clicks when hidden */
+    }
+
+    .back-to-top:hover {
+      background: #1e7fd1;
+    }
+
+
+    /* tighten mobile header, remove rotation, reduce big subtitle */
+    @media (max-width: 600px) {
+      .header {
+        padding-top: env(safe-area-inset-top, 20px);
+      }
+
+      .header-top {
+        flex-direction: column;
+        align-items: center;
+        padding: 16px;
+        gap: 16px;
+        /* was 100px */
+      }
+
+      .header-left {
+        margin-bottom: 0;
+      }
+
+      .header-center {
+        background: #f4b63d;
+        border-radius: 16px;
+        padding: 12px 16px;
+
+        transform-origin: center center;
+        transform: rotate(-3deg) !important;
+        /* remove jaunty tilt on mobile */
+      }
+
+      .header-center h1 {
+        font-size: 1.6rem;
+      }
+
+      .header-center p.subtitle {
+        font-size: 1rem;
+        margin: 4px 0 0;
+      }
+
+      .header-right.search-container {
+        justify-content: center;
+        width: 70%;
+        /* or any percentage of its parent */
+        max-width: 280px;
+        /* optional cap */
+        margin: 0 auto;
+        /* centers in the header */
+      }
+
+
+      .search-container {
+        width: 100%;
+        max-width: 420px;
+        gap: 8px;
+      }
+
+      .search-container input {
+        flex: 1;
+        padding: 12px 14px;
+        width: auto;
+      }
+
+      .search-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+      }
+
+
+      .back-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: none;
+        background: #2a9df4;
+        color: #fff;
+        font-size: 1.4rem;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 7000;
+        transition: opacity 0.3s ease;
+        opacity: 0;
+        /* start hidden */
+        pointer-events: none;
+        /* ignore clicks when hidden */
+      }
+
+      .back-to-top:hover {
+        background: #1e7fd1;
+      }
+
+
+    }
+
+    /* only desktop/laptop should magnify on hover */
+    @media (hover: hover) and (pointer: fine) {
+      .gallery-card:hover {
+        transform: scale(1.5) !important;
+      }
+    }
+
+    /* touch devices: no hover zoom; show tooltip on tap via .show-tip */
+    @media (hover: none) and (pointer: coarse) {
+      .gallery-card:hover {
+        transform: none !important;
+      }
+
+      /* keep tooltips renderable but hidden by default */
+      .tooltip {
+        display: block;
+        /* was none */
+        opacity: 0;
+        transform: translate(-50%, -110%) scale(0.9);
+        pointer-events: none;
+      }
+
+      /* when the card has .show-tip, reveal it */
+      .gallery-card.show-tip .tooltip {
+        opacity: 1;
+        transform: translate(-50%, -110%) scale(1);
+        pointer-events: auto;
+      }
+    }
+  </style>
+
+  <!-- firebase init -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      orderBy,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    // ← your config from the console
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwpNjnDFAA_5P64zMOt-GTSOdETx2xKJQ",
+      authDomain: "people-of-pdd-website.firebaseapp.com",
+      projectId: "people-of-pdd-website",
+      storageBucket: "people-of-pdd-website.firebasestorage.app",
+      messagingSenderId: "685048567158",
+      appId: "1:685048567158:web:abc51754b5b785219c1657",
+      measurementId: "G-1VRMYRMXKN"
+    };
+
+    // init
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // expose to your non-module script
+    window.db = db;
+    window.collection = collection;
+    window.query = query;
+    window.orderBy = orderBy;
+    window.getDocs = getDocs;
+  </script>
+
+</head>
+
+<body>
+  <header class="header">
+    <div class="header-top">
+      <!-- Left Column -->
+      <div class="header-left">
+        <button id="goBackMain" class="circle-button" onclick="goBack()">←</button>
+        <button class="text-back" onclick="goBack()">BACK TO MAIN PAGE</button>
+      </div>
+
+      <!-- Center Column -->
+      <div class="header-center">
+        <h1>GALLERY</h1>
+        <p class="subtitle">Step into the characters of the PDD Community!</p>
+      </div>
+
+      <!-- Right Column -->
+      <div class="header-right search-container">
+        <input type="text" id="search-input" placeholder="SEARCH NAME" autocomplete="off" />
+        <button id="search-btn" class="search-btn">&#128269;</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="gallery-container"></main>
+  <footer class="footer-section">
+    <!-- <button id="shuffle-btn" class="text-back next-btn">SHUFFLE</button> -->
+  </footer>
+
+  <!-- put this just before </body> -->
+  <button id="backToTop" class="back-to-top">↑</button>
+
+  <script>
+    const backToTop = document.getElementById('backToTop');
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // optional: only show after scrolling a bit
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 200) {
+        backToTop.style.opacity = '1';
+        backToTop.style.pointerEvents = 'auto';
+      } else {
+        backToTop.style.opacity = '0';
+        backToTop.style.pointerEvents = 'none';
+      }
+    });
+  </script>
+
+
+
+
+  <script>
+
+    //localStorage.clear();
+
+    const CARD_W = 200 / 1.5;
+    const CARD_H = 360 / 1.5;
+    const container = document.getElementById('gallery-container');
+    const headerEl = document.querySelector('header');
+    const footerEl = document.querySelector('footer');
+
+    // const CARD_W = 200 / 1.5;
+    // const CARD_H = 360 / 1.5;
+
+    let SCALE = 1;  // updated on load + resize, used by render + layout
+
+    function isMobileView() {
+      return window.matchMedia('(max-width: 600px)').matches;
+    }
+    function currentScale() {
+      // tweak as you like; a hair larger on bigger phones
+      return isMobileView() ? 0.72 : 1;
+    }
+
+
+    function resizeContainer() {
+      container.style.height = (window.innerHeight - headerEl.offsetHeight - footerEl.offsetHeight) + 'px';
+      SCALE = currentScale();
+    }
+
+
+
+    window.addEventListener('resize', resizeContainer);
+
+
+
+    function goBack() { window.location.href = 'index.html'; }
+
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // resize the gallery container to fill the remaining viewport
+      resizeContainer();
+
+      // load saved characters and render
+      // fetch from Firestore instead of localStorage
+      const q = window.query(
+        window.collection(window.db, "galleryCharacters"),
+        window.orderBy("createdAt", "desc")
+      );
+      const snap = await window.getDocs(q);
+
+      let i = 0;
+      snap.forEach(doc => {
+        const d = doc.data();
+        renderAvatar(
+          { selections: d.selections, faceData: d.faceUrl, name: d.name, favThing: d.favThing },
+          i++,
+          SCALE                   // <— pass scale here
+        );
+      });
+
+      // now do your layout
+      brickLayout();
+
+
+      window.addEventListener('resize', () => {
+        resizeContainer();         // updates SCALE
+        // update transform on all cards when breakpoint changes
+        document.querySelectorAll('.gallery-card').forEach(card => {
+          card.dataset.scale = SCALE;
+          card.style.transform = `scale(${SCALE})`;
+        });
+        brickLayout();
+      });
+
+      // set up live search
+      const searchInput = document.getElementById('search-input');
+      const searchBtn = document.getElementById('search-btn');
+
+      if (searchInput) {
+        // live‑type filtering
+        searchInput.addEventListener('input', filterGallery);
+      }
+
+      // optional: still allow button click
+      if (searchBtn) {
+        searchBtn.addEventListener('click', filterGallery);
+      }
+
+      // shuffle button (if you keep it)
+      const shuffleBtn = document.getElementById('shuffle-btn');
+      if (shuffleBtn) {
+        shuffleBtn.addEventListener('click', brickLayout);
+      }
+    });
+
+
+
+
+    function drawStrokesOnCanvas(strokes, canvas) {
+      const ctx = canvas.getContext('2d');
+      strokes.forEach(stroke => {
+        const pts = stroke.points;
+        if (!pts || pts.length < 2) return;
+        ctx.beginPath();
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = stroke.color;
+        ctx.lineWidth = stroke.width;
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length - 1; i++) {
+          const xc = (pts[i].x + pts[i + 1].x) / 2;
+          const yc = (pts[i].y + pts[i + 1].y) / 2;
+          ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+        }
+        ctx.stroke();
+      });
+    }
+
+    function renderAvatar({ selections, faceData, name, favThing }, index, scale = 1) {
+      const wrapper = document.createElement('div');
+      wrapper.classList.add('gallery-card');
+      wrapper.dataset.name = (name || '').trim().toLowerCase();
+      wrapper.dataset.scale = scale;                // <— keep the scale with the card
+      wrapper.style.width = CARD_W + 'px';
+      wrapper.style.height = CARD_H + 'px';
+      wrapper.style.transform = `scale(${scale})`;  // <— apply scale visually
+
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('viewBox', `0 0 ${CARD_W} ${CARD_H}`);
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+      svg.setAttribute('width', CARD_W);
+      svg.setAttribute('height', CARD_H);
+      svg.style.position = 'absolute';
+      svg.style.left = '0';
+      svg.style.top = '0';
+      svg.style.zIndex = '1';
+
+      const group = document.createElementNS(svgNS, 'g');
+      group.setAttribute('transform', `translate(${CARD_W / 2}, 10)`);
+
+      // Add random base shape first
+      const baseShape = createBaseShape(svgNS, CARD_W);
+      // Move it further down by 20px
+      baseShape.setAttribute(
+        'transform',
+        (baseShape.getAttribute('transform') || '') + ' translate(0, 20)'
+      );
+      group.appendChild(baseShape);
+
+      // Define body-part centers
+      const baseRig = {
+        head: { x: 0, y: 20 },
+        neck: { x: 0, y: 20 },
+        shoulderL: { x: -40, y: 20 },
+        shoulderR: { x: 40, y: 20 },
+        hipL: { x: 0, y: 75 },
+        hipR: { x: 0, y: 75 },
+        kneeL: { x: 0, y: 140 },
+        kneeR: { x: 0, y: 140 },
+        footL: { x: 0, y: 180 },
+        footR: { x: 0, y: 180 }
+      };
+
+      const centers = [
+        { ctr: baseRig.footL, size: 80 },
+        { ctr: baseRig.kneeL, size: 100 },
+        { ctr: baseRig.hipL, size: 90 },
+        { ctr: baseRig.head, size: 60 }
+      ];
+
+      // Add character images
+      centers.forEach((cfg, i) => {
+        const img = document.createElementNS(svgNS, 'image');
+        img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', selections[3 - i]);
+        img.setAttribute('width', cfg.size);
+        img.setAttribute('height', cfg.size);
+        img.setAttribute('x', cfg.ctr.x - cfg.size / 2);
+        img.setAttribute('y', cfg.ctr.y - cfg.size / 2);
+        group.appendChild(img);
+      });
+
+      svg.appendChild(group);
+      wrapper.appendChild(svg);
+
+      // Overlay face strokes
+      // Overlay face strokes (only if it's actually an image, not text)
+      if (isRenderableImage(faceData)) {
+        const headCfg = centers[3];
+        const offsetX = CARD_W / 2 + headCfg.ctr.x - headCfg.size / 2;
+        const offsetY = 5 + headCfg.ctr.y - headCfg.size / 2;
+
+        loadImageSafe(faceData).then((img) => {
+          if (!img) return; // bail if unreadable
+
+          img.width = headCfg.size;
+          img.height = headCfg.size;
+          img.style.position = 'absolute';
+          img.style.left = `${offsetX}px`;
+          img.style.top = `${offsetY}px`;
+          img.style.zIndex = '2';
+
+          // optional: lift this card above neighbors while face is shown
+          wrapper.style.zIndex = '3';
+
+          wrapper.appendChild(img);
+        });
+      }
+
+
+
+
+      // Tooltip with name and favorite thing
+      // Tooltip with name and favorite thing
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('tooltip');
+      tooltip.innerHTML = `
+  <h3>${(name || '').toUpperCase()}</h3>
+  
+  <p> My favourite thing to do in Punggol: <b style="color: #fff;"> ${favThing ? `${favThing}!` : ''} </b></p>
+`;
+      wrapper.appendChild(tooltip);
+
+
+
+      container.appendChild(wrapper);
+    }
+
+    function loadImageSafe(src, timeout = 4000) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        let finished = false;
+        const done = (ok) => { if (!finished) { finished = true; resolve(ok ? img : null); } };
+        const t = setTimeout(() => done(false), timeout);
+        img.onload = () => { clearTimeout(t); done(true); };
+        img.onerror = () => { clearTimeout(t); done(false); };
+        img.src = src;
+      });
+    }
+
+
+    function ensureFaceCanvasReady() {
+      const c = document.getElementById('faceCanvas');
+      if (!c.width || !c.height) {
+        resizeCanvasToFace();   // you already have this
+        drawAllStrokes();       // re-render after resize
+      }
+      return c;
+    }
+
+    function isRenderableImage(src) {
+      if (!src || typeof src !== 'string') return false;
+      const s = src.trim();
+
+      // explicitly reject text-y data URIs
+      if (s.startsWith('data:text/')) return false;
+
+      // valid inline/blob images
+      if (s.startsWith('data:image/')) return true;
+      if (s.startsWith('blob:')) return true;
+
+      // http(s) images with common extensions
+      try {
+        const u = new URL(s, location.href);
+        const p = u.pathname.toLowerCase();
+        const okProto = u.protocol === 'http:' || u.protocol === 'https:';
+        const okExt = p.endsWith('.png') || p.endsWith('.jpg') || p.endsWith('.jpeg') || p.endsWith('.webp');
+        return okProto && okExt;
+      } catch {
+        return false;
+      }
+    }
+
+
+
+    function filterGallery() {
+      const term = document.getElementById('search-input')
+        .value.trim()
+        .toLowerCase();
+
+      const cards = Array.from(document.querySelectorAll('.gallery-card'));
+
+      if (!term) {
+        // no search → show all and re‑layout
+        cards.forEach(card => card.style.display = '');
+        brickLayout();
+        return;
+      }
+
+      const matching = [];
+      const nonMatching = [];
+
+      cards.forEach(card => {
+        if (card.dataset.name.includes(term)) {
+          matching.push(card);
+          card.style.display = '';
+        } else {
+          nonMatching.push(card);
+          card.style.display = 'none';
+        }
+      });
+
+      // clear & re‑append: matching first, then hidden ones
+      container.innerHTML = '';
+      [...matching, ...nonMatching].forEach(card => {
+        container.appendChild(card);
+      });
+
+      brickLayout();
+    }
+
+    function brickLayout() {
+      const cards = Array.from(document.querySelectorAll('.gallery-card'));
+      if (cards.length === 0) return;
+
+      // base (unscaled) dimensions
+      const baseW = CARD_W;
+      const baseH = CARD_H;
+
+      const containerWidth = container.clientWidth;
+      const mobile = isMobileView();
+      const margin = mobile ? 30 : 100;
+      const scale = currentScale();
+
+      // spacing tuned per platform
+      const gapX = mobile ? 100 : Math.max(24, container.clientWidth / 9);
+      const gapY = mobile ? 8 : 60;
+
+      const usableWidth = containerWidth - 2 * margin;
+
+      // compute effective scaled card size for layout math
+      const effW = baseW * scale;
+      const effH = baseH * scale;
+
+      // how many cards fit per row
+      const maxCardsPerRow = Math.max(1, Math.floor((usableWidth + gapX) / (effW + gapX)));
+
+      let x = 0, y = 0, row = 0, col = 0;
+
+      cards.forEach((card) => {
+        // ensure the DOM scale matches (e.g., if you resized from desktop → mobile)
+        if (parseFloat(card.dataset.scale || '1') !== scale) {
+          card.dataset.scale = scale;
+          card.style.transform = `scale(${scale})`;
+        }
+
+        const offsetX = (row % 2 === 0) ? 0 : (effW / 2 + gapX / 2);
+        card.style.left = `${margin + x + offsetX}px`;
+        card.style.top = `${margin + y}px`;
+
+        col++;
+        x += effW + gapX;
+
+        const nextWouldOverflow = (margin + x + effW + offsetX > containerWidth - margin);
+        if (col >= maxCardsPerRow || nextWouldOverflow) {
+          row++; col = 0; x = 0; y += effH + gapY;
+        }
+      });
+
+      // allow container to scroll if content extends below
+      const totalHeight = margin + y + effH + gapY + 8;
+      container.style.minHeight = `${Math.max(totalHeight, container.style.height)}px`;
+    }
+
+
+    function createBaseShape(svgNS) {
+      const shapes = [
+        {
+          type: 'ellipse',
+          cx: 68.41, cy: 28.33, rx: 53.5, ry: 16.59
+        },
+        {
+          type: 'path',
+          d: 'M101.97,31.92l-35.5,17.77c-5.41,2.71-11.77,2.77-17.24.17L11.98,32.14c-3.41-1.62-3.41-6.48,0-8.1L48.4,6.69c5.31-2.53,11.47-2.55,16.79-.05l36.67,17.2c3.39,1.59,3.46,6.4.1,8.08Z'
+        },
+        {
+          type: 'path',
+          d: 'M94.9,36l4.47,8.76c2.07,4.04-8.4,7.25-17.15,5.25l-18.94-4.34c-1.52-.35-3.38-.34-4.9.03l-18.85,4.55c-8.7,2.11-19.24-1-17.26-5.1l4.28-8.86c.34-.71-.24-1.44-1.53-1.93l-16.12-6.02c-7.44-2.79-3.49-7.93,6.48-8.43l21.59-1.07c1.73-.09,3.24-.54,3.95-1.2l8.88-8.23c4.1-3.79,17.08-3.82,21.27-.04l9.06,8.16c.73.66,2.24,1.1,3.97,1.18l21.61.93c9.98.43,14.04,5.5,6.66,8.32l-15.99,6.1c-1.29.49-1.85,1.22-1.49,1.93Z'
+        }
+      ];
+
+      const colors = ['#9e005d', '#3fa9f5', '#22b573', '#e85e24', '#f7931e'];
+
+      // Pick random shape and color
+      const shapeData = shapes[Math.floor(Math.random() * shapes.length)];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      // Create SVG element
+      const base = document.createElementNS(svgNS, shapeData.type);
+      base.setAttribute('fill', color);
+
+      // Apply attributes
+      if (shapeData.type === 'ellipse') {
+        base.setAttribute('cx', 0);
+        base.setAttribute('cy', 180);
+        base.setAttribute('rx', shapeData.rx);
+        base.setAttribute('ry', shapeData.ry);
+      } else if (shapeData.type === 'path') {
+        base.setAttribute('d', shapeData.d);
+        base.setAttribute('transform', 'translate(-60, 150)'); // adjust position
+      }
+
+      return base;
+    }
+
+
+
+
+
+
+    function positionCard(card) {
+      const cw = container.clientWidth - card.offsetWidth;
+      const ch = container.clientHeight - card.offsetHeight;
+      card.style.left = Math.random() * cw + 'px';
+      card.style.top = Math.random() * ch + 'px';
+    }
+
+    function shufflePositions() {
+      document.querySelectorAll('.gallery-card').forEach(positionCard);
+    }
+
+
+    function enableTapZoom() {
+      const cards = document.querySelectorAll('.gallery-card');
+
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          if (card.classList.contains('zoomed')) {
+            card.classList.remove('zoomed');
+          } else {
+            cards.forEach(c => c.classList.remove('zoomed'));
+            card.classList.add('zoomed');
+          }
+        });
+      });
+
+      // Close zoom if tapped outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.gallery-card')) {
+          cards.forEach(c => c.classList.remove('zoomed'));
+        }
+      });
+    }
+
+    if ('ontouchstart' in window) {
+      document.addEventListener('DOMContentLoaded', enableTapZoom);
+    }
+
+    // smoothen transforms a bit
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.gallery-card').forEach(c => {
+        c.style.willChange = 'transform, left, top';
+      });
+    });
+
+    // reduce motion for users who asked
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.querySelectorAll('.gallery-card').forEach(c => c.style.transition = 'none');
+    }
+
+
+  </script>
+
+  <script>
+    // enable tap-to-toggle tooltip on mobile only
+    function enableMobileTooltips() {
+      const cards = document.querySelectorAll('.gallery-card');
+
+      cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+          e.stopPropagation();
+
+          // close others
+          document.querySelectorAll('.gallery-card.show-tip').forEach(c => {
+            if (c !== card) {
+              c.classList.remove('show-tip');
+              c.style.zIndex = '';
+            }
+          });
+
+          // toggle this one
+          if (card.classList.toggle('show-tip')) {
+            card.style.zIndex = '9999';   // lift above neighbors
+          } else {
+            card.style.zIndex = '';
+          }
+        }, { passive: true });
+      });
+
+      // tap outside to close
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.gallery-card.show-tip').forEach(c => {
+          c.classList.remove('show-tip');
+          c.style.zIndex = '';
+        });
+      });
+    }
+
+    // run only on touch/mobile
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+      document.addEventListener('DOMContentLoaded', enableMobileTooltips);
+    }
+  </script>
+
+</body>
+
+</html>
