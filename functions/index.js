@@ -32,7 +32,62 @@ const TEX_PATHS = {
     trait4: path.join("textures", "trait4.png"),
 };
 const TRAIT_KEYS = ["trait1", "trait2", "trait3", "trait4"];
-const STAGE_BASENAME = "animationtemplate.usdc";
+const DEFAULT_STAGE_BASENAME = "animationtemplate.usdc";
+
+const OLD_SCHOOL_TRAITS = new Set([
+    "rooted",
+    "flowing",
+    "nourishing",
+    "connected",
+    "accessible",
+    "guided",
+    "harmonious",
+    "nurturing",
+    "serene",
+    "peaceful",
+    "cultivated",
+    "cheerful",
+]);
+const FUTURE_TRAITS = new Set([
+    "transformative",
+    "active",
+    "vibrant",
+    "lively",
+    "renewable",
+    "inventive",
+    "resilient",
+    "intelligent",
+    "inclusive",
+    "sustainable",
+    "directed",
+    "flourishing",
+]);
+
+function pickTemplateVariant(traits = []) {
+    let oldCount = 0;
+    let futureCount = 0;
+    for (const trait of traits) {
+        const normalized = typeof trait === "string" ? trait.trim().toLowerCase() : "";
+        if (!normalized) continue;
+        if (OLD_SCHOOL_TRAITS.has(normalized)) {
+            oldCount += 1;
+        } else if (FUTURE_TRAITS.has(normalized)) {
+            futureCount += 1;
+        }
+    }
+
+    if (oldCount === futureCount) {
+        return Math.random() < 0.5 ? "future" : "oldSchool";
+    }
+    return oldCount > futureCount ? "oldSchool" : "future";
+}
+
+function templateConfigForVariant(variantInput) {
+    const normalized = variantInput === "future" ? "future" : "oldSchool";
+    const filename = normalized === "future" ? "animationtemplate2.usdz" : "animationtemplate.usdz";
+    const stageBasename = `${path.parse(filename).name}.usdc`;
+    return { filename, stageBasename, variant: normalized };
+}
 
 // ---- init ----
 admin.initializeApp();
@@ -88,7 +143,7 @@ async function unzipUsdZ(usdzPath, outDir) {
 }
 
 
-async function zipUsdZFromDir(srcDir, outUsdz) {
+async function zipUsdZFromDir(srcDir, outUsdz, stageBasename = DEFAULT_STAGE_BASENAME) {
     await fsp.mkdir(path.dirname(outUsdz), { recursive: true });
     const zipfile = new yazl.ZipFile();
 
@@ -127,12 +182,12 @@ async function zipUsdZFromDir(srcDir, outUsdz) {
         );
 
         enriched.sort((a, b) => {
-            if (!rel) {
-                const priority = (entry) => {
-                    if (entry.name === STAGE_BASENAME) return -20;
-                    if (entry.stats.isDirectory()) return 0;
-                    return 10;
-                };
+                if (!rel) {
+                    const priority = (entry) => {
+                        if (entry.name === stageBasename) return -20;
+                        if (entry.stats.isDirectory()) return 0;
+                        return 10;
+                    };
                 const pa = priority(a);
                 const pb = priority(b);
                 if (pa !== pb) return pa - pb;
@@ -161,17 +216,20 @@ async function zipUsdZFromDir(srcDir, outUsdz) {
 app.options("/make-usdz", (_, res) => res.sendStatus(204)); // CORS preflight
 app.post("/make-usdz", async (req, res) => {
     try {
-        const { posterDataUrl, pngDataUrl, pngUrl, traitDataUrls, nameDataUrl, displayName } = req.body || {};
+        const { posterDataUrl, pngDataUrl, pngUrl, traitDataUrls, nameDataUrl, displayName, traits } = req.body || {};
         const posterSrc = posterDataUrl || pngDataUrl || pngUrl;
         if (!posterSrc) {
             return res.status(400).json({ ok: false, error: "posterDataUrl or pngDataUrl required" });
         }
         const traitSrcs = Array.isArray(traitDataUrls) ? traitDataUrls : [];
+        const traitNames = Array.isArray(traits) ? traits : [];
+        const selectedVariant = pickTemplateVariant(traitNames);
+        const { filename: templateFilename, stageBasename, variant: templateVariant } = templateConfigForVariant(selectedVariant);
 
         // local, checked-in template
-        const templatePath = path.join(__dirname, "template", "animationtemplate.usdz");
+        const templatePath = path.join(__dirname, "template", templateFilename);
         if (!fs.existsSync(templatePath)) {
-            return res.status(500).json({ ok: false, error: "animationtemplate.usdz missing on server" });
+            return res.status(500).json({ ok: false, error: `${templateFilename} missing on server` });
         }
 
         // workspace
@@ -198,7 +256,7 @@ app.post("/make-usdz", async (req, res) => {
         // await fsp.writeFile(path.join(unpackDir, "version.txt"), String(Date.now()));
 
         // repack
-        await zipUsdZFromDir(unpackDir, outUsdz);
+        await zipUsdZFromDir(unpackDir, outUsdz, stageBasename);
 
         // upload with token so it's publicly fetchable by iOS Quick Look
         const safeName = (displayName || "character").replace(/[^\w\-]+/g, "_");
@@ -221,7 +279,7 @@ app.post("/make-usdz", async (req, res) => {
         const encoded = encodeURIComponent(destPath);
         const usdzUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encoded}?alt=media&token=${token}`;
 
-        return res.json({ ok: true, usdzUrl });
+        return res.json({ ok: true, usdzUrl, templateVariant });
     } catch (e) {
         console.error(e);
         return res.status(500).json({ ok: false, error: String(e) });

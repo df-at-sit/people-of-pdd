@@ -1142,12 +1142,17 @@
         const API_BASE =
             "https://asia-southeast1-people-of-pdd-website.cloudfunctions.net/api";
 
-        async function makeUsdzFromPng({ posterDataUrl, traitDataUrls = [], nameDataUrl, pngDataUrl, pngUrl, displayName }) {
+        async function makeUsdzFromPng({ posterDataUrl, traitDataUrls = [], nameDataUrl, pngDataUrl, pngUrl, displayName, traits = [] }) {
             const payload = { displayName };
             if (posterDataUrl || pngDataUrl) payload.posterDataUrl = posterDataUrl || pngDataUrl;
             if (pngUrl) payload.pngUrl = pngUrl;
             if (Array.isArray(traitDataUrls) && traitDataUrls.length) payload.traitDataUrls = traitDataUrls;
             if (nameDataUrl) payload.nameDataUrl = nameDataUrl;
+            if (Array.isArray(traits) && traits.length) {
+                payload.traits = traits
+                    .map(t => typeof t === 'string' ? t.trim() : '')
+                    .filter(Boolean);
+            }
             const resp = await fetch(`${API_BASE}/make-usdz`, {
                 method: "POST",
                 headers: { "content-type": "application/json" },
@@ -1158,7 +1163,11 @@
 
             console.log("USDZ URL (from makeUsdzFromPng):", j.usdzUrl); // << add this
             window.lastUsdz = j.usdzUrl; // handy to grab in console later
-            return j.usdzUrl;
+            window.lastTemplateVariant = j.templateVariant || 'oldSchool';
+            return {
+                usdzUrl: j.usdzUrl,
+                templateVariant: j.templateVariant || 'oldSchool'
+            };
         }
 
     </script>
@@ -1694,14 +1703,16 @@
 
                 try {
                     window.__arUi?.setStatus('building', 'Packaging for AR…');
-                    const usdzUrl = await makeUsdzFromPng({
+                    const { usdzUrl, templateVariant } = await makeUsdzFromPng({
                         posterDataUrl: textures.posterDataUrl,
                         traitDataUrls: textures.traitDataUrls,
                         nameDataUrl: textures.nameDataUrl,
-                        displayName
+                        displayName,
+                        traits: textures.traits
                     });
                     console.log("USDZ URL (from click):", usdzUrl);
                     window.lastUsdz = usdzUrl; // optional
+                    window.lastTemplateVariant = templateVariant;
 
 
                     const mv = document.getElementById('arMV');
@@ -1709,6 +1720,7 @@
                     mv.setAttribute('ios-src', usdzUrl + '&v=' + Date.now());
 
                     // open modal + set runtime texture (Android/WebXR path)
+                    textures.templateVariant = templateVariant;
                     window.openARWithTexture?.(textures, displayName);
 
                     window.__arUi?.setStatus('ready', 'Tap “Open in AR” or the cube icon to place them.');
@@ -1959,6 +1971,9 @@
                 { text: legsTraits[legsFile] || '', color: '#f4b63d' },
                 { text: shoesTraits[shoesFile] || '', color: '#2a9df4' }
             ];
+            const traitLabels = traitEntries
+                .map(entry => (entry.text || '').trim())
+                .filter(label => !!label);
 
             const badgeImgs = await Promise.all(traitEntries.map(entry => {
                 const badgeUrl = entry.text ? badgeUrlFromTrait(entry.text) : null;
@@ -2065,7 +2080,7 @@
                 console.error('failed to compose name texture', err);
             }
 
-            return { posterDataUrl, traitDataUrls, nameDataUrl };
+            return { posterDataUrl, traitDataUrls, nameDataUrl, traits: traitLabels };
         }
 
     </script>
@@ -2093,13 +2108,27 @@
 
             if (!mv) { console.warn('#arMV missing'); return; }
 
+            const bundle = typeof textureBundle === 'string'
+                ? { posterDataUrl: textureBundle, traitDataUrls: [] }
+                : (textureBundle || {});
+            const templateVariant = bundle.templateVariant === 'future' ? 'future' : 'oldSchool';
+            const desiredGlbSrc = templateVariant === 'future'
+                ? './assets/ar/animationtemplate2.glb'
+                : './assets/ar/animationtemplate.glb';
+
+            if (mv.getAttribute('src') !== desiredGlbSrc) {
+                await new Promise(res => {
+                    mv.addEventListener('load', res, { once: true });
+                    mv.setAttribute('src', desiredGlbSrc);
+                });
+            } else if (!mv.model) {
+                await new Promise(res => mv.addEventListener('load', res, { once: true }));
+            }
+
             if (!mv.model) {
                 await new Promise(res => mv.addEventListener('load', res, { once: true }));
             }
 
-            const bundle = typeof textureBundle === 'string'
-                ? { posterDataUrl: textureBundle, traitDataUrls: [] }
-                : (textureBundle || {});
             const posterDataUrl = bundle.posterDataUrl || bundle.poster || bundle.pngDataUrl || null;
             const traitDataUrls = Array.isArray(bundle.traitDataUrls)
                 ? bundle.traitDataUrls
