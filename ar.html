@@ -28,61 +28,53 @@
             top: 0;
             z-index: 6000;
             background: white;
-            padding: 16px 20px 12px;
+            padding: 16px 22px;
         }
 
         .hero-inner {
             background: linear-gradient(135deg, #fff6dc, #f4b63d);
-            border-radius: 26px;
-            padding: 20px 28px 24px;
+            border-radius: 24px;
+            padding: 20px;
             box-shadow: 0 20px 40px rgba(244, 182, 61, 0.2);
             max-width: 1200px;
             margin: 0 auto;
             transition: padding 0.25s ease, box-shadow 0.25s ease;
-        }
-
-        .hero-top {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
+            flex-direction: column;
+            gap: 18px;
         }
 
         .hero-nav {
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-wrap: wrap;
             background: #58aaf7;
             border-radius: 999px;
             padding: 8px 12px;
-            position: sticky;
-            top: 16px;
-            z-index: 2;
-        }
-
-        .hero-search {
-            margin-left: auto;
-            margin-right: auto;
-            position: sticky;
-            top: 16px;
-            z-index: 2;
         }
 
         .hero-body {
             display: flex;
-            gap: 20px;
-            align-items: stretch;
-            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
+            gap: 18px;
         }
 
         .hero-copy {
-            flex: 1 1 320px;
+            flex: 1 1 auto;
             display: flex;
             flex-direction: column;
             align-items: center;
+        }
+
+        .hero-search {
+            width: 100%;
+        }
+
+        .hero-search .search-container {
+            width: 100%;
         }
 
         .hero-eyebrow {
@@ -102,6 +94,7 @@
             transform: rotate(-1.5deg);
             transform-origin: left center;
             text-shadow: 0 6px 25px rgba(247, 147, 30, 0.35);
+            transition: font-size 0.25s ease, transform 0.25s ease;
         }
 
         .hero-subcopy {
@@ -109,6 +102,9 @@
             font-size: 1rem;
             max-width: 520px;
             line-height: 1.4;
+            transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.25s ease, margin 0.25s ease;
+            max-height: 220px;
+            overflow: hidden;
         }
 
         .hero-meta {
@@ -118,39 +114,48 @@
             align-items: center;
             justify-content: center;
             margin-top: 18px;
+            transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.25s ease, margin 0.25s ease;
+            max-height: 140px;
+            overflow: hidden;
         }
 
         .hero-stat {
             background: #fff;
-            border-radius: 20px;
-            padding: 12px 18px;
-            min-width: 130px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            padding: 4px 10px;
+            min-width: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity 0.25s ease, transform 0.25s ease;
         }
 
-        .hero-stat strong {
-            display: block;
-            font-size: 1.6rem;
-            color: #2a9df4;
-            line-height: 1.2;
-        }
-
+        .hero-stat strong,
         .hero-stat span {
-            font-size: 0.8rem;
-            letter-spacing: 0.1em;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #7a3b00;
+            color: #2a9df4;
+            line-height: 1;
         }
 
         .hero-tips-link {
-            background: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
             border: none;
+            border-radius: 12px;
+            padding: 4px 10px;
             color: #c13a00;
             font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
             cursor: pointer;
-            text-decoration: underline;
-            padding: 4px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
         .hero-card {
@@ -202,7 +207,7 @@
         }
 
         .hero-scroll-cta {
-            margin-top: 22px;
+            margin-top: 12px;
             display: flex;
             justify-content: center;
         }
@@ -225,7 +230,7 @@
         }
 
         .hero.is-condensed .hero-inner {
-            padding: 14px 22px 14px;
+            padding: 12px 16px;
             box-shadow: 0 12px 26px rgba(244, 182, 61, 0.18);
         }
 
@@ -477,47 +482,41 @@
         @media (max-width: 900px) {
             .hero {
                 position: static;
-                padding: 12px 16px;
+                padding: 12px;
             }
 
             .hero-inner {
-                padding: 16px 20px;
+                padding: 18px;
             }
 
-            .hero-body {
-                flex-direction: column;
-            }
-
-            .hero-card {
-                display: none;
+            .hero-nav,
+            .hero-search {
+                width: 100%;
             }
 
             .hero-meta {
                 gap: 10px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hero-card {
+                display: none;
             }
         }
 
         /* tighten mobile hero */
         @media (max-width: 600px) {
             .hero {
-                padding: env(safe-area-inset-top, 16px) 16px 16px;
+                padding: env(safe-area-inset-top, 16px) 12px 12px;
             }
 
             .hero-inner {
                 padding: 20px;
             }
 
-            .hero-top {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
             .hero-nav {
                 justify-content: space-between;
-            }
-
-            .hero-search {
-                width: 100%;
             }
 
             .search-container {
@@ -530,12 +529,7 @@
                 width: auto;
             }
 
-            .hero-body {
-                flex-direction: column;
-            }
-
             .hero-meta {
-                flex-direction: column;
                 align-items: flex-start;
             }
 
@@ -567,6 +561,119 @@
             .gallery-card:hover {
                 transform: scale(1.5) !important;
             }
+        }
+
+        @media (min-width: 901px) {
+            .hero {
+                padding: 18px 36px 20px;
+            }
+
+            .hero-inner {
+                padding: 24px 30px;
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                align-items: start;
+                gap: 12px 28px;
+            }
+
+            .hero-nav {
+                grid-column: 1;
+                justify-self: flex-start;
+                align-self: start;
+            }
+
+            .hero-body {
+                grid-column: 2;
+                align-self: start;
+                align-items: flex-start;
+                text-align: left;
+                gap: 12px;
+            }
+
+            .hero-copy {
+                align-items: flex-start;
+            }
+
+            .hero-meta {
+                justify-content: flex-start;
+            }
+
+            .hero-search {
+                grid-column: 3;
+                width: auto;
+                justify-self: flex-end;
+                align-self: start;
+            }
+
+            .hero-search .search-container {
+                width: auto;
+            }
+
+            .search-container input {
+                font-size: 0.85rem;
+                padding: 6px 12px;
+            }
+
+            .search-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+
+            .hero-scroll-cta {
+                grid-column: 2;
+                justify-content: flex-start;
+                margin-top: 0;
+            }
+
+            .hero-tips-panel {
+                grid-column: 1 / -1;
+            }
+
+            .hero-card {
+                display: none;
+            }
+
+            .hero.is-condensed .hero-inner {
+                padding: 12px 20px;
+                box-shadow: 0 8px 18px rgba(244, 182, 61, 0.12);
+            }
+
+            .hero.is-condensed .hero-title {
+                font-size: clamp(1.4rem, 2vw, 2rem);
+            }
+
+            .hero.is-condensed .hero-subcopy {
+                font-size: 0.85rem;
+            }
+
+            .hero.is-muted .hero-subcopy,
+            .hero.is-muted .hero-meta {
+                opacity: 0;
+                transform: translateY(-6px);
+                pointer-events: none;
+                max-height: 0;
+                margin-top: 0;
+            }
+
+            .hero.is-muted .hero-meta .hero-stat,
+            .hero.is-muted .hero-meta .hero-tips-link {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+        }
+
+        /* Slightly shrink buttons globally so the bar looks shorter */
+        .circle-button {
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
+        }
+
+        .text-back {
+            padding: 8px 14px;
+            border-radius: 16px;
+            font-size: 0.82rem;
         }
     </style>
 
@@ -913,18 +1020,9 @@
 <body>
     <header class="hero">
         <div class="hero-inner">
-            <div class="hero-top">
-                <div class="hero-nav">
-                    <button id="goBackMain" class="circle-button" onclick="goBack()">←</button>
-                    <button class="text-back" onclick="goBack()">BACK TO MAIN PAGE</button>
-                </div>
-                <div class="hero-search">
-                    <label class="sr-only" for="search-input">Search characters</label>
-                    <div class="search-container">
-                        <input type="text" id="search-input" placeholder="SEARCH NAME" autocomplete="off" />
-                        <button id="search-btn" class="search-btn">&#128269;</button>
-                    </div>
-                </div>
+            <div class="hero-nav">
+                <button id="goBackMain" class="circle-button" onclick="goBack()">←</button>
+                <button class="text-back" onclick="goBack()">BACK TO MAIN PAGE</button>
             </div>
             <div class="hero-body">
                 <div class="hero-copy">
@@ -947,6 +1045,13 @@
                         <li>Tap a card to read their story and traits.</li>
                         <li>Hit “View in AR” to drop them into your world.</li>
                     </ul>
+                </div>
+            </div>
+            <div class="hero-search">
+                <label class="sr-only" for="search-input">Search characters</label>
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="SEARCH NAME" autocomplete="off" />
+                    <button id="search-btn" class="search-btn">&#128269;</button>
                 </div>
             </div>
             <div class="hero-scroll-cta">
@@ -1075,6 +1180,10 @@
     <!-- 3) Gallery rendering + tooltip + "view in ar" + PNG compositor -->
     <script>
         const heroEl = document.querySelector('.hero');
+        const heroDesktopMq = window.matchMedia('(min-width: 901px)');
+        const HERO_CONDENSE_SCROLL = 160;
+        const HERO_RELAX_SCROLL = 80;
+        let heroIsCondensed = false;
         const heroTipsToggle = document.getElementById('arTipsToggle');
         const heroTipsPanel = document.getElementById('heroTipsPanel');
         heroTipsToggle?.addEventListener('click', () => {
@@ -1088,19 +1197,36 @@
             document.getElementById('gallery-container')?.scrollIntoView({ behavior: 'smooth' });
         });
 
+        function setHeroCondensed(next) {
+            if (heroIsCondensed === next) return;
+            heroIsCondensed = next;
+            heroEl.classList.toggle('is-condensed', next);
+            heroEl.classList.toggle('is-muted', next);
+        }
+
         function updateHeroCondensed() {
             if (!heroEl) return;
-            const stickyAllowed = window.matchMedia('(min-width: 901px)').matches;
-            if (!stickyAllowed) {
-                heroEl.classList.remove('is-condensed');
+            const isDesktop = heroDesktopMq.matches;
+            if (!isDesktop) {
+                setHeroCondensed(false);
                 return;
             }
-            const shouldCondense = window.scrollY > 40;
-            heroEl.classList.toggle('is-condensed', shouldCondense);
+            const y = window.scrollY;
+            if (!heroIsCondensed && y > HERO_CONDENSE_SCROLL) {
+                setHeroCondensed(true);
+            } else if (heroIsCondensed && y < HERO_RELAX_SCROLL) {
+                setHeroCondensed(false);
+            }
         }
+
 
         window.addEventListener('scroll', updateHeroCondensed);
         window.addEventListener('resize', updateHeroCondensed);
+        if (typeof heroDesktopMq.addEventListener === 'function') {
+            heroDesktopMq.addEventListener('change', updateHeroCondensed);
+        } else if (typeof heroDesktopMq.addListener === 'function') {
+            heroDesktopMq.addListener(updateHeroCondensed);
+        }
         updateHeroCondensed();
 
         const heroStatEls = {
