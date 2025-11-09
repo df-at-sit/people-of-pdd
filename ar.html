@@ -827,6 +827,45 @@
                 height: 80px;
             }
         }
+
+        @media (max-width: 600px) {
+            .ar-wrap {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .ar-topbar {
+                padding: 0 12px;
+                justify-content: space-between;
+            }
+
+            .ar-topbar h3 {
+                font-size: 0.85rem;
+            }
+
+            .ar-help {
+                position: static;
+                width: 100%;
+                border-radius: 0;
+                box-shadow: none;
+                padding: 16px;
+                gap: 12px;
+                overflow-y: auto;
+                max-height: 40vh;
+            }
+
+            .ar-status-block,
+            .ar-checklist,
+            .ar-device-note,
+            .ar-launch {
+                width: 100%;
+            }
+
+            model-viewer#arMV {
+                height: 60vh;
+            }
+        }
     </style>
 </head>
 
