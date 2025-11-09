@@ -21,45 +21,206 @@
             color: #2a9df4;
         }
 
-        /* HEADER */
-        .header {
+        /* HERO HEADER */
+        .hero {
             width: 100%;
-            padding-top: 30px;
             position: sticky;
             top: 0;
             z-index: 6000;
+            background: white;
+            padding: 16px 20px 12px;
         }
 
-        .header-top {
+        .hero-inner {
+            background: linear-gradient(135deg, #fff6dc, #f4b63d);
+            border-radius: 26px;
+            padding: 20px 28px 24px;
+            box-shadow: 0 20px 40px rgba(244, 182, 61, 0.2);
+            max-width: 1200px;
+            margin: 0 auto;
+            transition: padding 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .hero-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 20px 40px;
-            position: relative;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
         }
 
-        .header-center {
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            background: #f4b63d;
-            border-radius: 20px;
-            padding: 20px 30px;
-            transform-origin: center center;
-            transform: rotate(-2deg) !important;
-        }
-
-        .header-left,
-        .header-right {
+        .hero-nav {
             display: flex;
             align-items: center;
-            flex-shrink: 0;
+            gap: 12px;
+            background: #58aaf7;
+            border-radius: 999px;
+            padding: 8px 12px;
         }
 
-        .header-left {
-            padding: 15px 20px;
-            background-color: #58aaf7;
+        .hero-search {
+            margin-left: auto;
+        }
+
+        .hero-body {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+
+        .hero-copy {
+            flex: 1 1 320px;
+        }
+
+        .hero-eyebrow {
+            font-size: 0.75rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: #c13a00;
+            margin-bottom: 8px;
+        }
+
+        .hero-title {
+            color: #c13a00;
+            font-size: clamp(2.2rem, 4vw, 3rem);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: inline-block;
+            transform: rotate(-1.5deg);
+            transform-origin: left center;
+        }
+
+        .hero-subcopy {
+            color: #7a3b00;
+            font-size: 1rem;
+            max-width: 520px;
+            line-height: 1.4;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 18px;
+        }
+
+        .hero-stat {
+            background: #fff;
             border-radius: 20px;
+            padding: 12px 18px;
+            min-width: 130px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .hero-stat strong {
+            display: block;
+            font-size: 1.6rem;
+            color: #2a9df4;
+            line-height: 1.2;
+        }
+
+        .hero-stat span {
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #7a3b00;
+        }
+
+        .hero-tips-link {
+            background: none;
+            border: none;
+            color: #c13a00;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 4px 0;
+        }
+
+        .hero-card {
+            flex: 1 1 260px;
+            max-width: 340px;
+            background: #fff;
+            border-radius: 22px;
+            padding: 18px 20px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .hero-card h3 {
+            margin-bottom: 10px;
+            color: #c13a00;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+        }
+
+        .hero-card ul {
+            list-style: none;
+            color: #2a9df4;
+            line-height: 1.4;
+            font-size: 0.95rem;
+            padding-left: 0;
+        }
+
+        .hero-card li::before {
+            content: '•';
+            color: #f4b63d;
+            margin-right: 6px;
+        }
+
+        .hero-tips-panel {
+            display: none;
+            margin-top: 18px;
+            background: #fff;
+            border-radius: 18px;
+            padding: 16px 20px;
+            color: #2a9df4;
+            font-size: 0.9rem;
+            box-shadow: inset 0 0 0 1px rgba(42, 157, 244, 0.15);
+        }
+
+        .hero-tips-panel.open {
+            display: block;
+        }
+
+        .hero.is-condensed .hero-inner {
+            padding: 14px 22px 14px;
+            box-shadow: 0 12px 26px rgba(244, 182, 61, 0.18);
+        }
+
+        .hero.is-condensed .hero-title {
+            font-size: clamp(1.8rem, 3vw, 2.3rem);
+            transform: rotate(-0.5deg);
+        }
+
+        .hero.is-condensed .hero-subcopy {
+            font-size: 0.9rem;
+            max-width: 420px;
+        }
+
+        .hero.is-condensed .hero-card {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-10px);
+            height: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
         }
 
         .circle-button {
@@ -115,7 +276,7 @@
             text-transform: uppercase;
             color: #2a9df4;
             outline: none;
-            width: 200px;
+            width: min(280px, 100%);
         }
 
         .search-container input::placeholder {
@@ -272,62 +433,69 @@
             background: #1e7fd1;
         }
 
-        /* tighten mobile header, remove rotation, reduce big subtitle */
-        @media (max-width: 600px) {
-            .header {
-                padding-top: env(safe-area-inset-top, 20px);
-            }
-
-            .header-top {
-                flex-direction: column;
-                align-items: center;
-                padding: 16px;
-                gap: 16px;
-            }
-
-            .header-left {
-                margin-bottom: 0;
-            }
-
-            .header-center {
-                background: #f4b63d;
-                border-radius: 16px;
+        @media (max-width: 900px) {
+            .hero {
+                position: static;
                 padding: 12px 16px;
-                transform: rotate(-3deg) !important;
             }
 
-            .header-center h1 {
-                font-size: 1.6rem;
+            .hero-inner {
+                padding: 16px 20px;
             }
 
-            .header-center p.subtitle {
-                font-size: 1rem;
-                margin: 4px 0 0;
+            .hero-body {
+                flex-direction: column;
             }
 
-            .header-right.search-container {
-                justify-content: center;
-                width: 70%;
-                max-width: 280px;
-                margin: 0 auto;
+            .hero-card {
+                display: none;
+            }
+
+            .hero-meta {
+                gap: 10px;
+            }
+        }
+
+        /* tighten mobile hero */
+        @media (max-width: 600px) {
+            .hero {
+                padding: env(safe-area-inset-top, 16px) 16px 16px;
+            }
+
+            .hero-inner {
+                padding: 20px;
+            }
+
+            .hero-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .hero-nav {
+                justify-content: space-between;
+            }
+
+            .hero-search {
+                width: 100%;
             }
 
             .search-container {
                 width: 100%;
-                max-width: 420px;
                 gap: 8px;
             }
 
             .search-container input {
                 flex: 1;
-                padding: 12px 14px;
                 width: auto;
             }
 
-            .search-btn {
-                width: 44px;
-                height: 44px;
-                font-size: 1.1rem;
+            .hero-body {
+                flex-direction: column;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                align-items: flex-start;
             }
 
             .back-to-top {
@@ -341,7 +509,7 @@
                 color: #fff;
                 font-size: 1.4rem;
                 cursor: pointer;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
                 z-index: 7000;
                 transition: opacity 0.3s ease;
                 opacity: 0;
@@ -396,7 +564,7 @@
         .ar-modal {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, .7);
+            background: rgba(255, 255, 255, .7);
             display: none;
             align-items: center;
             justify-content: center;
@@ -411,7 +579,7 @@
             position: relative;
             width: min(100vw, 100vh);
             height: min(100vw, 100vh);
-            background: #000;
+            background: #fff;
             border-radius: 12px;
             overflow: hidden;
         }
@@ -429,20 +597,20 @@
             color: #2a9df4;
             font-size: 20px;
             cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, .4);
+            box-shadow: 0 2px 10px rgba(255, 255, 255, .4);
         }
 
         model-viewer#arMV {
             width: 100%;
             height: 100%;
-            background: #000;
+            background: #fff;
         }
 
         /* Modal container */
         .ar-modal {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, .7);
+            background: rgba(255, 255, 2555, .7);
             display: none;
             align-items: center;
             justify-content: center;
@@ -458,11 +626,11 @@
             position: relative;
             width: min(94vw, 94vh);
             height: min(94vw, 94vh);
-            background: #000;
+            background: #fff;
             /* keep dark behind the model */
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, .35);
+            box-shadow: 0 10px 40px rgba(255, 255, 255, .35);
         }
 
         /* Top bar */
@@ -475,7 +643,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, .75), rgba(0, 0, 0, 0));
+            /* background: linear-gradient(to bottom, rgba(224, 0, 0, 0.75), rgba(0, 0, 0, 0)); */
             z-index: 3;
             pointer-events: none;
             /* allow model-viewer controls through */
@@ -516,102 +684,199 @@
             background: transparent;
         }
 
-        /* Bottom help bar */
+        /* Bottom help panel */
         .ar-help {
             position: absolute;
-            left: 12px;
-            right: 12px;
-            bottom: 12px;
-            border-radius: 12px;
-            background: rgba(0, 0, 0, .65);
-            color: #fff;
-            z-index: 3;
-            padding: 10px 12px;
-            font: 13px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #2a9df4;
+            padding: 18px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            z-index: 4;
         }
 
-        .ar-help b {
-            color: #ffe699;
-            font-weight: 800;
+        .ar-preview {
+            width: 96px;
+            height: 96px;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 2px solid rgba(42, 157, 244, 0.35);
+            background: rgba(42, 157, 244, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
-        .cube-dot {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 3px;
-            background: #fff;
-            box-shadow: inset 0 0 0 2px #2a9df4;
-            transform: rotate(15deg);
-            margin: 0 4px -1px 4px;
+        .ar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        /* Pulsing pointer that sits above the cube button */
-        .ar-pointer {
-            position: absolute;
-            right: 20px;
-            bottom: 70px;
-            /* sits just above <model-viewer>'s cube */
-            width: 18px;
-            height: 18px;
+        .ar-status-block {
+            flex: 1 1 180px;
+            min-width: 220px;
+        }
+
+        .ar-status-block p {
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: #2a9df4;
+        }
+
+        .ar-status-chip {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            background: #edf6ff;
+            color: #2a9df4;
+        }
+
+        .ar-status-chip[data-state="building"] {
+            background: #fff1cf;
+            color: #a45c00;
+        }
+
+        .ar-status-chip[data-state="ready"] {
+            background: #daffe2;
+            color: #04703d;
+        }
+
+        .ar-status-chip[data-state="error"] {
+            background: #ffe4e4;
+            color: #c54141;
+        }
+
+        .ar-checklist {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            flex: 1 1 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.82rem;
+        }
+
+        .ar-checklist li {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .ar-checklist span {
+            width: 20px;
+            height: 20px;
+            background: #2a9df4;
             border-radius: 50%;
-            background: #fff;
-            box-shadow: 0 0 0 0 rgba(255, 255, 255, .8);
-            animation: pulse 1.6s ease-out infinite;
-            z-index: 3;
-            opacity: .9;
+            color: #fff;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
         }
 
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(255, 255, 255, .7);
-                transform: scale(1);
-            }
-
-            70% {
-                box-shadow: 0 0 0 18px rgba(255, 255, 255, 0);
-                transform: scale(1.1);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-                transform: scale(1);
-            }
+        .ar-device-note {
+            flex: 1 1 200px;
+            font-size: 0.78rem;
+            color: #2a9df4;
         }
 
-        /* tighten on very small phones */
-        @media (max-width: 280px) {
+        .ar-device-note p {
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .ar-launch {
+            margin-left: auto;
+            border: none;
+            border-radius: 18px;
+            padding: 12px 24px;
+            font-weight: 700;
+            background: #2a9df4;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .ar-launch:disabled {
+            background: #8fc1ea;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 480px) {
             .ar-help {
-                font-size: 12px;
+                font-size: 0.78rem;
             }
 
-            .ar-pointer {
-                right: 16px;
-                bottom: 64px;
+            .ar-preview {
+                width: 80px;
+                height: 80px;
             }
         }
     </style>
 </head>
 
 <body>
-    <header class="header">
-        <div class="header-top">
-            <!-- Left Column -->
-            <div class="header-left">
-                <button id="goBackMain" class="circle-button" onclick="goBack()">←</button>
-                <button class="text-back" onclick="goBack()">BACK TO MAIN PAGE</button>
+    <header class="hero">
+        <div class="hero-inner">
+            <div class="hero-top">
+                <div class="hero-nav">
+                    <button id="goBackMain" class="circle-button" onclick="goBack()">←</button>
+                    <button class="text-back" onclick="goBack()">BACK TO MAIN PAGE</button>
+                </div>
+                <div class="hero-search">
+                    <label class="sr-only" for="search-input">Search characters</label>
+                    <div class="search-container">
+                        <input type="text" id="search-input" placeholder="SEARCH NAME" autocomplete="off" />
+                        <button id="search-btn" class="search-btn">&#128269;</button>
+                    </div>
+                </div>
             </div>
-
-            <!-- Center Column -->
-            <div class="header-center">
-                <h1>GALLERY</h1>
-                <p class="subtitle">Step into the characters of the PDD Community!</p>
+            <div class="hero-body">
+                <div class="hero-copy">
+                    <p class="hero-eyebrow">People of PDD</p>
+                    <h1 class="hero-title">Step into the Gallery</h1>
+                    <p class="hero-subcopy">Browse every neighbour, learn their quirks, then launch them into your space
+                        with AR.</p>
+                    <div class="hero-meta">
+                        <div class="hero-stat">
+                            <strong id="statTotal">0</strong>
+                            <span>characters</span>
+                        </div>
+                        <div class="hero-stat">
+                            <strong id="statNew">0</strong>
+                            <span>new this week</span>
+                        </div>
+                        <button class="hero-tips-link" type="button" id="arTipsToggle">View AR tips →</button>
+                    </div>
+                </div>
+                <div class="hero-card">
+                    <h3>How it works</h3>
+                    <ul>
+                        <li>Pick a floating card to meet someone new.</li>
+                        <li>Tap a card to read their story and traits.</li>
+                        <li>Hit “View in AR” to drop them into your world.</li>
+                    </ul>
+                </div>
             </div>
-
-            <!-- Right Column -->
-            <div class="header-right search-container">
-                <input type="text" id="search-input" placeholder="SEARCH NAME" autocomplete="off" />
-                <button id="search-btn" class="search-btn">&#128269;</button>
+            <div class="hero-tips-panel" id="heroTipsPanel" aria-live="polite">
+                <strong>AR READY CHECK</strong>
+                <p>Find a clear floor, brighten your room, and move your phone slowly so Scene Viewer or Quick Look can
+                    lock onto the space.</p>
             </div>
         </div>
     </header>
@@ -639,15 +904,26 @@
                 environment-image="neutral" interaction-prompt="none">
             </model-viewer>
 
-            <!-- Bottom instruction bar -->
-            <!-- <div class="ar-help">
-                <p><b>Tip:</b> Tap the <span class="cube-dot" aria-hidden="true"></span> cube in the bottom-right to
-                    enter AR.
-                    Then move your phone to find the floor and tap to place.</p>
-            </div> -->
+            <div class="ar-help" id="arHelpPanel">
+                <div class="ar-preview">
+                    <img id="arPreviewImg" src="./assets/wave-home-1.png" alt="Character preview thumbnail">
+                </div>
+                <div class="ar-status-block">
+                    <span class="ar-status-chip" id="arStatusChip" data-state="idle">Idle</span>
+                    <p id="arStatusText">Pick a card and tap “View in AR”.</p>
+                </div>
+                <ol class="ar-checklist">
+                    <li><span>1</span>Tap the cube icon or “Open in AR”.</li>
+                    <li><span>2</span>Move your phone slowly to find the floor.</li>
+                    <li><span>3</span>Tap once to place your neighbour.</li>
+                </ol>
+                <div class="ar-device-note">
+                    <p><strong>Android:</strong> Scene Viewer launches in a sheet.</p>
+                    <p><strong>iOS:</strong> Quick Look opens with your textures.</p>
+                </div>
+                <button class="ar-launch" id="arLaunchBtn" type="button" disabled>Open in AR</button>
+            </div>
 
-            <!-- little pulsing pointer near the cube -->
-            <div class="ar-pointer" aria-hidden="true"></div>
         </div>
     </div>
 
@@ -719,6 +995,92 @@
 
     <!-- 3) Gallery rendering + tooltip + "view in ar" + PNG compositor -->
     <script>
+        const heroEl = document.querySelector('.hero');
+        const heroTipsToggle = document.getElementById('arTipsToggle');
+        const heroTipsPanel = document.getElementById('heroTipsPanel');
+        heroTipsToggle?.addEventListener('click', () => {
+            if (!heroTipsPanel) return;
+            const open = heroTipsPanel.classList.toggle('open');
+            heroTipsToggle.textContent = open ? 'Hide AR tips ×' : 'View AR tips →';
+        });
+
+        function updateHeroCondensed() {
+            if (!heroEl) return;
+            const stickyAllowed = window.matchMedia('(min-width: 901px)').matches;
+            if (!stickyAllowed) {
+                heroEl.classList.remove('is-condensed');
+                return;
+            }
+            const shouldCondense = window.scrollY > 40;
+            heroEl.classList.toggle('is-condensed', shouldCondense);
+        }
+
+        window.addEventListener('scroll', updateHeroCondensed);
+        window.addEventListener('resize', updateHeroCondensed);
+        updateHeroCondensed();
+
+        const heroStatEls = {
+            total: document.getElementById('statTotal'),
+            week: document.getElementById('statNew')
+        };
+
+        function updateHeroStats({ total = 0, week = 0 } = {}) {
+            if (heroStatEls.total) heroStatEls.total.textContent = total.toString();
+            if (heroStatEls.week) heroStatEls.week.textContent = week.toString();
+        }
+
+        const arUi = (() => {
+            const statusChip = document.getElementById('arStatusChip');
+            const statusText = document.getElementById('arStatusText');
+            const previewImg = document.getElementById('arPreviewImg');
+            const launchBtn = document.getElementById('arLaunchBtn');
+            const fallbackPreview = './assets/wave-home-1.png';
+
+            const setStatus = (state = 'idle', message = 'Pick a card and tap “View in AR”.') => {
+                if (statusChip) {
+                    statusChip.dataset.state = state;
+                    const label = { idle: 'Idle', building: 'Preparing', ready: 'Ready', error: 'Error' }[state] || state;
+                    statusChip.textContent = label;
+                }
+                if (statusText) statusText.textContent = message;
+                if (launchBtn) {
+                    if (state === 'ready') launchBtn.removeAttribute('disabled');
+                    else launchBtn.setAttribute('disabled', 'disabled');
+                }
+            };
+
+            const setPreview = (src) => {
+                if (!previewImg) return;
+                previewImg.src = src || fallbackPreview;
+            };
+
+            setPreview();
+            setStatus('idle');
+
+            return { setStatus, setPreview, launchBtn };
+        })();
+
+        window.__arUi = arUi;
+
+        arUi.launchBtn?.addEventListener('click', async () => {
+            const mv = document.getElementById('arMV');
+            if (!mv) return;
+            try {
+                arUi.setStatus('ready', 'Attempting to open AR…');
+                if (typeof mv.activateAR === 'function') {
+                    await mv.activateAR();
+                } else if (typeof mv.enterAR === 'function') {
+                    await mv.enterAR();
+                } else {
+                    alert('Use the cube button in the viewer to open AR on this device.');
+                }
+                arUi.setStatus('ready', 'If nothing happens, tap the cube icon inside the viewer.');
+            } catch (err) {
+                console.error('activateAR failed', err);
+                arUi.setStatus('ready', 'Open AR via the cube button if this shortcut does not work.');
+            }
+        });
+
         // layout constants
         const CARD_W = 200 / 1.5;
         const CARD_H = 360 / 1.5;
@@ -826,6 +1188,15 @@
                 img.onerror = () => resolve(null);
                 img.src = url;
             });
+        }
+
+        function createdAtToMs(value) {
+            if (!value) return null;
+            if (typeof value.toMillis === 'function') return value.toMillis();
+            if (typeof value.seconds === 'number') return value.seconds * 1000;
+            if (typeof value._seconds === 'number') return value._seconds * 1000;
+            if (typeof value === 'number') return value;
+            return null;
         }
 
         const ensureSemiBoldFont = (() => {
@@ -938,7 +1309,13 @@
         const isMobileView = () => window.matchMedia('(max-width: 600px)').matches;
         const currentScale = () => isMobileView() ? 0.72 : 1;
         function resizeContainer() {
-            container.style.height = (window.innerHeight - headerEl.offsetHeight - footerEl.offsetHeight) + 'px';
+            const headerHeight = headerEl?.offsetHeight || 0;
+            const footerHeight = footerEl?.offsetHeight || 0;
+            const available = window.innerHeight - headerHeight - footerHeight;
+            const minHeight = isMobileView() ? window.innerHeight * 0.65 : 320;
+            const targetHeight = Math.max(available, minHeight);
+            container.style.height = `${targetHeight}px`;
+            container.style.minHeight = `${Math.max(targetHeight, 320)}px`;
             SCALE = currentScale();
         }
         window.addEventListener('resize', resizeContainer);
@@ -952,8 +1329,14 @@
             const snap = await window.getDocs(q);
 
             let i = 0;
+            const stats = { total: 0, week: 0 };
+            const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
             snap.forEach(doc => {
                 const d = doc.data();
+                stats.total += 1;
+                const createdAtMs = createdAtToMs(d.createdAt);
+                if (createdAtMs && createdAtMs >= weekAgo) stats.week += 1;
                 renderAvatar(
                     { selections: d.selections, faceData: d.faceUrl, name: d.name, favThing: d.favThing },
                     i++,
@@ -961,6 +1344,7 @@
                 );
             });
 
+            updateHeroStats(stats);
             brickLayout();
 
             // reflow on resize
@@ -1094,12 +1478,15 @@
                 const face = wrapper.dataset.face || '';
                 const displayName = (name || '').trim() || 'Your Character';
 
+                window.__arUi?.setStatus('building', 'Composing textures…');
                 const textures = await composeAvatarPNG(sels, face, displayName);
                 if (!textures || !textures.posterDataUrl) {
+                    window.__arUi?.setStatus('error', 'Could not compose AR textures. Please try again.');
                     alert('Could not compose AR textures (CORS).');
                     return;
                 }
                 window.lastArTextures = textures;
+                window.__arUi?.setPreview(textures.posterDataUrl);
 
                 // SAFER: btn may be null if handler bound oddly or DOM moved
                 const btn = (e.currentTarget && e.currentTarget.nodeType === 1)
@@ -1110,6 +1497,7 @@
                 if (btn) { btn.textContent = 'preparing…'; btn.disabled = true; }
 
                 try {
+                    window.__arUi?.setStatus('building', 'Packaging for AR…');
                     const usdzUrl = await makeUsdzFromPng({
                         posterDataUrl: textures.posterDataUrl,
                         traitDataUrls: textures.traitDataUrls,
@@ -1127,6 +1515,8 @@
                     // open modal + set runtime texture (Android/WebXR path)
                     window.openARWithTexture?.(textures, displayName);
 
+                    window.__arUi?.setStatus('ready', 'Tap “Open in AR” or the cube icon to place them.');
+
                     // iOS quick look (ignore errors if not supported)
                     if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
                         try { await mv.activateAR(); } catch { }
@@ -1134,6 +1524,7 @@
                 } catch (err) {
                     console.error(err);
                     alert('AR package error: ' + err.message);
+                    window.__arUi?.setStatus('error', 'Could not build the AR package. Please try again.');
                 } finally {
                     if (btn) { btn.textContent = prevLabel; btn.disabled = false; }
                 }
@@ -1519,6 +1910,9 @@
                 ? bundle.traitDataUrls
                 : Array.isArray(bundle.traits) ? bundle.traits : [];
             const nameDataUrl = bundle.nameDataUrl || bundle.name || null;
+
+            window.__arUi?.setPreview(posterDataUrl);
+            window.__arUi?.setStatus('ready', 'Tap “Open in AR” or the cube icon to place them.');
 
             const materials = mv.model?.materials || [];
             const posterMat = materials.find(m => m.name === 'PosterMaterial') || materials.find(m => m.name === 'AvatarMat');
