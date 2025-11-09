@@ -1612,7 +1612,6 @@
                 const t = setTimeout(() => done(false), timeout);
                 img.onload = () => { clearTimeout(t); done(true); };
                 img.onerror = () => { clearTimeout(t); done(false); };
-                img.crossOrigin = 'anonymous'; // requires CORS on your bucket
                 img.src = src;
             });
         }
