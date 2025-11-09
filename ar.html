@@ -44,7 +44,7 @@
         .hero-top {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             gap: 16px;
             flex-wrap: wrap;
             margin-bottom: 16px;
@@ -57,10 +57,17 @@
             background: #58aaf7;
             border-radius: 999px;
             padding: 8px 12px;
+            position: sticky;
+            top: 16px;
+            z-index: 2;
         }
 
         .hero-search {
             margin-left: auto;
+            margin-right: auto;
+            position: sticky;
+            top: 16px;
+            z-index: 2;
         }
 
         .hero-body {
@@ -68,10 +75,14 @@
             gap: 20px;
             align-items: stretch;
             flex-wrap: wrap;
+            text-align: center;
         }
 
         .hero-copy {
             flex: 1 1 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .hero-eyebrow {
@@ -83,13 +94,14 @@
         }
 
         .hero-title {
-            color: #c13a00;
+            color: #f7931e;
             font-size: clamp(2.2rem, 4vw, 3rem);
             text-transform: uppercase;
             margin-bottom: 12px;
             display: inline-block;
             transform: rotate(-1.5deg);
             transform-origin: left center;
+            text-shadow: 0 6px 25px rgba(247, 147, 30, 0.35);
         }
 
         .hero-subcopy {
@@ -104,6 +116,7 @@
             gap: 14px;
             flex-wrap: wrap;
             align-items: center;
+            justify-content: center;
             margin-top: 18px;
         }
 
@@ -149,6 +162,7 @@
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
             overflow: hidden;
             transition: opacity 0.25s ease, transform 0.25s ease;
+            margin: 0 auto;
         }
 
         .hero-card h3 {
@@ -187,6 +201,29 @@
             display: block;
         }
 
+        .hero-scroll-cta {
+            margin-top: 22px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .hero-scroll-cta button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            border-radius: 999px;
+            padding: 12px 28px;
+            background: #f7931e;
+            color: #fff;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(247, 147, 30, 0.35);
+        }
+
         .hero.is-condensed .hero-inner {
             padding: 14px 22px 14px;
             box-shadow: 0 12px 26px rgba(244, 182, 61, 0.18);
@@ -210,6 +247,10 @@
             padding: 0;
             margin: 0;
             overflow: hidden;
+        }
+
+        .hero.is-condensed .hero-scroll-cta {
+            display: none;
         }
 
         .sr-only {
@@ -896,10 +937,6 @@
                             <strong id="statTotal">0</strong>
                             <span>characters</span>
                         </div>
-                        <div class="hero-stat">
-                            <strong id="statNew">0</strong>
-                            <span>new this week</span>
-                        </div>
                         <button class="hero-tips-link" type="button" id="arTipsToggle">View AR tips →</button>
                     </div>
                 </div>
@@ -911,6 +948,9 @@
                         <li>Hit “View in AR” to drop them into your world.</li>
                     </ul>
                 </div>
+            </div>
+            <div class="hero-scroll-cta">
+                <button type="button" id="scrollToGallery">↓ Scroll to see the gallery</button>
             </div>
             <div class="hero-tips-panel" id="heroTipsPanel" aria-live="polite">
                 <strong>AR READY CHECK</strong>
@@ -1043,6 +1083,11 @@
             heroTipsToggle.textContent = open ? 'Hide AR tips ×' : 'View AR tips →';
         });
 
+        const scrollCtaBtn = document.getElementById('scrollToGallery');
+        scrollCtaBtn?.addEventListener('click', () => {
+            document.getElementById('gallery-container')?.scrollIntoView({ behavior: 'smooth' });
+        });
+
         function updateHeroCondensed() {
             if (!heroEl) return;
             const stickyAllowed = window.matchMedia('(min-width: 901px)').matches;
@@ -1059,13 +1104,11 @@
         updateHeroCondensed();
 
         const heroStatEls = {
-            total: document.getElementById('statTotal'),
-            week: document.getElementById('statNew')
+            total: document.getElementById('statTotal')
         };
 
-        function updateHeroStats({ total = 0, week = 0 } = {}) {
+        function updateHeroStats({ total = 0 } = {}) {
             if (heroStatEls.total) heroStatEls.total.textContent = total.toString();
-            if (heroStatEls.week) heroStatEls.week.textContent = week.toString();
         }
 
         const arUi = (() => {
@@ -1229,15 +1272,6 @@
             });
         }
 
-        function createdAtToMs(value) {
-            if (!value) return null;
-            if (typeof value.toMillis === 'function') return value.toMillis();
-            if (typeof value.seconds === 'number') return value.seconds * 1000;
-            if (typeof value._seconds === 'number') return value._seconds * 1000;
-            if (typeof value === 'number') return value;
-            return null;
-        }
-
         const ensureSemiBoldFont = (() => {
             let promise = null;
             return () => {
@@ -1368,14 +1402,11 @@
             const snap = await window.getDocs(q);
 
             let i = 0;
-            const stats = { total: 0, week: 0 };
-            const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+            const stats = { total: 0 };
 
             snap.forEach(doc => {
                 const d = doc.data();
                 stats.total += 1;
-                const createdAtMs = createdAtToMs(d.createdAt);
-                if (createdAtMs && createdAtMs >= weekAgo) stats.week += 1;
                 renderAvatar(
                     { selections: d.selections, faceData: d.faceUrl, name: d.name, favThing: d.favThing },
                     i++,
