@@ -1821,9 +1821,25 @@
     return { selections, name, favThing, faceData };
   }
 
+  function dataURLToBlob(dataURL) {
+    if (!dataURL || !dataURL.includes(',')) {
+      return new Blob();
+    }
+    const [header, data] = dataURL.split(',', 2);
+    const mimeMatch = header.match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+    const binary = atob(data);
+    const len = binary.length;
+    const buffer = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      buffer[i] = binary.charCodeAt(i);
+    }
+    return new Blob([buffer], { type: mime });
+  }
+
   async function uploadCharacter({ name, favThing, selections, faceData }) {
     // 1) fetch the PNG blob
-    const blob = await (await fetch(faceData)).blob();
+    const blob = dataURLToBlob(faceData);
 
     // 2) upload to Storage
     const fileRef = window.ref(window.storage, `avatars/${Date.now()}.png`);
@@ -2789,12 +2805,12 @@
   }
 
   // hotkey: press "R" to export transparent avatar
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'r' || e.key === 'R') {
-      e.preventDefault();
-      exportAvatarTransparentPNG();
-    }
-  });
+  // window.addEventListener('keydown', (e) => {
+  //   if (e.key === 'r' || e.key === 'R') {
+  //     e.preventDefault();
+  //     exportAvatarTransparentPNG();
+  //   }
+  // });
 </script>
 
 
