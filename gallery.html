@@ -448,6 +448,13 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             cursor: pointer;
+            transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }
+
+        .tooltip .ar-btn.ar-btn--active {
+            background: #ffd84d;
+            color: #7a3b00;
+            border-color: #7a3b00;
         }
 
         .gallery-card.show-tip .tooltip {
@@ -1715,7 +1722,12 @@
                     : e.target.closest('.ar-btn');
 
                 const prevLabel = btn ? btn.textContent : null;
-                if (btn) { btn.textContent = 'preparing…'; btn.disabled = true; }
+                const highlightButton = isMobileView();
+                if (btn) {
+                    btn.textContent = 'preparing…';
+                    btn.disabled = true;
+                    if (highlightButton) btn.classList.add('ar-btn--active');
+                }
 
                 try {
                     window.__arUi?.setStatus('building', 'Packaging for AR…');
@@ -1750,7 +1762,11 @@
                     alert('AR package error: ' + err.message);
                     window.__arUi?.setStatus('error', 'Could not build the AR package. Please try again.');
                 } finally {
-                    if (btn) { btn.textContent = prevLabel; btn.disabled = false; }
+                    if (btn) {
+                        btn.textContent = prevLabel;
+                        btn.disabled = false;
+                        btn.classList.remove('ar-btn--active');
+                    }
                 }
             });
 
