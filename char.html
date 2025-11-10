@@ -718,7 +718,7 @@
   window.addEventListener('resize', setScaleForViewport);
   window.addEventListener('resize', () => {
     if (document.body.classList.contains('stage-3')) {
-      resizeCanvasToFace();
+      resizeCanvasToFace({ allowRetry: true });
       layoutSwatchesInArc();
       placeUndoNearSwatches(); // <— add
     }
@@ -1518,10 +1518,32 @@
   const canvas = document.getElementById('faceCanvas');
   const ctx = canvas.getContext('2d');
 
+  const MAX_CANVAS_RESIZE_ATTEMPTS = 6;
+  let canvasResizeAttempts = 0;
+  let canvasResizeRetryTimer = null;
+
+  function queueCanvasResizeRetry(options) {
+    clearTimeout(canvasResizeRetryTimer);
+    canvasResizeRetryTimer = setTimeout(() => {
+      canvasResizeRetryTimer = null;
+      resizeCanvasToFace(options);
+    }, 80);
+  }
+
   // 2. resize helper
-  function resizeCanvasToFace() {
+  function resizeCanvasToFace(options = {}) {
+    if (options instanceof Event) {
+      options = {};
+    }
+    const { allowRetry = false } = options;
     const container = document.querySelector('.head .list li.act .svg-container');
-    if (!container) return;
+    if (!container) {
+      if (allowRetry && canvasResizeAttempts < MAX_CANVAS_RESIZE_ATTEMPTS) {
+        canvasResizeAttempts += 1;
+        queueCanvasResizeRetry(options);
+      }
+      return;
+    }
 
     const box = container.getBoundingClientRect();
     const newW = box.width, newH = box.height;
@@ -1529,9 +1551,19 @@
     // Some mobile browsers (Android Chrome) report zero when the carousel
     // has just been hidden; skip resizing to avoid nuking the strokes.
     if (newW < 2 || newH < 2) {
+      if (allowRetry && canvasResizeAttempts < MAX_CANVAS_RESIZE_ATTEMPTS) {
+        canvasResizeAttempts += 1;
+        queueCanvasResizeRetry(options);
+      }
       return;
     }
     const oldW = canvasEl.width, oldH = canvasEl.height;
+
+    canvasResizeAttempts = 0;
+    if (canvasResizeRetryTimer) {
+      clearTimeout(canvasResizeRetryTimer);
+      canvasResizeRetryTimer = null;
+    }
 
     if (oldW && oldH) {
       const xScale = newW / oldW;
@@ -2496,7 +2528,7 @@
       // size overlay AFTER zoom CSS finishes
       // setTimeout(resizeCanvasToFace, 300);
       setTimeout(() => {
-        resizeCanvasToFace();
+        resizeCanvasToFace({ allowRetry: true });
         layoutSwatchesInArc();
         placeUndoNearSwatches(); // <— add
       }, 300);
