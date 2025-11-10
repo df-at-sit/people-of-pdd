@@ -1525,6 +1525,12 @@
 
     const box = container.getBoundingClientRect();
     const newW = box.width, newH = box.height;
+
+    // Some mobile browsers (Android Chrome) report zero when the carousel
+    // has just been hidden; skip resizing to avoid nuking the strokes.
+    if (newW < 2 || newH < 2) {
+      return;
+    }
     const oldW = canvasEl.width, oldH = canvasEl.height;
 
     if (oldW && oldH) {
