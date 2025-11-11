@@ -30,6 +30,9 @@ const TEX_PATHS = {
     trait2: path.join("textures", "trait2.png"),
     trait3: path.join("textures", "trait3.png"),
     trait4: path.join("textures", "trait4.png"),
+    friend1: path.join("textures", "friend1.png"),
+    friend2: path.join("textures", "friend2.png"),
+    friend3: path.join("textures", "friend3.png"),
 };
 const TRAIT_KEYS = ["trait1", "trait2", "trait3", "trait4"];
 const DEFAULT_STAGE_BASENAME = "animationtemplate.usdc";
@@ -84,7 +87,9 @@ function pickTemplateVariant(traits = []) {
 
 function templateConfigForVariant(variantInput) {
     const normalized = variantInput === "future" ? "future" : "oldSchool";
-    const filename = normalized === "future" ? "animationtemplate2.usdz" : "animationtemplate.usdz";
+    const filename = normalized === "future"
+        ? "animationtemplate2-withfriends.usdz"
+        : "animationtemplate-withfriends.usdz";
     const stageBasename = `${path.parse(filename).name}.usdc`;
     return { filename, stageBasename, variant: normalized };
 }
@@ -216,7 +221,18 @@ async function zipUsdZFromDir(srcDir, outUsdz, stageBasename = DEFAULT_STAGE_BAS
 app.options("/make-usdz", (_, res) => res.sendStatus(204)); // CORS preflight
 app.post("/make-usdz", async (req, res) => {
     try {
-        const { posterDataUrl, pngDataUrl, pngUrl, traitDataUrls, nameDataUrl, displayName, traits } = req.body || {};
+        const {
+            posterDataUrl,
+            pngDataUrl,
+            pngUrl,
+            traitDataUrls,
+            nameDataUrl,
+            displayName,
+            traits,
+            friendPosterDataUrl,
+            friendPoster2DataUrl,
+            friendPoster3DataUrl,
+        } = req.body || {};
         const posterSrc = posterDataUrl || pngDataUrl || pngUrl;
         if (!posterSrc) {
             return res.status(400).json({ ok: false, error: "posterDataUrl or pngDataUrl required" });
@@ -251,6 +267,9 @@ app.post("/make-usdz", async (req, res) => {
         await Promise.all(
             TRAIT_KEYS.map((key, idx) => replaceTexture(TEX_PATHS[key], traitSrcs[idx]))
         );
+        await replaceTexture(TEX_PATHS.friend1, friendPosterDataUrl);
+        await replaceTexture(TEX_PATHS.friend2, friendPoster2DataUrl);
+        await replaceTexture(TEX_PATHS.friend3, friendPoster3DataUrl);
 
         // optional cache buster
         // await fsp.writeFile(path.join(unpackDir, "version.txt"), String(Date.now()));

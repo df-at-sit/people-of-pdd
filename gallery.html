@@ -375,6 +375,10 @@
             margin-top: 50px;
         }
 
+        #gallery-container.is-tooltip-lifted {
+            z-index: 7001;
+        }
+
         .gallery-card {
             position: absolute;
             transform-origin: center center;
@@ -1105,10 +1109,11 @@
             </div>
 
             <!-- 3D viewer -->
-            <model-viewer id="arMV" src="./assets/ar/animationtemplate.glb"
-                ios-src="./functions/template/animationtemplate.usdz" ar ar-modes="webxr scene-viewer quick-look"
-                placement="floor" camera-controls shadow-intensity="0.25" exposure="1" tone-mapping="aces"
-                environment-image="neutral" interaction-prompt="none" autoplay animation-loop>
+            <model-viewer id="arMV" src="./assets/ar/animationtemplate-withfriends.glb"
+                ios-src="./functions/template/animationtemplate-withfriends.usdz" ar
+                ar-modes="webxr scene-viewer quick-look" placement="floor" camera-controls shadow-intensity="0.25"
+                exposure="1" tone-mapping="aces" environment-image="neutral" interaction-prompt="none" autoplay
+                animation-loop>
             </model-viewer>
 
 
@@ -1166,12 +1171,26 @@
         const API_BASE =
             "https://asia-southeast1-people-of-pdd-website.cloudfunctions.net/api";
 
-        async function makeUsdzFromPng({ posterDataUrl, traitDataUrls = [], nameDataUrl, pngDataUrl, pngUrl, displayName, traits = [] }) {
+        async function makeUsdzFromPng({
+            posterDataUrl,
+            traitDataUrls = [],
+            nameDataUrl,
+            pngDataUrl,
+            pngUrl,
+            displayName,
+            traits = [],
+            friendPosterDataUrl,
+            friendPoster2DataUrl,
+            friendPoster3DataUrl
+        }) {
             const payload = { displayName };
             if (posterDataUrl || pngDataUrl) payload.posterDataUrl = posterDataUrl || pngDataUrl;
             if (pngUrl) payload.pngUrl = pngUrl;
             if (Array.isArray(traitDataUrls) && traitDataUrls.length) payload.traitDataUrls = traitDataUrls;
             if (nameDataUrl) payload.nameDataUrl = nameDataUrl;
+            if (friendPosterDataUrl) payload.friendPosterDataUrl = friendPosterDataUrl;
+            if (friendPoster2DataUrl) payload.friendPoster2DataUrl = friendPoster2DataUrl;
+            if (friendPoster3DataUrl) payload.friendPoster3DataUrl = friendPoster3DataUrl;
             if (Array.isArray(traits) && traits.length) {
                 payload.traits = traits
                     .map(t => typeof t === 'string' ? t.trim() : '')
@@ -1265,6 +1284,42 @@
         const heroStatEls = {
             total: document.getElementById('statTotal')
         };
+
+        window.__galleryEntries = window.__galleryEntries || [];
+        const tooltipControllerMap = new WeakMap();
+
+        const tooltipLiftManager = (() => {
+            const container = document.getElementById('gallery-container');
+            const activeCards = new Map();
+            const update = () => {
+                if (!container) return;
+                if (activeCards.size > 0) container.classList.add('is-tooltip-lifted');
+                else container.classList.remove('is-tooltip-lifted');
+            };
+            const shouldLift = (card) => {
+                if (!card || !heroEl || !heroDesktopMq.matches) return false;
+                const heroRect = heroEl.getBoundingClientRect();
+                const cardRect = card.getBoundingClientRect();
+                return cardRect.top < heroRect.bottom + 12;
+            };
+            return {
+                request(card) {
+                    if (!shouldLift(card)) return false;
+                    const next = (activeCards.get(card) || 0) + 1;
+                    activeCards.set(card, next);
+                    update();
+                    return true;
+                },
+                release(card) {
+                    if (!activeCards.has(card)) return;
+                    const next = (activeCards.get(card) || 0) - 1;
+                    if (next <= 0) activeCards.delete(card);
+                    else activeCards.set(card, next);
+                    update();
+                },
+                shouldLift,
+            };
+        })();
 
         function updateHeroStats({ total = 0 } = {}) {
             if (heroStatEls.total) heroStatEls.total.textContent = total.toString();
@@ -1560,18 +1615,24 @@
             const q = window.query(window.collection(window.db, "galleryCharacters"), window.orderBy("createdAt", "desc"));
             const snap = await window.getDocs(q);
 
-            let i = 0;
             const stats = { total: 0 };
+            const entries = [];
 
             snap.forEach(doc => {
                 const d = doc.data();
                 stats.total += 1;
-                renderAvatar(
-                    { selections: d.selections, faceData: d.faceUrl, name: d.name, favThing: d.favThing },
-                    i++,
-                    SCALE
-                );
+                const entry = {
+                    selections: Array.isArray(d.selections) ? d.selections : [],
+                    faceData: d.faceUrl || '',
+                    name: typeof d.name === 'string' ? d.name : '',
+                    favThing: typeof d.favThing === 'string' ? d.favThing : ''
+                };
+                const entryIndex = entries.length;
+                entries.push(entry);
+                renderAvatar(entry, entryIndex, SCALE);
             });
+
+            window.__galleryEntries = entries;
 
             updateHeroStats(stats);
             brickLayout();
@@ -1599,6 +1660,48 @@
             wrapper.dataset.scale = scale;
             wrapper.dataset.selections = JSON.stringify(selections || []);
             wrapper.dataset.face = faceData || '';
+            if (typeof index === 'number' && Number.isFinite(index)) {
+                wrapper.dataset.entryIndex = String(index);
+            } else {
+                delete wrapper.dataset.entryIndex;
+            }
+            let hoverLifted = false;
+            let tipLifted = false;
+
+            const requestHoverLift = () => {
+                if (hoverLifted || !heroDesktopMq.matches) return;
+                hoverLifted = tooltipLiftManager.request(wrapper);
+            };
+
+            const releaseHoverLift = () => {
+                if (!hoverLifted) return;
+                if (wrapper.classList.contains('show-tip')) return;
+                tooltipLiftManager.release(wrapper);
+                hoverLifted = false;
+            };
+
+            const ensureTipLift = () => {
+                if (tipLifted || !heroDesktopMq.matches) return;
+                tipLifted = tooltipLiftManager.request(wrapper);
+            };
+
+            const releaseTipLift = () => {
+                if (!tipLifted) return;
+                tooltipLiftManager.release(wrapper);
+                tipLifted = false;
+            };
+
+            const closeTooltip = () => {
+                if (!wrapper.classList.contains('show-tip')) return;
+                wrapper.classList.remove('show-tip');
+                wrapper.style.zIndex = '';
+                releaseTipLift();
+                if (!wrapper.matches(':hover')) releaseHoverLift();
+            };
+
+            tooltipControllerMap.set(wrapper, {
+                close: closeTooltip
+            });
 
             wrapper.style.width = CARD_W + 'px';
             wrapper.style.height = CARD_H + 'px';
@@ -1682,20 +1785,51 @@
     `;
             wrapper.appendChild(tooltip);
 
+            wrapper.addEventListener('mouseenter', () => {
+                if (!heroDesktopMq.matches) return;
+                requestHoverLift();
+            });
+
+            wrapper.addEventListener('mouseleave', () => {
+                if (!heroDesktopMq.matches) return;
+                if (!wrapper.classList.contains('show-tip')) {
+                    releaseHoverLift();
+                }
+            });
+
             // toggle tooltip on card click
             wrapper.addEventListener('click', (e) => {
                 if (e.target.closest('.ar-btn')) return; // AR handled below
                 e.stopPropagation();
                 document.querySelectorAll('.gallery-card.show-tip').forEach(c => {
-                    if (c !== wrapper) { c.classList.remove('show-tip'); c.style.zIndex = ''; }
+                    if (c === wrapper) return;
+                    const controller = tooltipControllerMap.get(c);
+                    if (controller?.close) controller.close();
+                    else {
+                        c.classList.remove('show-tip');
+                        c.style.zIndex = '';
+                    }
                 });
                 const open = wrapper.classList.toggle('show-tip');
                 wrapper.style.zIndex = open ? '9999' : '';
+                if (open) {
+                    ensureTipLift();
+                } else {
+                    releaseTipLift();
+                    if (!wrapper.matches(':hover')) releaseHoverLift();
+                }
             });
             // close when clicking outside
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.gallery-card')) {
-                    document.querySelectorAll('.gallery-card.show-tip').forEach(c => { c.classList.remove('show-tip'); c.style.zIndex = ''; });
+                    document.querySelectorAll('.gallery-card.show-tip').forEach(c => {
+                        const controller = tooltipControllerMap.get(c);
+                        if (controller?.close) controller.close();
+                        else {
+                            c.classList.remove('show-tip');
+                            c.style.zIndex = '';
+                        }
+                    });
                 }
             });
 
@@ -1706,6 +1840,22 @@
                 const sels = JSON.parse(wrapper.dataset.selections || '[]');
                 const face = wrapper.dataset.face || '';
                 const displayName = (name || '').trim() || 'Your Character';
+                const entryIndex = Number(wrapper.dataset.entryIndex);
+                const galleryEntries = Array.isArray(window.__galleryEntries) ? window.__galleryEntries : [];
+                const friendEntries = Number.isFinite(entryIndex)
+                    ? [galleryEntries[entryIndex + 1], galleryEntries[entryIndex + 2], galleryEntries[entryIndex + 3]]
+                    : [null, null, null];
+                const friendTexturePromises = friendEntries.map((entry, friendIdx) => {
+                    if (!entry) return Promise.resolve(null);
+                    return composeAvatarPNG(
+                        Array.isArray(entry.selections) ? entry.selections : [],
+                        entry.faceData || '',
+                        entry.name || `Friend ${friendIdx + 1}`
+                    ).catch(err => {
+                        console.warn(`Friend texture compose failed (slot ${friendIdx + 1})`, err);
+                        return null;
+                    });
+                });
 
                 window.__arUi?.setStatus('building', 'Composing textures…');
                 const textures = await composeAvatarPNG(sels, face, displayName);
@@ -1732,12 +1882,16 @@
 
                 try {
                     window.__arUi?.setStatus('building', 'Packaging for AR…');
+                    const [friend1Textures, friend2Textures, friend3Textures] = await Promise.all(friendTexturePromises);
                     const { usdzUrl, templateVariant } = await makeUsdzFromPng({
                         posterDataUrl: textures.posterDataUrl,
                         traitDataUrls: textures.traitDataUrls,
                         nameDataUrl: textures.nameDataUrl,
                         displayName,
-                        traits: textures.traits
+                        traits: textures.traits,
+                        friendPosterDataUrl: friend1Textures?.posterDataUrl || null,
+                        friendPoster2DataUrl: friend2Textures?.posterDataUrl || null,
+                        friendPoster3DataUrl: friend3Textures?.posterDataUrl || null
                     });
                     console.log("USDZ URL (from click):", usdzUrl);
                     window.lastUsdz = usdzUrl; // optional
@@ -1750,7 +1904,11 @@
 
                     // open modal + set runtime texture (Android/WebXR path)
                     textures.templateVariant = templateVariant;
-                    window.openARWithTexture?.(textures, displayName);
+                    await window.openARWithTexture?.(textures, displayName, {
+                        friend1: friend1Textures,
+                        friend2: friend2Textures,
+                        friend3: friend3Textures
+                    });
 
                     window.__arUi?.setStatus('ready', 'Tap “Open in AR” or the cube icon to place them.');
 
@@ -2124,6 +2282,10 @@
         const mv = document.getElementById('arMV');  // src set in HTML (e.g., "./assets/ar/avatar-billboard.glb")
         const closeBtn = document.getElementById('arClose');
         const arTitle = document.getElementById('arTitle');
+        const GLB_SOURCES = {
+            oldSchool: './assets/ar/animationtemplate-withfriends.glb',
+            future: './assets/ar/animationtemplate2-withfriends.glb'
+        };
 
         closeBtn.addEventListener('click', () => {
             modal.classList.remove('open');
@@ -2131,7 +2293,7 @@
         });
 
         // textureBundle: { posterDataUrl, nameDataUrl, traitDataUrls[] }, displayName: shown in modal header
-        async function openARWithTexture(textureBundle, displayName = 'Character') {
+        async function openARWithTexture(textureBundle, displayName = 'Character', friendTextureBundles = null) {
             const modal = document.getElementById('arModal');
             const mv = document.getElementById('arMV');
             const arTitle = document.getElementById('arTitle');
@@ -2145,9 +2307,7 @@
                 ? { posterDataUrl: textureBundle, traitDataUrls: [] }
                 : (textureBundle || {});
             const templateVariant = bundle.templateVariant === 'future' ? 'future' : 'oldSchool';
-            const desiredGlbSrc = templateVariant === 'future'
-                ? './assets/ar/animationtemplate2.glb'
-                : './assets/ar/animationtemplate.glb';
+            const desiredGlbSrc = GLB_SOURCES[templateVariant] || GLB_SOURCES.oldSchool;
 
             if (mv.getAttribute('src') !== desiredGlbSrc) {
                 await new Promise(res => {
@@ -2167,6 +2327,26 @@
                 ? bundle.traitDataUrls
                 : Array.isArray(bundle.traits) ? bundle.traits : [];
             const nameDataUrl = bundle.nameDataUrl || bundle.name || null;
+            const friendBundleMap = (friendTextureBundles && typeof friendTextureBundles === 'object')
+                ? friendTextureBundles
+                : {};
+            const normalizeFriendBundle = (bundle) => {
+                if (!bundle) return null;
+                if (typeof bundle === 'string') return { posterDataUrl: bundle };
+                return bundle;
+            };
+            const friend1Norm = normalizeFriendBundle(friendBundleMap.friend1);
+            const friend2Norm = normalizeFriendBundle(friendBundleMap.friend2);
+            const friend3Norm = normalizeFriendBundle(friendBundleMap.friend3);
+            const friendPosterDataUrl = friend1Norm
+                ? (friend1Norm.posterDataUrl || friend1Norm.poster || friend1Norm.pngDataUrl || null)
+                : null;
+            const friendPoster2DataUrl = friend2Norm
+                ? (friend2Norm.posterDataUrl || friend2Norm.poster || friend2Norm.pngDataUrl || null)
+                : null;
+            const friendPoster3DataUrl = friend3Norm
+                ? (friend3Norm.posterDataUrl || friend3Norm.poster || friend3Norm.pngDataUrl || null)
+                : null;
 
             window.__arUi?.setPreview(posterDataUrl);
             window.__arUi?.setStatus('ready', 'Tap “Open in AR” or the cube icon to place them.');
@@ -2208,6 +2388,24 @@
                 else if (pbr?.setBaseColorTexture) pbr.setBaseColorTexture(tex);
                 pbr?.setMetallicFactor?.(0.0);
                 pbr?.setRoughnessFactor?.(1.0);
+                mat?.setAlphaMode?.('BLEND');
+            }));
+
+            const friendMaterials = [
+                { name: 'FriendMaterial', texture: friendPosterDataUrl },
+                { name: 'FriendMaterial2', texture: friendPoster2DataUrl },
+                { name: 'FriendMaterial3', texture: friendPoster3DataUrl }
+            ];
+            await Promise.all(friendMaterials.map(async ({ name, texture }) => {
+                if (!texture) return;
+                const mat = materials.find(m => m.name === name);
+                if (!mat) return;
+                const friendTex = await mv.createTexture(texture);
+                const friendPbr = mat.pbrMetallicRoughness;
+                if (friendPbr?.baseColorTexture?.setTexture) friendPbr.baseColorTexture.setTexture(friendTex);
+                else if (friendPbr?.setBaseColorTexture) friendPbr.setBaseColorTexture(friendTex);
+                friendPbr?.setMetallicFactor?.(0.0);
+                friendPbr?.setRoughnessFactor?.(1.0);
                 mat?.setAlphaMode?.('BLEND');
             }));
         }
