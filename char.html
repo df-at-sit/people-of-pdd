@@ -4,11 +4,24 @@
 <head>
   <meta charset="UTF-8" />
   <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"/> -->
-  <meta name="viewport" content="width=device-width,
-                 initial-scale=1.0,
-                 maximum-scale=1.0,
-                 minimum-scale=1.0,
-                 user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <script>
+    (() => {
+      const viewportMeta = document.querySelector('meta[name="viewport"]');
+      if (!viewportMeta) return;
+      const screenWidth = window.screen?.width || window.innerWidth;
+      const screenHeight = window.screen?.height || window.innerHeight;
+      const kioskResolution = screenWidth === 1280 && screenHeight === 624;
+      const isHuawei = /huawei/i.test(navigator.userAgent);
+      const shortLandscape = window.innerHeight < 700 && window.innerWidth > window.innerHeight;
+      if (kioskResolution || (isHuawei && shortLandscape)) {
+        viewportMeta.setAttribute(
+          'content',
+          'width=device-width, initial-scale=0.85, maximum-scale=2.0, user-scalable=yes'
+        );
+      }
+    })();
+  </script>
   <title>Create Your Character</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="assets/favicon-pdd.ico" type="image/png" sizes="32x32" />
