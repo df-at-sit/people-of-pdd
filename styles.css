@@ -38,15 +38,6 @@ body {
       rgba(244, 182, 61, 0.3) 100%); */
 }
 
-@-moz-document url-prefix() {
-  body {
-    transform: scale(0.8);
-    transform-origin: top center;
-    width: 125%;
-    overflow-x: hidden;
-  }
-}
-
 .homepage {
   display: flex;
   flex-direction: column;
