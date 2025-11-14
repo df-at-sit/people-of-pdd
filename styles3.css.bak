@@ -131,6 +131,10 @@ body {
   color: white;
 }
 
+.green-bg {
+  background-color: #22b573;
+  color: white;
+}
 
 
 
@@ -199,7 +203,9 @@ body {
 
     .title-section {
       margin-top: 5px;
-      background-color: #f4b63d;
+      /* background-color: #f4b63d; */
+      background: linear-gradient(135deg, #ffd147, #f4b63d);
+
       border-radius: 20px;
 
       padding: 5px 20px 15px 20px;
@@ -1808,6 +1814,11 @@ small {
   right: 0;
 }
 
+.corner-circle.green-bg {
+  top: 0;
+  right: 0;
+}
+
 
 
 
@@ -2449,7 +2460,8 @@ body.stage-4 .carousel-nav {
 
   .char-page .title-section {
     margin-top: 5px;
-    background-color: #f7931e;
+    /* background-color: #f7931e; */
+    background: linear-gradient(135deg, #ffd147, #f4b63d);
     border-radius: 20px;
     padding: 5px 10px 15px 10px;
     transform: rotate(3deg) !important;
@@ -2623,6 +2635,7 @@ body.stage-4 .carousel-nav {
   html,
   body,
   .char-page {
+    height: 100vh;
     height: 100svh;
     /* <— instead of 100vh */
     overflow: hidden;
@@ -2645,6 +2658,7 @@ body.stage-4 .carousel-nav {
 
   /* fills exactly the space between header and fixed footer */
   .builder-section {
+    height: calc(100vh - var(--header-h) - var(--footer-h));
     height: calc(100svh - var(--header-h) - var(--footer-h));
     overflow: hidden;
   }
@@ -2670,6 +2684,7 @@ body.stage-4 .carousel-nav {
 
   /* allow vertical scroll and keep extra space for the footer art */
   .homepage {
+    min-height: 100vh;
     min-height: 100svh;
     /* visible viewport height */
     overflow-y: auto;
@@ -2798,6 +2813,7 @@ body.stage-4 .carousel-nav {
   /* Make the content scrollable in stage-4 only */
   body.stage-4 .builder-section {
     display: block !important;
+    height: 100vh;
     height: 100svh;
     /* use the visible viewport */
     overflow-y: auto !important;
@@ -2925,4 +2941,70 @@ body.stage-4 .carousel-nav {
 
 
 
+}
+
+@media (max-height: 720px) {
+
+  html:not(.force-desktop),
+  html:not(.force-desktop) body,
+  html:not(.force-desktop) .char-page {
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
+  html:not(.force-desktop) .char-page .header {
+    padding: 16px 16px 12px;
+  }
+
+  html:not(.force-desktop) .char-page .title-section {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    transform: none !important;
+  }
+
+  html:not(.force-desktop) .char-page .builder-section {
+    padding: 18px;
+    justify-content: flex-start;
+  }
+
+  html:not(.force-desktop) .char-page .rig-background {
+    width: 110px;
+  }
+
+  html:not(.force-desktop) .char-page .footer-section {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px 16px;
+    z-index: 2000;
+  }
+
+  html:not(.force-desktop) body.stage-4 .builder-section {
+    height: auto;
+    overflow-y: auto;
+    padding: 16px 16px 140px;
+  }
+
+  html:not(.force-desktop) body.stage-4 .footer-section {
+    position: fixed;
+  }
+
+  html:not(.force-desktop) body.stage-3 .draw-toolbar {
+    position: fixed !important;
+    top: 12px !important;
+    right: 12px !important;
+    transform: none !important;
+  }
+
+  html:not(.force-desktop) body.stage-3 #undoBtn {
+    top: 12px !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  html:not(.force-desktop) body.stage-4 .card-input {
+    max-width: 95vw !important;
+  }
 }

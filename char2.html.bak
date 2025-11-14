@@ -4,13 +4,74 @@
 <head>
   <meta charset="UTF-8" />
   <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"/> -->
-  <meta name="viewport" content="width=device-width,
-                 initial-scale=1.0,
-                 maximum-scale=1.0,
-                 minimum-scale=1.0,
-                 user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <script>
+
+    //
+
+    //  const ua = navigator.userAgent || '';
+    //   const isChromium83 = /(Chromium|Chrome)\/83\./.test(ua);
+    //   const isHuaweiIdeaHub = /huawei/i.test(ua);
+    //   if (isChromium83 && isHuaweiIdeaHub) {
+    //     document.documentElement.classList.add('force-desktop');
+    //     if (document.body) {
+    //       document.body.classList.add('force-desktop');
+    //     } else {
+    //       document.addEventListener('DOMContentLoaded', () => {
+    //         if (document.body) {
+    //           document.body.classList.add('force-desktop');
+    //         }
+    //       });
+    //     }
+
+
+    (() => {
+      const viewportMeta = document.querySelector('meta[name="viewport"]');
+      if (!viewportMeta) return;
+      const ua = navigator.userAgent || '';
+
+      const isHuaweiOrIdeaHub = /(huawei|ideahub)/i.test(ua);
+      const isChromium83 = /(Chromium|Chrome)\/83\./.test(ua);
+      const isFirefox = /firefox/i.test(ua);
+
+      const forceDesktopMode = () => {
+        document.documentElement.classList.add('force-desktop');
+        if (document.body) {
+          document.body.classList.add('force-desktop');
+        } else {
+          document.addEventListener('DOMContentLoaded', () => {
+            if (document.body) {
+              document.body.classList.add('force-desktop');
+            }
+          });
+        }
+      };
+
+      if (isHuaweiOrIdeaHub && (isChromium83 || isFirefox)) {
+        forceDesktopMode();
+        viewportMeta.setAttribute(
+          'content',
+          'width=device-width, initial-scale=1.0, user-scalable=yes'
+        );
+        return;
+      }
+
+      const screenWidth = window.screen?.width || window.innerWidth;
+      const screenHeight = window.screen?.height || window.innerHeight;
+      const kioskResolution = screenWidth === 1280 && screenHeight === 624;
+      const isHuawei = /huawei/i.test(navigator.userAgent);
+      const shortLandscape = window.innerHeight < 700 && window.innerWidth > window.innerHeight;
+      if (kioskResolution || (isHuawei && shortLandscape)) {
+        viewportMeta.setAttribute(
+          'content',
+          'width=device-width, initial-scale=0.85, maximum-scale=2.0, user-scalable=yes'
+        );
+      }
+    })();
+  </script>
   <title>Create Your Character</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="assets/favicon-pdd.ico" type="image/png" sizes="32x32" />
   <style>
     /* 
         body {
@@ -718,7 +779,7 @@
   window.addEventListener('resize', setScaleForViewport);
   window.addEventListener('resize', () => {
     if (document.body.classList.contains('stage-3')) {
-      resizeCanvasToFace();
+      resizeCanvasToFace({ allowRetry: true });
       layoutSwatchesInArc();
       placeUndoNearSwatches(); // <— add
     }
@@ -1518,14 +1579,52 @@
   const canvas = document.getElementById('faceCanvas');
   const ctx = canvas.getContext('2d');
 
+  const MAX_CANVAS_RESIZE_ATTEMPTS = 6;
+  let canvasResizeAttempts = 0;
+  let canvasResizeRetryTimer = null;
+
+  function queueCanvasResizeRetry(options) {
+    clearTimeout(canvasResizeRetryTimer);
+    canvasResizeRetryTimer = setTimeout(() => {
+      canvasResizeRetryTimer = null;
+      resizeCanvasToFace(options);
+    }, 80);
+  }
+
   // 2. resize helper
-  function resizeCanvasToFace() {
+  function resizeCanvasToFace(options = {}) {
+    if (options instanceof Event) {
+      options = {};
+    }
+    const { allowRetry = false } = options;
     const container = document.querySelector('.head .list li.act .svg-container');
-    if (!container) return;
+    if (!container) {
+      if (allowRetry && canvasResizeAttempts < MAX_CANVAS_RESIZE_ATTEMPTS) {
+        canvasResizeAttempts += 1;
+        queueCanvasResizeRetry(options);
+      }
+      return;
+    }
 
     const box = container.getBoundingClientRect();
     const newW = box.width, newH = box.height;
+
+    // Some mobile browsers (Android Chrome) report zero when the carousel
+    // has just been hidden; skip resizing to avoid nuking the strokes.
+    if (newW < 2 || newH < 2) {
+      if (allowRetry && canvasResizeAttempts < MAX_CANVAS_RESIZE_ATTEMPTS) {
+        canvasResizeAttempts += 1;
+        queueCanvasResizeRetry(options);
+      }
+      return;
+    }
     const oldW = canvasEl.width, oldH = canvasEl.height;
+
+    canvasResizeAttempts = 0;
+    if (canvasResizeRetryTimer) {
+      clearTimeout(canvasResizeRetryTimer);
+      canvasResizeRetryTimer = null;
+    }
 
     if (oldW && oldH) {
       const xScale = newW / oldW;
@@ -1821,9 +1920,25 @@
     return { selections, name, favThing, faceData };
   }
 
+  function dataURLToBlob(dataURL) {
+    if (!dataURL || !dataURL.includes(',')) {
+      return new Blob();
+    }
+    const [header, data] = dataURL.split(',', 2);
+    const mimeMatch = header.match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+    const binary = atob(data);
+    const len = binary.length;
+    const buffer = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      buffer[i] = binary.charCodeAt(i);
+    }
+    return new Blob([buffer], { type: mime });
+  }
+
   async function uploadCharacter({ name, favThing, selections, faceData }) {
     // 1) fetch the PNG blob
-    const blob = await (await fetch(faceData)).blob();
+    const blob = dataURLToBlob(faceData);
 
     // 2) upload to Storage
     const fileRef = window.ref(window.storage, `avatars/${Date.now()}.png`);
@@ -2474,7 +2589,7 @@
       // size overlay AFTER zoom CSS finishes
       // setTimeout(resizeCanvasToFace, 300);
       setTimeout(() => {
-        resizeCanvasToFace();
+        resizeCanvasToFace({ allowRetry: true });
         layoutSwatchesInArc();
         placeUndoNearSwatches(); // <— add
       }, 300);
@@ -2789,12 +2904,12 @@
   }
 
   // hotkey: press "R" to export transparent avatar
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'r' || e.key === 'R') {
-      e.preventDefault();
-      exportAvatarTransparentPNG();
-    }
-  });
+  // window.addEventListener('keydown', (e) => {
+  //   if (e.key === 'r' || e.key === 'R') {
+  //     e.preventDefault();
+  //     exportAvatarTransparentPNG();
+  //   }
+  // });
 </script>
 
 
