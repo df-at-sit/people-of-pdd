@@ -29,25 +29,32 @@
       const viewportMeta = document.querySelector('meta[name="viewport"]');
       if (!viewportMeta) return;
       const ua = navigator.userAgent || '';
-      const isChromium83 = /(Chromium|Chrome)\/83\./.test(ua);
+
       const isHuaweiOrIdeaHub = /(huawei|ideahub)/i.test(ua);
-      // if (isChromium83 && isHuaweiOrIdeaHub) {
-      //   document.documentElement.classList.add('force-desktop');
-      //   if (document.body) {
-      //     document.body.classList.add('force-desktop');
-      //   } else {
-      //     document.addEventListener('DOMContentLoaded', () => {
-      //       if (document.body) {
-      //         document.body.classList.add('force-desktop');
-      //       }
-      //     });
-      //   }
-      //   viewportMeta.setAttribute(
-      //     'content',
-      //     'width=device-width, initial-scale=1.0, user-scalable=yes'
-      //   );
-      //   return;
-      // }
+      const isChromium83 = /(Chromium|Chrome)\/83\./.test(ua);
+      const isFirefox = /firefox/i.test(ua);
+
+      const forceDesktopMode = () => {
+        document.documentElement.classList.add('force-desktop');
+        if (document.body) {
+          document.body.classList.add('force-desktop');
+        } else {
+          document.addEventListener('DOMContentLoaded', () => {
+            if (document.body) {
+              document.body.classList.add('force-desktop');
+            }
+          });
+        }
+      };
+
+      if (isHuaweiOrIdeaHub && (isChromium83 || isFirefox)) {
+        forceDesktopMode();
+        viewportMeta.setAttribute(
+          'content',
+          'width=device-width, initial-scale=1.0, user-scalable=yes'
+        );
+        return;
+      }
 
       const screenWidth = window.screen?.width || window.innerWidth;
       const screenHeight = window.screen?.height || window.innerHeight;
