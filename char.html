@@ -9,9 +9,20 @@
     (() => {
       const viewportMeta = document.querySelector('meta[name="viewport"]');
       if (!viewportMeta) return;
-      const isChromium83 = /Chromium\/83\.0\.4098\.1/.test(navigator.userAgent);
-      if (isChromium83) {
+      const ua = navigator.userAgent || '';
+      const isChromium83 = /(Chromium|Chrome)\/83\./.test(ua);
+      const isHuaweiIdeaHub = /huawei/i.test(ua);
+      if (isChromium83 && isHuaweiIdeaHub) {
         document.documentElement.classList.add('force-desktop');
+        if (document.body) {
+          document.body.classList.add('force-desktop');
+        } else {
+          document.addEventListener('DOMContentLoaded', () => {
+            if (document.body) {
+              document.body.classList.add('force-desktop');
+            }
+          });
+        }
         viewportMeta.setAttribute(
           'content',
           'width=device-width, initial-scale=1.0, user-scalable=yes'
