@@ -131,6 +131,10 @@ body {
   color: white;
 }
 
+.green-bg {
+  background-color: #22b573;
+  color: white;
+}
 
 
 
@@ -1810,6 +1814,11 @@ small {
   right: 0;
 }
 
+.corner-circle.green-bg {
+  top: 0;
+  right: 0;
+}
+
 
 
 
@@ -2626,6 +2635,7 @@ body.stage-4 .carousel-nav {
   html,
   body,
   .char-page {
+    height: 100vh;
     height: 100svh;
     /* <— instead of 100vh */
     overflow: hidden;
@@ -2648,6 +2658,7 @@ body.stage-4 .carousel-nav {
 
   /* fills exactly the space between header and fixed footer */
   .builder-section {
+    height: calc(100vh - var(--header-h) - var(--footer-h));
     height: calc(100svh - var(--header-h) - var(--footer-h));
     overflow: hidden;
   }
@@ -2673,6 +2684,7 @@ body.stage-4 .carousel-nav {
 
   /* allow vertical scroll and keep extra space for the footer art */
   .homepage {
+    min-height: 100vh;
     min-height: 100svh;
     /* visible viewport height */
     overflow-y: auto;
@@ -2801,6 +2813,7 @@ body.stage-4 .carousel-nav {
   /* Make the content scrollable in stage-4 only */
   body.stage-4 .builder-section {
     display: block !important;
+    height: 100vh;
     height: 100svh;
     /* use the visible viewport */
     overflow-y: auto !important;
