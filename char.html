@@ -225,10 +225,12 @@
 
   <!-- FOOTER: 1/6 -->
   <footer class="footer-section">
-    <button class="back-btn">BACK</button>
-    <button class="next-btn " style="margin-left: 20px;">
-      NEXT
-    </button>
+    <div class="footer-buttons">
+      <button class="back-btn">BACK</button>
+      <button class="next-btn ">
+        NEXT
+      </button>
+    </div>
 
 
   </footer>
@@ -2788,13 +2790,6 @@
     a.click();
   }
 
-  // hotkey: press "R" to export transparent avatar
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'r' || e.key === 'R') {
-      e.preventDefault();
-      exportAvatarTransparentPNG();
-    }
-  });
 </script>
 
 
