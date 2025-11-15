@@ -977,6 +977,30 @@
             cursor: not-allowed;
         }
 
+        .ar-create-btn {
+            display: block;
+            width: calc(100% - 24px);
+            max-width: 320px;
+            margin: 16px auto 0;
+            padding: 10px 16px;
+            border-radius: 16px;
+            border: 2px solid #fff;
+            background: linear-gradient(135deg, #22b573, #2a9df4);
+            color: #fff;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .ar-create-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(0, 0, 0, 0.2);
+        }
+
         @media (max-width: 480px) {
             .ar-help {
                 font-size: 0.78rem;
@@ -1125,17 +1149,18 @@
                     <span class="ar-status-chip" id="arStatusChip" data-state="idle">Idle</span>
                     <p id="arStatusText">Pick a card and tap “View in AR”.</p>
                 </div>
-                <ol class="ar-checklist">
-                    <li><span>1</span>Tap the cube icon or “Open in AR”.</li>
-                    <li><span>2</span>Move your phone slowly to find the floor.</li>
-                    <li><span>3</span>Tap once to place your neighbour.</li>
-                </ol>
-                <div class="ar-device-note">
-                    <p><strong>Android:</strong> Scene Viewer launches in a sheet.</p>
-                    <p><strong>iOS:</strong> Quick Look opens with your textures.</p>
+                    <ol class="ar-checklist">
+                        <li><span>1</span>Tap the cube icon or “Open in AR”.</li>
+                        <li><span>2</span>Move your phone slowly to find the floor.</li>
+                        <li><span>3</span>Tap once to place your neighbour.</li>
+                    </ol>
+                    <div class="ar-device-note">
+                        <p><strong>Android:</strong> Scene Viewer launches in a sheet.</p>
+                        <p><strong>iOS:</strong> Quick Look opens with your textures.</p>
+                    </div>
+                    <button class="ar-launch" id="arLaunchBtn" type="button" disabled>Open in AR</button>
+                    <button class="ar-create-btn" id="makeAvatarBtn" type="button">Make your own avatar!</button>
                 </div>
-                <button class="ar-launch" id="arLaunchBtn" type="button" disabled>Open in AR</button>
-            </div>
 
         </div>
     </div>
@@ -1286,7 +1311,52 @@
         };
 
         window.__galleryEntries = window.__galleryEntries || [];
+        window.__galleryCards = window.__galleryCards || [];
         const tooltipControllerMap = new WeakMap();
+
+        const AUTO_AR_PARAM = 'autoAr';
+        const autoArRequested = new URLSearchParams(window.location.search).has(AUTO_AR_PARAM);
+        let autoArConsumed = false;
+
+        function pickAutoArEntryIndex(entries = []) {
+            if (!entries.length) return -1;
+            const excludeCount = Math.min(3, entries.length);
+            const eligibleCount = entries.length - excludeCount;
+            if (eligibleCount > 0) {
+                return Math.floor(Math.random() * eligibleCount);
+            }
+            return Math.floor(Math.random() * entries.length);
+        }
+
+        function clearAutoArParamFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            if (!params.has(AUTO_AR_PARAM)) return;
+            params.delete(AUTO_AR_PARAM);
+            const search = params.toString();
+            const newUrl = window.location.pathname + (search ? `?${search}` : '') + window.location.hash;
+            if (window.history && typeof window.history.replaceState === 'function') {
+                window.history.replaceState(null, '', newUrl);
+            }
+        }
+
+        async function maybeAutoLaunchArPreview() {
+            if (!autoArRequested || autoArConsumed) return;
+            const entries = Array.isArray(window.__galleryEntries) ? window.__galleryEntries : [];
+            const cards = Array.isArray(window.__galleryCards) ? window.__galleryCards : [];
+            const targetIndex = pickAutoArEntryIndex(entries);
+            const targetCard = cards[targetIndex];
+            if (!targetCard) return;
+            const arBtn = targetCard.querySelector('.ar-btn');
+            if (!arBtn) return;
+            autoArConsumed = true;
+            clearAutoArParamFromUrl();
+            if (typeof targetCard.scrollIntoView === 'function') {
+                targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            targetCard.click();
+            await new Promise(res => setTimeout(res, 320));
+            arBtn.click();
+        }
 
         const tooltipLiftManager = (() => {
             const container = document.getElementById('gallery-container');
@@ -1617,6 +1687,7 @@
 
             const stats = { total: 0 };
             const entries = [];
+            window.__galleryCards = [];
 
             snap.forEach(doc => {
                 const d = doc.data();
@@ -1636,6 +1707,7 @@
 
             updateHeroStats(stats);
             brickLayout();
+            void maybeAutoLaunchArPreview();
 
             // reflow on resize
             window.addEventListener('resize', () => {
@@ -1658,6 +1730,7 @@
             wrapper.classList.add('gallery-card');
             wrapper.dataset.name = (name || '').trim().toLowerCase();
             wrapper.dataset.scale = scale;
+            window.__galleryCards.push(wrapper);
             wrapper.dataset.selections = JSON.stringify(selections || []);
             wrapper.dataset.face = faceData || '';
             if (typeof index === 'number' && Number.isFinite(index)) {
@@ -2282,6 +2355,7 @@
         const mv = document.getElementById('arMV');  // src set in HTML (e.g., "./assets/ar/avatar-billboard.glb")
         const closeBtn = document.getElementById('arClose');
         const arTitle = document.getElementById('arTitle');
+        const makeAvatarBtn = document.getElementById('makeAvatarBtn');
         const GLB_SOURCES = {
             oldSchool: './assets/ar/animationtemplate-withfriends.glb',
             future: './assets/ar/animationtemplate2-withfriends.glb'
@@ -2290,6 +2364,14 @@
         closeBtn.addEventListener('click', () => {
             modal.classList.remove('open');
             modal.setAttribute('aria-hidden', 'true');
+        });
+
+        makeAvatarBtn?.addEventListener('click', () => {
+            if (modal) {
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+            window.location.href = 'char.html';
         });
 
         // textureBundle: { posterDataUrl, nameDataUrl, traitDataUrls[] }, displayName: shown in modal header

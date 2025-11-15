@@ -72,7 +72,7 @@
 
       </div>
       <!-- GREEN CARD -->
-      <div class="card-wrapper mobile-only" onclick="visitGallery()">
+      <div class="card-wrapper mobile-only" onclick="launchArExperience()">
         <svg viewBox="0 0 340 340" class="card-bg">
           <path
             d="M62.3638,337.9417h213.2141c34.4426,0,62.3638-27.9212,62.3638-62.3638v-88.4862c0-34.4426-27.9212-62.3638-62.3638-62.3638h-20.283c-23.2407,0-42.0809-18.8403-42.0809-42.0809v-20.283C213.2139,27.9212,185.2927,0,150.8501,0H62.3638C27.9212,0,0,27.9212,0,62.3638v213.214c0,34.4426,27.9212,62.3638,62.3638,62.3638Z"
@@ -110,6 +110,12 @@
           '_blank',
           'noopener'
         );
+      }
+
+      function launchArExperience() {
+        const url = new URL('gallery.html', window.location.href);
+        url.searchParams.set('autoAr', '1');
+        window.location.href = url.toString();
       }
     </script>
     <!-- <script src="script.js"></script> -->
