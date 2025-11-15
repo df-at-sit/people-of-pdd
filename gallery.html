@@ -27,7 +27,7 @@
             width: 100%;
             position: sticky;
             top: 0;
-            z-index: 6000;
+            z-index: 10;
             background: white;
             padding: 16px 22px;
         }
@@ -372,7 +372,7 @@
             overflow: visible;
             z-index: 2;
             margin-bottom: 500px;
-            margin-top: 50px;
+            margin-top: 160px;
         }
 
         #gallery-container.is-tooltip-lifted {
@@ -1151,18 +1151,19 @@
                     <span class="ar-status-chip" id="arStatusChip" data-state="idle">Idle</span>
                     <p id="arStatusText">Pick a card and tap “View in AR”.</p>
                 </div>
-                    <ol class="ar-checklist">
-                        <li><span>1</span>Tap the cube icon or “Open in AR”.</li>
-                        <li><span>2</span>Move your phone slowly to find the floor.</li>
-                        <li><span>3</span>Tap once to place your neighbour.</li>
-                    </ol>
-                    <div class="ar-device-note">
-                        <p><strong>Android:</strong> Scene Viewer launches in a sheet.</p>
-                        <p><strong>iOS:</strong> Quick Look opens with your textures.</p>
-                    </div>
-                    <button class="ar-launch ar-action-btn" id="arLaunchBtn" type="button" disabled>Open in AR</button>
-                    <button class="ar-create-btn ar-action-btn" id="makeAvatarBtn" type="button">Make your own avatar!</button>
+                <ol class="ar-checklist">
+                    <li><span>1</span>Tap the cube icon or “Open in AR”.</li>
+                    <li><span>2</span>Move your phone slowly to find the floor.</li>
+                    <li><span>3</span>Pinch or zoom to move your avatar around!</li>
+                </ol>
+                <div class="ar-device-note">
+                    <p><strong>Android:</strong> Launches Scene Viewer.</p>
+                    <p><strong>iOS:</strong> Opens Quick Look!</p>
                 </div>
+                <button class="ar-launch ar-action-btn" id="arLaunchBtn" type="button" disabled>Open in AR</button>
+                <button class="ar-create-btn ar-action-btn" id="makeAvatarBtn" type="button">Make your own
+                    avatar!</button>
+            </div>
 
         </div>
     </div>
@@ -1260,9 +1261,16 @@
     <script>
         const heroEl = document.querySelector('.hero');
         const heroDesktopMq = window.matchMedia('(min-width: 901px)');
-        const HERO_CONDENSE_SCROLL = 160;
+        const HERO_NUDGE_ZONE_MIN = 150;
+        const HERO_NUDGE_ZONE_MAX = 170;
+        const HERO_CONDENSE_SCROLL = HERO_NUDGE_ZONE_MAX;
         const HERO_RELAX_SCROLL = 80;
+        const HERO_STATE_DELAY = 120;
+        const HERO_NUDGE_DELAY = 180;
         let heroIsCondensed = false;
+        let heroNudgeTimer = 0;
+        let heroStateTimer = 0;
+        let heroStateTarget = null;
         const heroTipsToggle = document.getElementById('arTipsToggle');
         const heroTipsPanel = document.getElementById('heroTipsPanel');
         heroTipsToggle?.addEventListener('click', () => {
@@ -1276,35 +1284,89 @@
             document.getElementById('gallery-container')?.scrollIntoView({ behavior: 'smooth' });
         });
 
+        function cancelPendingHeroState() {
+            if (heroStateTimer) {
+                window.clearTimeout(heroStateTimer);
+                heroStateTimer = 0;
+            }
+            heroStateTarget = null;
+        }
+
         function setHeroCondensed(next) {
             if (heroIsCondensed === next) return;
+            cancelPendingHeroState();
             heroIsCondensed = next;
             heroEl.classList.toggle('is-condensed', next);
             heroEl.classList.toggle('is-muted', next);
+        }
+
+        function scheduleHeroState(next) {
+            if (heroIsCondensed === next && heroStateTarget === null) return;
+            if (heroStateTarget === next) return;
+            cancelPendingHeroState();
+            heroStateTarget = next;
+            heroStateTimer = window.setTimeout(() => {
+                heroStateTimer = 0;
+                heroStateTarget = null;
+                setHeroCondensed(next);
+            }, HERO_STATE_DELAY);
         }
 
         function updateHeroCondensed() {
             if (!heroEl) return;
             const isDesktop = heroDesktopMq.matches;
             if (!isDesktop) {
+                cancelPendingHeroState();
                 setHeroCondensed(false);
+                cancelHeroNudge();
                 return;
             }
-            const y = window.scrollY;
-            if (!heroIsCondensed && y > HERO_CONDENSE_SCROLL) {
-                setHeroCondensed(true);
-            } else if (heroIsCondensed && y < HERO_RELAX_SCROLL) {
-                setHeroCondensed(false);
-            }
+            cancelPendingHeroState();
+            cancelHeroNudge();
+            setHeroCondensed(true);
         }
 
+        function cancelHeroNudge() {
+            if (!heroNudgeTimer) return;
+            window.clearTimeout(heroNudgeTimer);
+            heroNudgeTimer = 0;
+        }
 
-        window.addEventListener('scroll', updateHeroCondensed);
-        window.addEventListener('resize', updateHeroCondensed);
+        function nudgeHeroScroll() {
+            const y = window.scrollY;
+            if (y < HERO_NUDGE_ZONE_MIN || y > HERO_NUDGE_ZONE_MAX) return;
+            const target = heroIsCondensed ? HERO_NUDGE_ZONE_MAX : HERO_NUDGE_ZONE_MIN;
+            if (Math.abs(y - target) < 1) return;
+            window.scrollTo({ top: target, behavior: 'auto' });
+        }
+
+        function scheduleHeroNudge() {
+            cancelHeroNudge();
+            if (!heroEl || !heroDesktopMq.matches || heroIsCondensed) return;
+            const y = window.scrollY;
+            if (y < HERO_NUDGE_ZONE_MIN || y > HERO_NUDGE_ZONE_MAX) return;
+            heroNudgeTimer = window.setTimeout(() => {
+                heroNudgeTimer = 0;
+                nudgeHeroScroll();
+            }, HERO_NUDGE_DELAY);
+        }
+
+        function handleHeroScroll() {
+            updateHeroCondensed();
+            scheduleHeroNudge();
+        }
+
+        const handleHeroMediaChange = () => {
+            updateHeroCondensed();
+            cancelHeroNudge();
+        };
+
+        window.addEventListener('scroll', handleHeroScroll);
+        window.addEventListener('resize', handleHeroMediaChange);
         if (typeof heroDesktopMq.addEventListener === 'function') {
-            heroDesktopMq.addEventListener('change', updateHeroCondensed);
+            heroDesktopMq.addEventListener('change', handleHeroMediaChange);
         } else if (typeof heroDesktopMq.addListener === 'function') {
-            heroDesktopMq.addListener(updateHeroCondensed);
+            heroDesktopMq.addListener(handleHeroMediaChange);
         }
         updateHeroCondensed();
 
@@ -1317,7 +1379,10 @@
         const tooltipControllerMap = new WeakMap();
 
         const AUTO_AR_PARAM = 'autoAr';
-        const autoArRequested = new URLSearchParams(window.location.search).has(AUTO_AR_PARAM);
+        const AUTO_AR_ENTRY_PARAM = 'autoArEntryId';
+        const urlParams = new URLSearchParams(window.location.search);
+        const autoArRequested = urlParams.has(AUTO_AR_PARAM);
+        const autoArEntryId = urlParams.get(AUTO_AR_ENTRY_PARAM);
         let autoArConsumed = false;
 
         function pickAutoArEntryIndex(entries = []) {
@@ -1332,8 +1397,11 @@
 
         function clearAutoArParamFromUrl() {
             const params = new URLSearchParams(window.location.search);
-            if (!params.has(AUTO_AR_PARAM)) return;
+            const hadAuto = params.has(AUTO_AR_PARAM);
+            const hadEntry = params.has(AUTO_AR_ENTRY_PARAM);
+            if (!hadAuto && !hadEntry) return;
             params.delete(AUTO_AR_PARAM);
+            params.delete(AUTO_AR_ENTRY_PARAM);
             const search = params.toString();
             const newUrl = window.location.pathname + (search ? `?${search}` : '') + window.location.hash;
             if (window.history && typeof window.history.replaceState === 'function') {
@@ -1345,8 +1413,14 @@
             if (!autoArRequested || autoArConsumed) return;
             const entries = Array.isArray(window.__galleryEntries) ? window.__galleryEntries : [];
             const cards = Array.isArray(window.__galleryCards) ? window.__galleryCards : [];
-            const targetIndex = pickAutoArEntryIndex(entries);
-            const targetCard = cards[targetIndex];
+            let targetIndex = -1;
+            if (autoArEntryId) {
+                targetIndex = entries.findIndex(entry => entry.id === autoArEntryId);
+            }
+            if (targetIndex < 0) {
+                targetIndex = pickAutoArEntryIndex(entries);
+            }
+            const targetCard = (targetIndex >= 0 && targetIndex < cards.length) ? cards[targetIndex] : null;
             if (!targetCard) return;
             const arBtn = targetCard.querySelector('.ar-btn');
             if (!arBtn) return;
@@ -1695,6 +1769,7 @@
                 const d = doc.data();
                 stats.total += 1;
                 const entry = {
+                    id: doc.id,
                     selections: Array.isArray(d.selections) ? d.selections : [],
                     faceData: d.faceUrl || '',
                     name: typeof d.name === 'string' ? d.name : '',
@@ -1727,7 +1802,7 @@
         });
 
         // ---- render each avatar card ----
-        function renderAvatar({ selections = [], faceData, name, favThing }, index, scale = 1) {
+        function renderAvatar({ selections = [], faceData, name, favThing, id }, index, scale = 1) {
             const wrapper = document.createElement('div');
             wrapper.classList.add('gallery-card');
             wrapper.dataset.name = (name || '').trim().toLowerCase();
@@ -1739,6 +1814,11 @@
                 wrapper.dataset.entryIndex = String(index);
             } else {
                 delete wrapper.dataset.entryIndex;
+            }
+            if (id) {
+                wrapper.dataset.entryId = id;
+            } else {
+                delete wrapper.dataset.entryId;
             }
             let hoverLifted = false;
             let tipLifted = false;

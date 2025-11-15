@@ -285,9 +285,12 @@
     <div class="custom-alert__content">
       <p id="custom-alert__message"></p>
       <div class="custom-alert__buttons">
+        <button id="custom-alert__ar" class="custom-alert__button">VIEW IN AR <span
+            style="font-size: 2.2rem;">📱</span></button>
         <button id="custom-alert__gallery">VISIT THE GALLERY <span style="font-size: 2.2rem;">👀</span></button>
         <button id="custom-alert__another">MAKE ANOTHER AVATAR <span style="font-size: 2.2rem;">🎨</span></button>
         <button id="custom-alert__save">SAVE AVATAR <span style="font-size: 2.2rem;">💾</span></button>
+
         <button id="custom-alert__home">GO TO HOMEPAGE <span style="font-size: 2.2rem;">🏡</span></button>
       </div>
     </div>
@@ -1833,7 +1836,7 @@
     const faceUrl = await window.getDownloadURL(fileRef);
 
     // 3) save metadata to Firestore
-    await window.addDoc(
+    const docRef = await window.addDoc(
       window.collection(window.db, "galleryCharacters"),
       {
         name,
@@ -1844,7 +1847,10 @@
       }
     );
 
-    return faceUrl;
+    return {
+      id: docRef.id,
+      faceUrl
+    };
   }
 
   // call this **after** you write the avatar to galleryCharacters
@@ -2412,6 +2418,8 @@
   const btnGallery = document.getElementById('custom-alert__gallery');
   const btnAnother = document.getElementById('custom-alert__another');
   const btntoHome = document.getElementById('custom-alert__home');
+  const btnViewAr = document.getElementById('custom-alert__ar');
+  let lastUploadedEntryId = null;
 
   const btnSave = document.getElementById('custom-alert__save');
   btnSave.addEventListener('click', () => {
@@ -2438,6 +2446,17 @@
   btntoHome.addEventListener('click', () => {
     alertBox.style.display = 'none';
     window.location.href = './index.html';
+  });
+
+  btnViewAr?.addEventListener('click', () => {
+    alertBox.style.display = 'none';
+    const params = new URLSearchParams();
+    params.set('autoAr', '1');
+    if (lastUploadedEntryId) {
+      params.set('autoArEntryId', lastUploadedEntryId);
+    }
+    const query = params.toString();
+    window.location.href = `./gallery.html${query ? `?${query}` : ''}`;
   });
 
 
@@ -2536,7 +2555,8 @@
           const email = document.getElementById('emailAddress').value.trim();
 
           // upload character
-          const faceUrl = await uploadCharacter(data);
+          const { id: entryId } = await uploadCharacter(data);
+          lastUploadedEntryId = entryId;
 
           // if they opted in, send email
           if (consent && email) {

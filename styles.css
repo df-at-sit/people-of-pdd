@@ -1580,11 +1580,20 @@ small {
   transform: rotate(4deg);
 }
 
+/* fifth button: purple gradient */
+#custom-alert__ar {
+  background: linear-gradient(135deg, #6a4aff, #d946ef);
+  color: #fff;
+  transform: rotate(-2deg);
+}
+
 /* fourth button: orange outline & text */
 #custom-alert__home {
   background-color: #f7941d;
   color: #fff;
   transform: rotate(-1deg);
+  grid-column: 1 / -1;
+  justify-self: center;
 }
 
 
