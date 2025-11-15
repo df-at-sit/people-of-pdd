@@ -5738,6 +5738,17 @@ body.stage-4 .trait-card.yellow {
   .character:not(.character-4) {
     display: none;
   }
+
+  .card-content {
+    top: 10px;
+    left: 10px;
+    padding: 8px;
+  }
+
+  .card-content h3,
+  .card-content p {
+    line-height: 1.2;
+  }
 }
 
 .mobile-break {
