@@ -998,9 +998,18 @@
 
         .ar-create-btn {
             --ar-action-gradient: linear-gradient(135deg, #22b573, #2a9df4);
-            width: calc(100% - 24px);
-            max-width: 320px;
-            margin: 16px auto 0;
+            width: auto;
+            margin: 0;
+        }
+
+        .ar-action-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            width: 100%;
         }
 
         @media (max-width: 480px) {
@@ -1160,9 +1169,11 @@
                     <p><strong>Android:</strong> Launches Scene Viewer.</p>
                     <p><strong>iOS:</strong> Opens Quick Look!</p>
                 </div>
-                <button class="ar-launch ar-action-btn" id="arLaunchBtn" type="button" disabled>Open in AR</button>
-                <button class="ar-create-btn ar-action-btn" id="makeAvatarBtn" type="button">Make your own
-                    avatar!</button>
+                <div class="ar-action-row">
+                    <button class="ar-create-btn ar-action-btn" id="makeAvatarBtn" type="button">Make your own
+                        avatar!</button>
+                    <button class="ar-launch ar-action-btn" id="arLaunchBtn" type="button" disabled>Open in AR</button>
+                </div>
             </div>
 
         </div>
